@@ -2061,6 +2061,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             symLayoutController = symLayoutController,
             isInputViewActive = { isInputViewActive },
             hasActiveTextField = { inputContextState.isEditable },
+            allowsPersistentSurface = {
+                SettingsManager.getShowKeyboardBarOnLauncher(this) ||
+                    !LauncherEditorPolicy.isNiagaraHomeEditor(currentInputEditorInfo)
+            },
             isNavModeLatched = { ctrlLatchFromNavMode },
             currentInputConnection = { currentInputConnection },
             isInputViewShown = { isInputViewShown },
@@ -2319,7 +2323,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                     updateStatusBarText()
                 }
             } else if (SettingsManager.isModifierIndicatorPreferenceKey(key) ||
-                key == "suggestions_enabled" || key == "status_bar_variations_visible") {
+                key == "suggestions_enabled" || key == "status_bar_variations_visible" ||
+                key == "keyboard_bar_show_on_launcher") {
                 Handler(Looper.getMainLooper()).post {
                     invalidateRenderedStatusSnapshot()
                     updateStatusBarText()
@@ -2878,6 +2883,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
 
     override fun onShowInputRequested(flags: Int, configChange: Boolean): Boolean {
+        if (!keyboardVisibilityController.allowsSurface()) return false
         val accepted = super.onShowInputRequested(flags, configChange)
         if (::keyboardVisibilityController.isInitialized) {
             keyboardVisibilityController.onExplicitShowRequested()
@@ -3431,6 +3437,9 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         val isReallyEditable = state.isReallyEditable
         isInputViewActive = isEditable
         keyboardVisibilityController.onInputStarted(restarting)
+        if (!keyboardVisibilityController.allowsSurface()) {
+            keyboardVisibilityController.onKeyboardBarConfigurationChanged()
+        }
         traceImeVisibility("onStartInput restarting=$restarting")
         
         if (restarting) {

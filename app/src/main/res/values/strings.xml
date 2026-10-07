@@ -1613,6 +1613,8 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="status_bar_buttons_description">Choose suggestions, actions and indicator locations. Slim mode hides actions while keeping your choices.</string>
     <string name="status_bar_style_section">Keyboard bar presentation</string>
     <string name="extended_status_bar_title">Full keyboard bar</string>
+    <string name="keyboard_bar_show_on_launcher">Show bar on the launcher home screen</string>
+    <string name="keyboard_bar_show_on_launcher_description">Also show the bar when Niagara uses an invisible input field on its home screen.</string>
     <string name="keyboard_bar_suggestions">Suggestions</string>
     <string name="keyboard_bar_actions">Variations and menu</string>
     <string name="keyboard_bar_slim_description">Slim hides variations and menu controls. Suggestions and indicators follow the checkboxes above.</string>

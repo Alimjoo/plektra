@@ -252,6 +252,7 @@ internal object BackupPreferenceContract {
             "keyboard_theme_layout_overrides_software" to PreferenceValueType.STRING,
             "modifier_indicator_mode" to PreferenceValueType.STRING,
             "auto_show_keyboard" to PreferenceValueType.BOOLEAN,
+            "keyboard_bar_show_on_launcher" to PreferenceValueType.BOOLEAN,
             "accessibility_live_announcements_enabled" to PreferenceValueType.BOOLEAN,
             "accessibility_read_second_row_enabled" to PreferenceValueType.BOOLEAN,
             "accessibility_suggestions_announcement_delay_ms" to PreferenceValueType.LONG,

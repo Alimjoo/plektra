@@ -2171,6 +2171,13 @@ object SettingsManager {
     /**
      * Returns the state of automatically showing the keyboard when a field gains focus.
      */
+    fun getShowKeyboardBarOnLauncher(context: Context): Boolean =
+        getPreferences(context).getBoolean("keyboard_bar_show_on_launcher", false)
+
+    fun setShowKeyboardBarOnLauncher(context: Context, enabled: Boolean) {
+        getPreferences(context).edit().putBoolean("keyboard_bar_show_on_launcher", enabled).apply()
+    }
+
     fun getAutoShowKeyboard(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_AUTO_SHOW_KEYBOARD, DEFAULT_AUTO_SHOW_KEYBOARD)
     }

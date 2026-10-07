@@ -381,7 +381,25 @@ class KeyboardVisibilityControllerTest {
         assertTrue(h.actions.isEmpty())
     }
 
+    @Test
+    fun suppressedLauncherDoesNotShowOnStartOrHardwareInputAndCanBeEnabled() {
+        val h = Harness()
+        h.allowPersistent = false
+        assertFalse(h.controller.onEvaluateInputViewShown(true))
+        h.controller.ensureImeSurfaceVisible()
+        h.controller.onHardwareInputRequested()
+        h.drain()
+        assertEquals(0, h.showRequests)
+        h.controller.onKeyboardBarConfigurationChanged()
+        assertEquals(1, h.hideRequests)
+        h.allowPersistent = true
+        h.controller.onKeyboardBarConfigurationChanged()
+        h.runNextUiAction()
+        assertEquals(1, h.showRequests)
+    }
+
     private inner class Harness {
+        var allowPersistent = true
         var active = true
         var connection: InputConnection? = mock(InputConnection::class.java)
         var inputShown = false
@@ -425,7 +443,8 @@ class KeyboardVisibilityControllerTest {
                 if (rejectHideRequest) throw IllegalStateException("Window detached")
             },
             requestShowInputView = { showRequests++ },
-            refreshStatusBar = { refreshes++ }
+            refreshStatusBar = { refreshes++ },
+            allowsPersistentSurface = { allowPersistent }
         )
         fun runNext() = actions.removeAt(0).second.invoke()
         fun hasImmediateActions() = actions.any { it.first == 0L }

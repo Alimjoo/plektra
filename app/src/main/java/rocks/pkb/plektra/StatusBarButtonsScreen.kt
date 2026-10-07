@@ -32,15 +32,20 @@ import rocks.pkb.plektra.R
 private enum class StatusBarEditorMode { Extended, Slim }
 
 @Composable
-private fun KeyboardBarCheckRow(label: String, checked: Boolean, linkId: String, onChange: (Boolean) -> Unit) {
+private fun KeyboardBarCheckRow(label: String, checked: Boolean, linkId: String,
+    description: String? = null, onChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().settingRow(linkId)
             .toggleable(value = checked, role = Role.Checkbox, onValueChange = onChange)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface)
+            if (description != null) Text(description, style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
         Checkbox(checked = checked, onCheckedChange = null)
     }
 }
@@ -57,6 +62,7 @@ fun StatusBarButtonsScreen(
     var leftSlots by remember { mutableStateOf(SettingsManager.getStatusBarSlotsLeft(context)) }
     var rightSlots by remember { mutableStateOf(SettingsManager.getStatusBarSlotsRight(context)) }
     var suggestionsEnabled by remember { mutableStateOf(SettingsManager.getSuggestionsEnabled(context)) }
+    var showOnLauncher by remember { mutableStateOf(SettingsManager.getShowKeyboardBarOnLauncher(context)) }
     var indicators by remember { mutableStateOf(SettingsManager.getModifierIndicators(context)) }
     var variationsVisible by remember {
         mutableStateOf(SettingsManager.areStatusBarVariationsEnabled(context))
@@ -182,6 +188,11 @@ fun StatusBarButtonsScreen(
             "status_bar.variations_visible") {
             variationsVisible = it
             SettingsManager.setStatusBarVariationsEnabled(context, it)
+        }
+        KeyboardBarCheckRow(stringResource(R.string.keyboard_bar_show_on_launcher), showOnLauncher,
+            "status_bar.show_on_launcher", stringResource(R.string.keyboard_bar_show_on_launcher_description)) {
+            showOnLauncher = it
+            SettingsManager.setShowKeyboardBarOnLauncher(context, it)
         }
         SettingsSectionDivider(stringResource(R.string.modifiers_section_indicators))
         listOf(

@@ -903,6 +903,13 @@ object SettingLinkRegistry {
             keyboardThemeTab = KeyboardThemeEditorTab.Colors
         ),
 
+        entry(
+            "status_bar.show_on_launcher",
+            R.string.keyboard_bar_show_on_launcher,
+            R.string.keyboard_bar_show_on_launcher_description,
+            destination = SettingsDestination.Customization,
+            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
+        ),
         // Modifier indicator chips (rendered on the modifiers screen)
         entry(
             SettingLinkIds.MODIFIERS_INDICATOR_BOTTOM_STRIP,
