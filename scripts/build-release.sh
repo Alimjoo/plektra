@@ -86,21 +86,21 @@ configure_release_signing_env() {
     return
   fi
 
-  if [ -z "${PASTIERA_KEYSTORE_PATH:-}" ]; then
+  if [ -z "${PLEKTRA_KEYSTORE_PATH:-}" ]; then
     local store_file
-    store_file="$(first_non_empty_prop "storeFile" "PASTIERA_KEYSTORE_FILE" || true)"
+    store_file="$(first_non_empty_prop "storeFile" "PLEKTRA_KEYSTORE_FILE" || true)"
     if [ -n "$store_file" ]; then
       if [ "${store_file#/}" != "$store_file" ]; then
-        export PASTIERA_KEYSTORE_PATH="$store_file"
+        export PLEKTRA_KEYSTORE_PATH="$store_file"
       else
-        export PASTIERA_KEYSTORE_PATH="$ROOT_DIR/release/$store_file"
+        export PLEKTRA_KEYSTORE_PATH="$ROOT_DIR/release/$store_file"
       fi
     fi
   fi
 
-  [ -n "${PASTIERA_KEYSTORE_PASSWORD:-}" ] || export PASTIERA_KEYSTORE_PASSWORD="$(first_non_empty_prop "storePassword" "PASTIERA_KEYSTORE_PASSWORD" "PASTIERA_KEY_PASSWORD" || true)"
-  [ -n "${PASTIERA_KEY_ALIAS:-}" ] || export PASTIERA_KEY_ALIAS="$(first_non_empty_prop "keyAlias" "PASTIERA_KEY_ALIAS" || true)"
-  [ -n "${PASTIERA_KEY_PASSWORD:-}" ] || export PASTIERA_KEY_PASSWORD="$(first_non_empty_prop "keyPassword" "PASTIERA_KEY_PASSWORD" || true)"
+  [ -n "${PLEKTRA_KEYSTORE_PASSWORD:-}" ] || export PLEKTRA_KEYSTORE_PASSWORD="$(first_non_empty_prop "storePassword" "PLEKTRA_KEYSTORE_PASSWORD" "PLEKTRA_KEY_PASSWORD" || true)"
+  [ -n "${PLEKTRA_KEY_ALIAS:-}" ] || export PLEKTRA_KEY_ALIAS="$(first_non_empty_prop "keyAlias" "PLEKTRA_KEY_ALIAS" || true)"
+  [ -n "${PLEKTRA_KEY_PASSWORD:-}" ] || export PLEKTRA_KEY_PASSWORD="$(first_non_empty_prop "keyPassword" "PLEKTRA_KEY_PASSWORD" || true)"
 }
 
 cd "$ROOT_DIR"
@@ -108,12 +108,12 @@ bash "$ROOT_DIR/scripts/materialize-signing-keystores.sh" "$KEYSTORE_PROPS_FILE"
 configure_release_signing_env
 
 ./gradlew :app:testStableDebugUnitTest \
-  -PPASTIERA_VERSION_CODE="$VERSION_CODE" \
-  -PPASTIERA_VERSION_NAME="$VERSION_NAME"
+  -PPLEKTRA_VERSION_CODE="$VERSION_CODE" \
+  -PPLEKTRA_VERSION_NAME="$VERSION_NAME"
 
 ./gradlew :app:assembleStableRelease \
-  -PPASTIERA_VERSION_CODE="$VERSION_CODE" \
-  -PPASTIERA_VERSION_NAME="$VERSION_NAME"
+  -PPLEKTRA_VERSION_CODE="$VERSION_CODE" \
+  -PPLEKTRA_VERSION_NAME="$VERSION_NAME"
 
 sha256sum "$APK_PATH" | tee "$SHA_PATH"
 
@@ -127,7 +127,7 @@ fi
 
 if [ "$PUBLISH" = "--publish" ]; then
   gh release create "$TAG_NAME" "$APK_PATH" "$SHA_PATH" \
-    --title "Pastiera v${VERSION_NAME}" \
+    --title "Plektra v${VERSION_NAME}" \
     --generate-notes
 fi
 

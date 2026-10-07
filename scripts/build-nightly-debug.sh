@@ -6,9 +6,9 @@ usage() {
 Usage: $0 <base-version> [--install] [--device <adb-serial>]
 
 Examples:
-  $0 0.86
-  $0 0.86 --install
-  $0 0.86 --install --device 192.168.178.190:46293
+  $0 26.09
+  $0 26.09 --install
+  $0 26.09 --install --device 192.168.178.190:46293
 USAGE
 }
 
@@ -53,6 +53,7 @@ done
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION_INFO="$($ROOT_DIR/scripts/nightly-version.sh "$BASE_VERSION")"
 TIMESTAMP="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^timestamp=/{print $2}')"
+NIGHTLY_SUFFIX="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^nightly_suffix=/{print $2}')"
 VERSION_CODE="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^version_code=/{print $2}')"
 FULL_VERSION="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^full_version=/{print $2}')"
 APK_PATH="$ROOT_DIR/app/build/outputs/apk/nightly/debug/app-nightly-debug.apk"
@@ -98,9 +99,9 @@ resolve_adb() {
 cd "$ROOT_DIR"
 
 ./gradlew :app:assembleNightlyDebug \
-  -PPASTIERA_VERSION_NAME="$BASE_VERSION" \
-  -PPASTIERA_NIGHTLY_VERSION_CODE="$VERSION_CODE" \
-  -PPASTIERA_NIGHTLY_VERSION_SUFFIX="-nightly.${TIMESTAMP}"
+  -PPLEKTRA_VERSION_NAME="$BASE_VERSION" \
+  -PPLEKTRA_NIGHTLY_VERSION_CODE="$VERSION_CODE" \
+  -PPLEKTRA_NIGHTLY_VERSION_SUFFIX="-nightly.${NIGHTLY_SUFFIX}"
 
 if [ "$INSTALL" = true ]; then
   ADB_BIN="$(resolve_adb || true)"
@@ -114,11 +115,17 @@ if [ "$INSTALL" = true ]; then
     ADB_DEVICE_ARGS=(-s "$DEVICE_SERIAL")
   else
     device_count="$($ADB_BIN devices | awk 'NR>1 && $2=="device" {count++} END {print count+0}')"
+    if [ "$device_count" -eq 0 ]; then
+      echo "No adb device detected. Connect a device or pass --device <serial>." >&2
+      exit 1
+    fi
     if [ "$device_count" -gt 1 ]; then
       echo "Multiple adb devices detected. Pass --device <serial> or set ADB_SERIAL." >&2
       "$ADB_BIN" devices -l
       exit 1
     fi
+    DEVICE_SERIAL="$($ADB_BIN devices | awk 'NR>1 && $2=="device" {print $1; exit}')"
+    ADB_DEVICE_ARGS=(-s "$DEVICE_SERIAL")
   fi
 
   PREVIOUS_DEFAULT_IME="$(
@@ -129,9 +136,9 @@ if [ "$INSTALL" = true ]; then
   "$ADB_BIN" "${ADB_DEVICE_ARGS[@]}" install -r "$APK_PATH"
 
   # A package replacement stops the running IME. Some Android builds then keep the
-  # fallback keyboard selected even though Pastiera remains enabled. Restore Nightly
+  # fallback keyboard selected even though Plektra remains enabled. Restore Nightly
   # only when it was already the user's selected input method before this install.
-  if [[ "$PREVIOUS_DEFAULT_IME" == it.palsoftware.pastiera.nightly/* ]]; then
+  if [[ "$PREVIOUS_DEFAULT_IME" == rocks.pkb.plektra.nightly/* ]]; then
     "$ADB_BIN" "${ADB_DEVICE_ARGS[@]}" shell ime enable "$PREVIOUS_DEFAULT_IME" >/dev/null
     "$ADB_BIN" "${ADB_DEVICE_ARGS[@]}" shell ime set "$PREVIOUS_DEFAULT_IME" >/dev/null
   fi

@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SECRETS_FILE="${1:-$ROOT_DIR/release/nightly-secrets.env}"
 RELEASE_DIR="$ROOT_DIR/release"
-KEYSTORE_PATH="$RELEASE_DIR/pastiera-nightly.jks"
+KEYSTORE_PATH="$RELEASE_DIR/plektra-nightly.jks"
 KEYSTORE_PROPS_PATH="$RELEASE_DIR/keystore.properties"
 
 if [ ! -f "$SECRETS_FILE" ]; then
@@ -17,10 +17,10 @@ source "$SECRETS_FILE"
 set +a
 
 required_vars=(
-  PASTIERA_NIGHTLY_KEYSTORE_B64
-  PASTIERA_NIGHTLY_KEYSTORE_PASSWORD
-  PASTIERA_NIGHTLY_KEY_ALIAS
-  PASTIERA_NIGHTLY_KEY_PASSWORD
+  PLEKTRA_NIGHTLY_KEYSTORE_B64
+  PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD
+  PLEKTRA_NIGHTLY_KEY_ALIAS
+  PLEKTRA_NIGHTLY_KEY_PASSWORD
 )
 
 for var_name in "${required_vars[@]}"; do
@@ -32,13 +32,13 @@ done
 
 mkdir -p "$RELEASE_DIR"
 
-printf '%s' "$PASTIERA_NIGHTLY_KEYSTORE_B64" | base64 -d > "$KEYSTORE_PATH"
+printf '%s' "$PLEKTRA_NIGHTLY_KEYSTORE_B64" | base64 -d > "$KEYSTORE_PATH"
 
 cat > "$KEYSTORE_PROPS_PATH" <<EOF
 nightlyStoreFile=$(basename "$KEYSTORE_PATH")
-nightlyStorePassword=$PASTIERA_NIGHTLY_KEYSTORE_PASSWORD
-nightlyKeyAlias=$PASTIERA_NIGHTLY_KEY_ALIAS
-nightlyKeyPassword=$PASTIERA_NIGHTLY_KEY_PASSWORD
+nightlyStorePassword=$PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD
+nightlyKeyAlias=$PLEKTRA_NIGHTLY_KEY_ALIAS
+nightlyKeyPassword=$PLEKTRA_NIGHTLY_KEY_PASSWORD
 EOF
 
 printf 'keystore=%s\n' "$KEYSTORE_PATH"

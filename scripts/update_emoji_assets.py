@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update Pastiera's generated emoji assets from pinned Unicode sources.
+"""Update Plektra's generated emoji assets from pinned Unicode sources.
 
 The generator intentionally pins both Unicode Emoji and CLDR. ``--check`` runs
 the complete generation in a temporary tree and fails when committed assets are
@@ -355,7 +355,7 @@ def generated_files(root: Path) -> list[Path]:
 
 
 def check(root: Path) -> int:
-    with tempfile.TemporaryDirectory(prefix="pastiera-emoji-check-") as temp_dir:
+    with tempfile.TemporaryDirectory(prefix="plektra-emoji-check-") as temp_dir:
         temp_root = Path(temp_dir)
         source_common = root / "app/src/main/assets/common"
         target_common = temp_root / "app/src/main/assets/common"

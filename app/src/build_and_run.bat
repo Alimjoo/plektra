@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo Compilazione e installazione Pastiera
+echo Compilazione e installazione Plektra
 echo ========================================
 echo.
 
@@ -17,7 +17,7 @@ if %ERRORLEVEL% EQU 0 (
     echo Avvio dell'app sul dispositivo...
     
     REM Lancia l'app sul dispositivo Android
-    adb shell am start -n it.palsoftware.pastiera/.MainActivity
+    adb shell am start -n rocks.pkb.plektra/.MainActivity
     
     if %ERRORLEVEL% EQU 0 (
         echo.

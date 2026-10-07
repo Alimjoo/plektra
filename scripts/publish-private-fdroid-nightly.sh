@@ -3,10 +3,10 @@ set -euo pipefail
 
 BASE_VERSION="${1:-}"
 PAGES_PUBLIC_DIR="../palsoftware-web/apps/docs/public"
-REPO_URL="https://pastiera.eu/fdroid/nightly/repo"
+REPO_URL="https://pkb.rocks/fdroid/nightly/repo"
 PAGES_REPO_DIR_OVERRIDE="${PAGES_REPO_DIR:-}"
 AUTO_PUSH_PAGES="${AUTO_PUSH_PAGES:-true}"
-NIGHTLY_TIMESTAMP="${PASTIERA_NIGHTLY_TIMESTAMP:-}"
+NIGHTLY_TIMESTAMP="${PLEKTRA_NIGHTLY_TIMESTAMP:-}"
 NIGHTLY_HIGHLIGHTS_FILE="${NIGHTLY_HIGHLIGHTS_FILE:-}"
 
 if [ -z "$BASE_VERSION" ]; then
@@ -47,7 +47,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -n "$NIGHTLY_TIMESTAMP" ]; then
-  export PASTIERA_NIGHTLY_TIMESTAMP="$NIGHTLY_TIMESTAMP"
+  export PLEKTRA_NIGHTLY_TIMESTAMP="$NIGHTLY_TIMESTAMP"
 fi
 
 if ! command -v fdroid >/dev/null 2>&1; then
@@ -71,12 +71,12 @@ FDROID_REPO_DIR="$FDROID_ROOT/repo"
 FDROID_METADATA_DIR="$FDROID_ROOT/metadata"
 TARGET_REPO_DIR="$PAGES_PUBLIC_DIR/fdroid/nightly/repo"
 APK_PATH="$ROOT_DIR/app/build/outputs/apk/nightly/release/app-nightly-release.apk"
-APP_ID="it.palsoftware.pastiera.nightly"
+APP_ID="rocks.pkb.plektra.nightly"
 VERSION_INFO="$("$ROOT_DIR/scripts/nightly-version.sh" "$BASE_VERSION")"
 FULL_VERSION="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^full_version=/{print $2}')"
 VERSION_CODE="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^version_code=/{print $2}')"
-COMMIT_MESSAGE="${COMMIT_MESSAGE:-Publish Pastiera nightly F-Droid repo ${FULL_VERSION}}"
-FDROID_APK_PATH="$FDROID_REPO_DIR/pastiera-nightly-${FULL_VERSION}.apk"
+COMMIT_MESSAGE="${COMMIT_MESSAGE:-Publish Plektra nightly F-Droid repo ${FULL_VERSION}}"
+FDROID_APK_PATH="$FDROID_REPO_DIR/plektra-nightly-${FULL_VERSION}.apk"
 
 if [ ! -d "$PAGES_PUBLIC_DIR" ]; then
   echo "Pages public directory not found: $PAGES_PUBLIC_DIR" >&2
@@ -105,8 +105,8 @@ if [ ! -f "$FDROID_ROOT/config.yml" ]; then
 fi
 
 ensure_yaml_value "$FDROID_ROOT/config.yml" "repo_url" "$REPO_URL"
-ensure_yaml_value "$FDROID_ROOT/config.yml" "repo_name" "Pastiera Nightly"
-ensure_yaml_value "$FDROID_ROOT/config.yml" "repo_description" "Nightly builds for Pastiera"
+ensure_yaml_value "$FDROID_ROOT/config.yml" "repo_name" "Plektra Nightly"
+ensure_yaml_value "$FDROID_ROOT/config.yml" "repo_description" "Nightly builds for Plektra"
 
 mkdir -p "$FDROID_ROOT/config"
 cat > "$FDROID_ROOT/config/categories.yml" <<EOF
@@ -121,12 +121,12 @@ cat > "$FDROID_METADATA_DIR/${APP_ID}.yml" <<EOF
 AuthorName: PalSoftware
 Categories:
   - nightly
-IssueTracker: https://github.com/palsoftware/pastiera/issues
+IssueTracker: https://github.com/pkb-rocks/plektra/issues
 License: GPL-3.0-only
-Name: Pastiera Nightly
-SourceCode: https://github.com/palsoftware/pastiera
-Summary: Nightly builds for Pastiera
-WebSite: https://pastiera.eu
+Name: Plektra Nightly
+SourceCode: https://github.com/pkb-rocks/plektra
+Summary: Nightly builds for Plektra
+WebSite: https://pkb.rocks
 EOF
 
 if [ -s "$NIGHTLY_HIGHLIGHTS_FILE" ]; then

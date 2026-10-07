@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Pastiera</string>
-    <string name="input_method_name">Pastiera</string>
+    <string name="app_name">Plektra</string>
+    <string name="input_method_name">Plektra</string>
     <string name="input_method_name_en">English</string>
     <string name="input_method_name_it">Italiano</string>
     <string name="input_method_name_fr">Français</string>
@@ -63,13 +63,13 @@
     <string name="auto_space_punctuation_title">Punctuation spacing</string>
     <string name="auto_space_punctuation_selected">Selected:</string>
     <string name="auto_space_punctuation_none_selected">none</string>
-    <string name="auto_space_punctuation_dialog_instruction">Choose whether Pastiera removes its own auto-space before each character and inserts a deferred space before following text.</string>
+    <string name="auto_space_punctuation_dialog_instruction">Choose whether Plektra removes its own auto-space before each character and inserts a deferred space before following text.</string>
     <string name="auto_space_punctuation_character_column">Character</string>
     <string name="auto_space_punctuation_before_column">Remove before</string>
     <string name="auto_space_punctuation_after_column">Before next text</string>
     <string name="auto_space_punctuation_help_action">Explain punctuation spacing</string>
     <string name="auto_space_punctuation_help_title">How punctuation spacing works</string>
-    <string name="auto_space_punctuation_help_text">“Remove before” removes only a space automatically inserted by Pastiera, not one you typed manually.\n\n“Before next text” defers the space until more text is typed. Enter or Send therefore leaves no trailing space.</string>
+    <string name="auto_space_punctuation_help_text">“Remove before” removes only a space automatically inserted by Plektra, not one you typed manually.\n\n“Before next text” defers the space until more text is typed. Enter or Send therefore leaves no trailing space.</string>
     <string name="auto_space_punctuation_choose">Selected:</string>
     <string name="auto_space_punctuation_choose_off">Off</string>
     <string name="auto_space_punctuation_reset">Reset</string>
@@ -133,7 +133,7 @@
     <string name="info_description">Settings are automatically saved and immediately applied to the input method.</string>
     
     <!-- Main Activity -->
-    <string name="keyboard_title">Pastiera Keyboard</string>
+    <string name="keyboard_title">Plektra Keyboard</string>
     <string name="software_keyboard_accessibility_shift">Shift</string>
     <string name="software_keyboard_accessibility_backspace">Backspace</string>
     <string name="software_keyboard_accessibility_symbols">Symbols</string>
@@ -154,15 +154,15 @@
     <!-- Installation Section -->
     <string name="installation_title">Installation</string>
     <string name="installation_step1">1. Click the button below to open settings</string>
-    <string name="installation_step2">2. Enable \'Pastiera Physical Keyboard\'</string>
+    <string name="installation_step2">2. Enable \'Plektra Physical Keyboard\'</string>
     <string name="installation_step3">3. Come back here and test the keyboard</string>
     <string name="open_keyboard_settings">Open Keyboard Settings</string>
     
     <!-- Main Activity - Enable/Select IME -->
-    <string name="enable_pastiera">Enable Pastiera</string>
-    <string name="pastiera_not_enabled">Pastiera is not enabled</string>
+    <string name="enable_plektra">Enable Plektra</string>
+    <string name="plektra_not_enabled">Plektra is not enabled</string>
     <string name="choose_input_method">Choose input method</string>
-    <string name="pastiera_not_selected">Pastiera is not selected</string>
+    <string name="plektra_not_selected">Plektra is not selected</string>
     
     <!-- Test Section -->
     <string name="test_keyboard_title">Keyboard Test</string>
@@ -206,7 +206,7 @@
     <string name="auto_correct_settings_title">Text Replacements</string>
     <string name="auto_correct_settings_description">Choose which replacement rule sets are active. These exact rules run before dictionary-based automatic correction.</string>
     <string name="auto_correct_system_language">System language</string>
-    <string name="auto_correct_ricette_pastiera_description">Customizations valid for all substitutions</string>
+    <string name="auto_correct_ricette_plektra_description">Customizations valid for all substitutions</string>
     <string name="auto_correct_other_languages">Other Substitutions</string>
     <string name="auto_correct_custom_languages">Custom Substitutions</string>
     <string name="auto_correct_at_least_one_language_required">At least one substitution required for operation</string>
@@ -241,7 +241,7 @@
     <string name="auto_correct_max_distance_off">Off</string>
     <string name="auto_correct_max_distance_description">Maximum number of character differences allowed for auto-correction. 0 = disabled, 1-3 = increasing tolerance.</string>
     <string name="auto_correct_manage_user_dict_title">Personal dictionary</string>
-    <string name="auto_correct_manage_user_dict_description">Words Pastiera should know and suggest, without creating replacement rules.</string>
+    <string name="auto_correct_manage_user_dict_description">Words Plektra should know and suggest, without creating replacement rules.</string>
     <string name="auto_correct_keyboard_proximity_title">Keyboard Proximity Ranking</string>
     <string name="auto_correct_keyboard_proximity_description">Filter unlikely typos based on key distance (QWERTY/AZERTY/QWERTZ)</string>
     <string name="auto_correct_edit_type_ranking_title">Edit Type Ranking</string>
@@ -360,8 +360,8 @@
     <string name="typing_sound_import_success">Typing sound pack imported</string>
     <string name="typing_sound_import_failed">Could not import this sound pack. Use a ZIP with audio files in normal/, space/, backspace/, enter/, and modifier/ folders.</string>
     <string name="typing_sound_docs_title">Sound pack format</string>
-    <string name="typing_sound_docs_description">Open the import guide on pastiera.eu</string>
-    <string name="typing_sound_docs_url">https://pastiera.eu/guides/typing-soundpacks/</string>
+    <string name="typing_sound_docs_description">Open the import guide on pkb.rocks</string>
+    <string name="typing_sound_docs_url">https://pkb.rocks/guides/typing-soundpacks/</string>
     <string name="tap_haptic_system_title">Tap vibration</string>
     <string name="tap_haptic_system_description">Use Android keyboard haptics for suggestions and variations on compatible devices.</string>
     <string name="tap_haptic_duration_title">Custom vibration: %1$d ms</string>
@@ -465,11 +465,11 @@
     <string name="clicks_cursor_mode_title">Cursor Mode</string>
     <string name="clicks_cursor_mode_description">Enable the keyboard firmware’s cursor navigation mode.</string>
     <string name="clicks_recommended_settings_title">Apply recommended settings</string>
-    <string name="clicks_recommended_settings_description">Restore native Tab and Alt outputs; assign the microphone button to Pastiera dictation; assign the red Clicks button and Launcher button directly to QuickLauncher; and disable Caps Lock and Cursor Mode.</string>
+    <string name="clicks_recommended_settings_description">Restore native Tab and Alt outputs; assign the microphone button to Plektra dictation; assign the red Clicks button and Launcher button directly to QuickLauncher; and disable Caps Lock and Cursor Mode.</string>
     <string name="clicks_recommended_settings_success">Recommended Clicks settings applied.</string>
     <string name="clicks_recommended_settings_failure">Recommended settings could not be applied completely.</string>
-    <string name="clicks_sticky_alt_help">Controls the Clicks firmware’s SYM Lock behaviour. Pastiera’s separate Sticky Alt behaviour remains configured under Modifiers.</string>
-    <string name="clicks_sticky_shift_help">Controls the Clicks firmware’s Caps Lock behaviour. Pastiera’s separate Sticky Shift behaviour remains configured under Modifiers.</string>
+    <string name="clicks_sticky_alt_help">Controls the Clicks firmware’s SYM Lock behaviour. Plektra’s separate Sticky Alt behaviour remains configured under Modifiers.</string>
+    <string name="clicks_sticky_shift_help">Controls the Clicks firmware’s Caps Lock behaviour. Plektra’s separate Sticky Shift behaviour remains configured under Modifiers.</string>
     <string name="clicks_cursor_mode_help">The Clicks firmware uses the SYM combinations W, A, S, and D for cursor movement when Cursor Mode is enabled.</string>
     <string name="clicks_soft_return_help">This is a firmware option exposed by the keyboard. Its exact behaviour is not yet documented reliably, so leave it unchanged unless you are testing it.</string>
     <string name="clicks_backlight_brightness_title">Brightness</string>
@@ -494,16 +494,16 @@
     <string name="clicks_remap_custom_value">Current custom mapping (%1$s)</string>
     <string name="clicks_button_bindings_title">Launcher and special buttons</string>
     <string name="clicks_button_bindings_description">Configure the red Clicks button, Launcher button, Keyboard button, and microphone button in one place.</string>
-    <string name="clicks_button_bindings_screen_description">Choose whether each physical button keeps its original function, directly invokes a Pastiera function, or sends a key or key combination.</string>
+    <string name="clicks_button_bindings_screen_description">Choose whether each physical button keeps its original function, directly invokes a Plektra function, or sends a key or key combination.</string>
     <string name="clicks_binding_category_original">Original function</string>
-    <string name="clicks_binding_category_function">Pastiera function</string>
-    <string name="clicks_binding_category_pastiera_shortcut">Pastiera shortcut</string>
+    <string name="clicks_binding_category_function">Plektra function</string>
+    <string name="clicks_binding_category_plektra_shortcut">Plektra shortcut</string>
     <string name="clicks_binding_category_key">Key input</string>
     <string name="clicks_binding_category_shortcut">Key combination</string>
     <string name="clicks_function_language_switch">Switch language (Ctrl+Space)</string>
-    <string name="clicks_function_language_switch_description">Send Ctrl+Space and enable Pastiera’s Ctrl+Space language switch.</string>
+    <string name="clicks_function_language_switch_description">Send Ctrl+Space and enable Plektra’s Ctrl+Space language switch.</string>
     <string name="clicks_function_dictation">Dictation mode (Alt+Ctrl)</string>
-    <string name="clicks_function_dictation_description">Send Alt+Ctrl and start Pastiera’s dictation mode instead of Android Gemini. The required Pastiera shortcut is enabled automatically.</string>
+    <string name="clicks_function_dictation_description">Send Alt+Ctrl and start Plektra’s dictation mode instead of Android Gemini. The required Plektra shortcut is enabled automatically.</string>
     <string name="clicks_red_button_title">red Clicks button</string>
     <string name="clicks_red_button_hardware_description">Red C button.</string>
     <string name="clicks_launcher_button_title">Launcher button</string>
@@ -521,13 +521,13 @@
     <string name="clicks_microphone_native_action">Native voice input</string>
     <string name="clicks_microphone_native_description">Use Android’s native voice-input action.</string>
     <string name="clicks_binding_alt_output_description">Send a real Alt modifier directly from the keyboard firmware.</string>
-    <string name="clicks_binding_shortcut_description">Send %1$s as a keyboard combination. It is not implicitly linked to a Pastiera function.</string>
+    <string name="clicks_binding_shortcut_description">Send %1$s as a keyboard combination. It is not implicitly linked to a Plektra function.</string>
     <string name="clicks_binding_custom_description">Keep the currently stored custom keyboard-firmware combination.</string>
     <string name="clicks_button_binding_applying">Applying…</string>
     <string name="clicks_button_binding_success">Button assignment applied.</string>
     <string name="clicks_button_binding_failure">Button assignment could not be applied.</string>
     <string name="clicks_button_binding_pending">Will be applied when a supported keyboard connection is ready.</string>
-    <string name="clicks_launcher_interception_service_label">Pastiera Clicks button interception</string>
+    <string name="clicks_launcher_interception_service_label">Plektra Clicks button interception</string>
     <string name="clicks_launcher_interception_service_description">Intercepts only explicitly configured buttons of a supported Clicks Power Keyboard.</string>
     <string name="clicks_launcher_interception_title">Android Clicks-button interception</string>
     <string name="clicks_launcher_interception_enabled">Enabled · Only explicitly configured buttons of a supported Clicks Power Keyboard are filtered.</string>
@@ -535,19 +535,19 @@
     <string name="clicks_button_mode_native">Native</string>
     <string name="clicks_button_mode_native_description">Keep the button’s original Android key event.</string>
     <string name="clicks_button_mode_quick_launcher">QuickLauncher</string>
-    <string name="clicks_button_mode_quick_launcher_description">Open Pastiera QuickLauncher directly and do not pass the key event to the app.</string>
-    <string name="clicks_button_mode_open_pastiera">Open Pastiera</string>
-    <string name="clicks_button_mode_open_pastiera_description">Open the Pastiera settings directly and do not pass the key event to the app.</string>
+    <string name="clicks_button_mode_quick_launcher_description">Open Plektra QuickLauncher directly and do not pass the key event to the app.</string>
+    <string name="clicks_button_mode_open_plektra">Open Plektra</string>
+    <string name="clicks_button_mode_open_plektra_description">Open the Plektra settings directly and do not pass the key event to the app.</string>
     <string name="clicks_button_mode_toggle_keyboard_mode">Toggle keyboard mode</string>
     <string name="clicks_button_mode_toggle_keyboard_mode_description">Temporarily open or close the on-screen keyboard until the next hardware connection change.</string>
     <string name="clicks_button_mode_toggle_emoji_picker">Toggle emoji picker</string>
-    <string name="clicks_button_mode_toggle_emoji_picker_description">Open the Pastiera emoji picker, or close it when it is already visible.</string>
+    <string name="clicks_button_mode_toggle_emoji_picker_description">Open the Plektra emoji picker, or close it when it is already visible.</string>
     <string name="clicks_button_mode_alt">Alt</string>
     <string name="clicks_button_mode_alt_description">Act as a real held Alt modifier.</string>
     <string name="clicks_button_mode_tab">Tab</string>
-    <string name="clicks_button_mode_tab_description">Send a real Tab key through Pastiera’s normal input path.</string>
+    <string name="clicks_button_mode_tab_description">Send a real Tab key through Plektra’s normal input path.</string>
     <string name="clicks_button_mode_sym">SYM</string>
-    <string name="clicks_button_mode_sym_description">Send a real Android SYM modifier to Pastiera. This is independent of the Clicks firmware’s physical SYM layer.</string>
+    <string name="clicks_button_mode_sym_description">Send a real Android SYM modifier to Plektra. This is independent of the Clicks firmware’s physical SYM layer.</string>
     <string name="clicks_gatt_error_disconnected">Clicks Power Keyboard disconnected (GATT %1$d)</string>
     <string name="clicks_gatt_error_services">Could not read GATT services.</string>
     <string name="clicks_gatt_error_control_service">Clicks Control Service is unavailable.</string>
@@ -575,7 +575,7 @@
     <string name="clicks_firmware_updates_open_app">Open the Clicks app to check for and install firmware updates.</string>
     <string name="clicks_firmware_updates_install_app">Install the Clicks app from Google Play to update the keyboard firmware.</string>
     <string name="clicks_bluetooth_permission_title">Allow access to nearby devices?</string>
-    <string name="clicks_bluetooth_permission_description">Pastiera needs Nearby devices access to communicate directly with the paired Clicks Power Keyboard. This lets it read keyboard status and battery data and control extended functions such as key behaviour, backlight, remapping, and charging automation.</string>
+    <string name="clicks_bluetooth_permission_description">Plektra needs Nearby devices access to communicate directly with the paired Clicks Power Keyboard. This lets it read keyboard status and battery data and control extended functions such as key behaviour, backlight, remapping, and charging automation.</string>
     <string name="clicks_bluetooth_permission_continue">Continue</string>
     <string name="clicks_bluetooth_permission_not_now">Not now</string>
     <string name="clicks_section_keyboard_behavior">Keyboard behaviour</string>
@@ -597,7 +597,7 @@
     <string name="clicks_number_row_repeat_description">Repeat a number while its physical key is held.</string>
     <string name="clicks_section_key_mappings">Key mappings</string>
     <string name="clicks_all_key_mappings_title">All-key remapping</string>
-    <string name="clicks_all_key_mappings_description">Pastiera-side Alt, Ctrl, modifier, and action assignments for every key.</string>
+    <string name="clicks_all_key_mappings_description">Plektra-side Alt, Ctrl, modifier, and action assignments for every key.</string>
     <string name="clicks_section_backlight_power">Backlight and power saving</string>
     <string name="clicks_backlight_title">Backlight</string>
     <string name="clicks_backlight_description">Enable state and brightness from 0–100%.</string>
@@ -609,7 +609,7 @@
     <string name="clicks_manual_wireless_charging_title">Charge for 15 minutes</string>
     <string name="clicks_manual_wireless_charging_description">Temporarily override the automatic thresholds.</string>
     <string name="clicks_charging_connection_boundary_title">Evaluated while connected</string>
-    <string name="clicks_charging_connection_boundary_description">Pastiera cannot send charging commands while the keyboard is closed and disconnected. Its current state remains unchanged; thresholds and expired overrides are applied immediately after reconnecting.</string>
+    <string name="clicks_charging_connection_boundary_description">Plektra cannot send charging commands while the keyboard is closed and disconnected. Its current state remains unchanged; thresholds and expired overrides are applied immediately after reconnecting.</string>
     <string name="clicks_phone_battery_threshold_title">Phone battery threshold</string>
     <string name="clicks_phone_battery_threshold_description">Start charging only when the phone battery drops below a chosen percentage.</string>
     <string name="clicks_charging_automation_title">Automatic wireless charging</string>
@@ -642,16 +642,16 @@
     <string name="alt_key_editor_matching_title">Name and device matching</string>
     <string name="alt_key_editor_matching_description">Configure profile metadata and optional device-name matching.</string>
     <string name="alt_key_editor_mappings_title">Device SYM and key mappings</string>
-    <string name="alt_key_editor_mappings_description">Assign characters, modifiers, shortcuts, and Pastiera actions.</string>
+    <string name="alt_key_editor_mappings_description">Assign characters, modifiers, shortcuts, and Plektra actions.</string>
     <string name="alt_key_editor_transfer_title">Import and export</string>
-    <string name="alt_key_editor_transfer_description">Share custom profiles and restore them with Pastiera backups.</string>
+    <string name="alt_key_editor_transfer_description">Share custom profiles and restore them with Plektra backups.</string>
     <string name="settings_planned_label">PLANNED</string>
     <string name="feature_status_construction_content_description">Under construction</string>
     <string name="feature_status_construction_hint">This feature is still being developed. It will improve in an upcoming Plektra build.</string>
     <string name="feature_status_experimental_content_description">Experimental feature</string>
     <string name="feature_status_experimental_hint">This may already work, but it is new and may soon be changed or improved. Bug reports are welcome.</string>
     <string name="tutorial_feature_status_title">Feature status symbols</string>
-    <string name="tutorial_feature_status_description">Pastiera marks work in progress directly in the app, so you do not need to search through every GitHub issue.</string>
+    <string name="tutorial_feature_status_description">Plektra marks work in progress directly in the app, so you do not need to search through every GitHub issue.</string>
     <string name="tutorial_feature_status_construction_title">Under construction</string>
     <string name="tutorial_feature_status_construction_description">This feature is still being developed. It will improve in an upcoming Plektra build.</string>
     <string name="tutorial_feature_status_experimental_title">Experimental</string>
@@ -660,32 +660,36 @@
     
     <!-- About Section -->
     <string name="about_github">GitHub</string>
-    <string name="about_build_info">Pastiera IME - Palsoftware 2026</string>
+    <string name="about_build_info">Plektra IME - Palsoftware 2026</string>
     <string name="settings_device_keyboard_info">Device: %1$s; Keyboard: %2$s</string>
     <string name="about_title">About</string>
     <string name="about_credits_error">Unable to load credits information.</string>
-    <string name="about_final_stable_notice">Pastiera 0.86 is the final planned release with new features. Security-relevant issues will continue to be fixed and released as updates. New feature development continues as Plektra.</string>
+    <string name="about_final_stable_notice">Plektra stable release.</string>
     <string name="about_imprint_title">Imprint</string>
     <string name="about_imprint_current_pdf">Current signed version (PDF)</string>
     <string name="about_imprint_details">Patrick Zauner\nBurgkmairstr. 51\n80686 München\n\nResponsible for content since 07.03.2026</string>
     <string name="about_plektra_github_title">Star Plektra on GitHub</string>
-    <string name="about_plektra_github_description">Follow the successor project and help it grow.</string>
+    <string name="about_plektra_github_description">Source, releases, and issue tracker.</string>
+    <string name="about_play_build_title">Google Play build</string>
+    <string name="about_play_build_description">Google Play signs this separately distributed build. The canonical Plektra APKs use published hardware-backed signing keys and remain available directly.</string>
+    <string name="about_canonical_downloads">Canonical downloads</string>
+    <string name="about_signing_attestations">Signing attestations</string>
     <string name="about_sbom_export">Export software bill of materials (CycloneDX JSON)</string>
     
     <!-- Launcher Shortcuts Section -->
-    <string name="starter_launcher_shortcuts_title">Pastiera-QuickLauncher</string>
+    <string name="starter_launcher_shortcuts_title">Plektra-QuickLauncher</string>
     <string name="starter_launcher_shortcuts_description">Quick launching, SYM shortcuts, and launcher key assignments</string>
-    <string name="starter_launcher_shortcuts_intro">These settings share one launcher-key assignment list. Choose where Pastiera should listen for those assigned keys.</string>
+    <string name="starter_launcher_shortcuts_intro">These settings share one launcher-key assignment list. Choose where Plektra should listen for those assigned keys.</string>
     <string name="launcher_shortcuts_title">Homescreen shortcuts</string>
     <string name="launcher_shortcuts_experimental">Experimental</string>
     <string name="launcher_shortcuts_description">Use assigned launcher keys directly on the Android launcher or home screen.</string>
     <string name="launcher_shortcuts_configure">Assigned launcher keys</string>
     <string name="launcher_shortcuts_configure_description">Tap a key to assign or replace a command. Assigned keys are shared by both trigger modes.</string>
     <string name="launcher_shortcuts_configure_description_with_quick_launcher">Tap a key to assign or replace a command. Quick launcher is currently assigned to %1$s.</string>
-    <string name="quick_launcher_default_blocked_hint">New: SYM can open the quick launcher. Pastiera would normally assign it to Space, but Space already has a shortcut. Open the assignments page and choose “Open quick launcher” on any key to try it.</string>
+    <string name="quick_launcher_default_blocked_hint">New: SYM can open the quick launcher. Plektra would normally assign it to Space, but Space already has a shortcut. Open the assignments page and choose “Open quick launcher” on any key to try it.</string>
     
     <!-- Launcher Shortcuts Screen -->
-    <string name="launcher_shortcuts_screen_title">Pastiera-QuickLauncher</string>
+    <string name="launcher_shortcuts_screen_title">Plektra-QuickLauncher</string>
     <string name="launcher_shortcuts_not_assigned">Not assigned</string>
     <string name="launcher_shortcuts_remove">Remove</string>
     <string name="launcher_shortcuts_app_name_unavailable">App (name unavailable)</string>
@@ -703,7 +707,7 @@
     <string name="launcher_shortcut_assignment_no_apps">No commands found</string>
     <string name="launcher_shortcut_assignment_no_results">No results for \"%1$s\"</string>
     <string name="launcher_shortcut_assignment_key_name">Key %1$d</string>
-    <string name="quick_launcher_title">Pastiera-QuickLauncher</string>
+    <string name="quick_launcher_title">Plektra-QuickLauncher</string>
     <string name="quick_launcher_subtitle">Type to search. Enter opens the top result.</string>
     <string name="quick_launcher_close">Close</string>
     <string name="quick_launcher_search_placeholder">Start typing...</string>
@@ -720,12 +724,12 @@
     <string name="quick_launcher_alt_shortcuts_outside_fields_title">Allow Alt shortcuts outside text fields</string>
     <string name="quick_launcher_alt_shortcuts_outside_fields_description">Use Alt with an assigned key to launch the same app or action as its SYM key shortcut.</string>
     <string name="quick_launcher_respect_keyboard_layout_title">Use active keyboard layout</string>
-    <string name="quick_launcher_respect_keyboard_layout_description">When enabled, search input follows the current Pastiera layout instead of Android’s raw QWERTY key output.</string>
+    <string name="quick_launcher_respect_keyboard_layout_description">When enabled, search input follows the current Plektra layout instead of Android’s raw QWERTY key output.</string>
     <string name="quick_launcher_typo_tolerant_ranking_title">Typo-tolerant search</string>
     <string name="quick_launcher_typo_tolerant_ranking_description">Also match app names with small typing mistakes. Existing prefix and abbreviation matches still rank higher.</string>
     <string name="quick_launcher_provider_title">QuickLauncher behaviour</string>
-    <string name="quick_launcher_provider_description">Choose whether the shortcut opens Pastiera search or Niagara Launcher search. Niagara falls back to Pastiera if unavailable.</string>
-    <string name="quick_launcher_provider_pastiera">Pastiera QuickLauncher</string>
+    <string name="quick_launcher_provider_description">Choose whether the shortcut opens Plektra search or Niagara Launcher search. Niagara falls back to Plektra if unavailable.</string>
+    <string name="quick_launcher_provider_plektra">Plektra QuickLauncher</string>
     <string name="quick_launcher_provider_niagara">Niagara Launcher Search</string>
     <string name="quick_launcher_ranking_info_button">How ranking works</string>
     <string name="quick_launcher_ranking_info_title">QuickLauncher ranking</string>
@@ -859,22 +863,22 @@
     <string name="alt_shortcuts_in_text_fields_description">Also use assigned Alt shortcuts while typing.</string>
     <string name="sym_shortcuts_compatibility_info">About SYM key compatibility</string>
     <string name="sym_shortcuts_compatibility_title">SYM key compatibility</string>
-    <string name="sym_shortcuts_compatibility_description">SYM key shortcuts require a keyboard that exposes SYM as a modifier to Android. They cannot currently work with keyboards whose firmware converts SYM combinations into final characters or navigation events before Pastiera receives them. This includes the Clicks Power Keyboard’s current SYM behaviour.</string>
+    <string name="sym_shortcuts_compatibility_description">SYM key shortcuts require a keyboard that exposes SYM as a modifier to Android. They cannot currently work with keyboards whose firmware converts SYM combinations into final characters or navigation events before Plektra receives them. This includes the Clicks Power Keyboard’s current SYM behaviour.</string>
     <string name="power_shortcuts_press_key">Press shortcut key to launch</string>
     
     <!-- Notification Helper -->
-    <string name="notification_nav_mode_channel_name">Pastiera Nav Mode</string>
-    <string name="notification_nav_mode_channel_description">Notifications for Pastiera nav mode</string>
+    <string name="notification_nav_mode_channel_name">Plektra Nav Mode</string>
+    <string name="notification_nav_mode_channel_description">Notifications for Plektra nav mode</string>
     <string name="notification_nav_mode_activated_title">Nav Mode Activated</string>
     <string name="notification_nav_mode_activated_text">Nav mode activated</string>
     
     <!-- Update Notifications -->
-    <string name="notification_update_channel_name">Pastiera Updates</string>
-    <string name="notification_update_channel_description">Notifications about new Pastiera versions</string>
-    <string name="notification_successor_release_title">Plektra release available</string>
-    <string name="notification_successor_release_text">%1$s is available as the successor to Pastiera.</string>
-    <string name="notification_pastiera_stable_update_title">Pastiera security update available</string>
-    <string name="notification_pastiera_stable_update_text">%1$s is available for Pastiera.</string>
+    <string name="notification_update_channel_name">Plektra Updates</string>
+    <string name="notification_update_channel_description">Notifications about new Plektra versions</string>
+    <string name="notification_successor_release_title">Plektra update available</string>
+    <string name="notification_successor_release_text">%1$s is available.</string>
+    <string name="notification_plektra_stable_update_title">Plektra security update available</string>
+    <string name="notification_plektra_stable_update_text">%1$s is available for Plektra.</string>
     
     <!-- Speech Recognition -->
     <string name="speech_recognition_prompt">Speak now...</string>
@@ -914,7 +918,7 @@ QWERTZ on physical QWERTY
 Nav Mode uses the physical key position so navigation remains stable. Layout hints on keys show when the active text layout would treat that physical key as a different letter, such as Y/Z on QWERTZ.
 
 Layout-aware app Ctrl shortcuts
-When held Ctrl is passed to apps, this optional setting can translate Ctrl+letter through the active Pastiera layout first. It affects app shortcuts, not the physical Nav Mode grid.
+When held Ctrl is passed to apps, this optional setting can translate Ctrl+letter through the active Plektra layout first. It affects app shortcuts, not the physical Nav Mode grid.
 
 Overrides
 Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrides to solve app-specific conflicts without changing the whole mode.</string>
@@ -923,10 +927,10 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="nav_mode_ctrl_hold_title">Ctrl-hold navigation</string>
     <string name="nav_mode_ctrl_hold_description">When enabled, text fields use Nav Mode mappings while Ctrl is held. When off, Ctrl shortcuts are passed to the app. Keys set to Native Ctrl are always passed through as real Ctrl shortcuts.</string>
     <string name="layout_aware_ctrl_shortcuts_title">Layout-aware app Ctrl shortcuts</string>
-    <string name="layout_aware_ctrl_shortcuts_description">When held Ctrl is passed to apps, translate Ctrl+letter through the active Pastiera layout first.</string>
+    <string name="layout_aware_ctrl_shortcuts_description">When held Ctrl is passed to apps, translate Ctrl+letter through the active Plektra layout first.</string>
     <string name="layout_aware_ctrl_shortcuts_disabled_description">Disabled while Ctrl-hold navigation is active, because held Ctrl is handled by Nav Mode instead of the app.</string>
     <string name="layout_aware_ctrl_shortcuts_info_title">Ctrl shortcuts and Nav Mode</string>
-    <string name="layout_aware_ctrl_shortcuts_info_text">There are two paths for held Ctrl. If Ctrl-hold navigation is on, Pastiera handles Ctrl+key with the Nav Mode mappings shown below. If Ctrl-hold navigation is off, Pastiera passes Ctrl+key to the app. This option only affects that app path: when enabled, Ctrl+letter is translated through the active Pastiera layout first, so shortcuts can follow the letters you type. When disabled, apps receive the original physical key positions.</string>
+    <string name="layout_aware_ctrl_shortcuts_info_text">There are two paths for held Ctrl. If Ctrl-hold navigation is on, Plektra handles Ctrl+key with the Nav Mode mappings shown below. If Ctrl-hold navigation is off, Plektra passes Ctrl+key to the app. This option only affects that app path: when enabled, Ctrl+letter is translated through the active Plektra layout first, so shortcuts can follow the letters you type. When disabled, apps receive the original physical key positions.</string>
     <string name="nav_mode_key_mappings">Key Mappings</string>
     <string name="nav_mode_revert_to_default">Revert to Default</string>
     <string name="nav_mode_note">Note: Modifying nav mode keys also affects Ctrl+key combinations in text fields.</string>
@@ -974,7 +978,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="app_enter_behaviour_title">Enter key behaviour</string>
     <string name="app_enter_behaviour_description">Configure app-specific Enter and newline handling</string>
     <string name="app_enter_behaviour_enable_title">App-specific Enter behaviour</string>
-    <string name="app_enter_behaviour_enable_description">Use Pastiera overrides for selected messaging apps. Tested apps show the strategy Pastiera actually uses.</string>
+    <string name="app_enter_behaviour_enable_description">Use Plektra overrides for selected messaging apps. Tested apps show the strategy Plektra actually uses.</string>
     <string name="app_enter_behaviour_preset_title">Messaging preset</string>
     <string name="app_enter_behaviour_preset_description">Apply a consistent default to installed known messaging apps.</string>
     <string name="app_enter_behaviour_preset_app_default">App default</string>
@@ -1000,12 +1004,12 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="app_enter_behaviour_option_send_shift_newline">Enter sends, Shift+Enter newline</string>
     <string name="app_enter_behaviour_option_newline_ctrl_send">Enter newline, Ctrl+Enter sends</string>
     <string name="app_enter_behaviour_option_enter_newline">Enter newline</string>
-    <string name="app_enter_behaviour_status_app_default">Pastiera does not intervene.</string>
+    <string name="app_enter_behaviour_status_app_default">Plektra does not intervene.</string>
     <string name="app_enter_behaviour_status_whatsapp_active">Active: %1$s.</string>
     <string name="app_enter_behaviour_status_partial_active">Partially active: %1$s.</string>
     <string name="app_enter_behaviour_status_experimental_active">Experimentally active: %1$s.</string>
     <string name="app_enter_behaviour_status_not_active">Not active yet: %1$s is planned.</string>
-    <string name="app_enter_behaviour_status_native_result">App default: Pastiera does not intervene.</string>
+    <string name="app_enter_behaviour_status_native_result">App default: Plektra does not intervene.</string>
     <string name="app_enter_behaviour_status_strategy_result">Active: %1$s.</string>
     <string name="app_enter_behaviour_status_experimental_result">Experimentally active: %1$s.</string>
     <string name="app_enter_behaviour_strategy_none_label">No override</string>
@@ -1013,12 +1017,12 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="app_enter_behaviour_strategy_plain_enter_label">Plain Enter</string>
     <string name="app_enter_behaviour_strategy_unconfigured_label">Not configured</string>
     <string name="app_enter_behaviour_strategy_app_default_detail">The app decides whether Enter sends or inserts a newline.</string>
-    <string name="app_enter_behaviour_strategy_whatsapp_newline_ctrl_send">Pastiera inserts newlines directly and sends through the app\'s send action.</string>
-    <string name="app_enter_behaviour_strategy_whatsapp_send_shift_newline">Pastiera sends through the app\'s send action. Shift+Enter is inserted directly as a newline.</string>
-    <string name="app_enter_behaviour_strategy_whatsapp_newline_only">Tested: Pastiera inserts Enter directly as a newline and does not trigger send.</string>
-    <string name="app_enter_behaviour_strategy_discord_app_default_detail">Tested: Discord already behaves correctly for Enter sends and Shift+Enter newline. Pastiera does not intervene here.</string>
+    <string name="app_enter_behaviour_strategy_whatsapp_newline_ctrl_send">Plektra inserts newlines directly and sends through the app\'s send action.</string>
+    <string name="app_enter_behaviour_strategy_whatsapp_send_shift_newline">Plektra sends through the app\'s send action. Shift+Enter is inserted directly as a newline.</string>
+    <string name="app_enter_behaviour_strategy_whatsapp_newline_only">Tested: Plektra inserts Enter directly as a newline and does not trigger send.</string>
+    <string name="app_enter_behaviour_strategy_discord_app_default_detail">Tested: Discord already behaves correctly for Enter sends and Shift+Enter newline. Plektra does not intervene here.</string>
     <string name="app_enter_behaviour_strategy_discord_partial_detail">Tested: Newlines are inserted directly. Ctrl+Enter sends a plain Enter without Ctrl meta because Discord\'s app action only hides the keyboard.</string>
-    <string name="app_enter_behaviour_strategy_experimental_detail">Not confirmed: Pastiera is trying the app\'s send action and direct newline insertion.</string>
+    <string name="app_enter_behaviour_strategy_experimental_detail">Not confirmed: Plektra is trying the app\'s send action and direct newline insertion.</string>
     <string name="app_enter_behaviour_strategy_not_tested_detail">The technical strategy still needs to be tested for this app.</string>
     <string name="app_enter_behaviour_desired_label">Wanted behaviour</string>
     <string name="app_enter_behaviour_strategy_label">Send strategy</string>
@@ -1064,24 +1068,24 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="settings_support_creator_ko_fi">Support the creator on Ko-fi</string>
     <string name="settings_nav_mode_configure">Configure navigation mode key mappings</string>
     <string name="settings_update_section_title">Plektra</string>
-    <string name="settings_update_section_description">Check for Pastiera security updates and Plektra Nightlies.</string>
-    <string name="settings_update_checking">Checking Pastiera security updates and Plektra Nightlies…</string>
-    <string name="settings_update_up_to_date">No Pastiera security update or Plektra Nightly found.</string>
-    <string name="settings_stable_update_section_title">Pastiera and Plektra updates</string>
-    <string name="settings_stable_update_section_description">Check for Pastiera security updates and Plektra releases.</string>
-    <string name="settings_stable_update_checking">Checking Pastiera and Plektra releases…</string>
-    <string name="settings_stable_update_up_to_date">No Pastiera or Plektra update found.</string>
+    <string name="settings_update_section_description">Check for Plektra Nightly updates.</string>
+    <string name="settings_update_checking">Checking for Plektra Nightly updates…</string>
+    <string name="settings_update_up_to_date">No newer Plektra Nightly found.</string>
+    <string name="settings_stable_update_section_title">Plektra updates</string>
+    <string name="settings_stable_update_section_description">Check for stable Plektra releases.</string>
+    <string name="settings_stable_update_checking">Checking for Plektra releases…</string>
+    <string name="settings_stable_update_up_to_date">No newer Plektra release found.</string>
     <string name="settings_update_check_failed">Unable to reach GitHub.</string>
-    <string name="successor_dialog_title">Pastiera has a successor</string>
-    <string name="successor_dialog_message">Plektra succeeds Pastiera. %1$s is available on GitHub.</string>
-    <string name="successor_dialog_open_release">View Plektra release</string>
+    <string name="successor_dialog_title">Plektra update available</string>
+    <string name="successor_dialog_message">%1$s is available on GitHub.</string>
+    <string name="successor_dialog_open_release">View release</string>
     <string name="successor_dialog_later">Later</string>
-    <string name="pastiera_stable_update_title">Pastiera security update available</string>
-    <string name="pastiera_stable_update_message">%1$s is available for Pastiera. Install it to receive the latest security fixes.</string>
-    <string name="pastiera_stable_update_open">View Pastiera release</string>
+    <string name="plektra_stable_update_title">Plektra security update available</string>
+    <string name="plektra_stable_update_message">%1$s is available for Plektra. Install it to receive the latest security fixes.</string>
+    <string name="plektra_stable_update_open">View Plektra release</string>
     
     <!-- Auto Correct Settings -->
-    <string name="auto_correct_ricette_pastiera_name">Ricette Pastiera</string>
+    <string name="auto_correct_ricette_plektra_name">Ricette Plektra</string>
     
     <!-- Settings Categories -->
     <string name="settings_category_text_input">Smart Features</string>
@@ -1097,7 +1101,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="settings_group_customization">Interface</string>
     <string name="settings_group_system">Advanced</string>
     <string name="settings_group_utility">Utility</string>
-    <string name="settings_group_pastiera">About</string>
+    <string name="settings_group_plektra">About</string>
     <string name="settings_about_version_summary">v%1$s</string>
     <string name="settings_accessibility_live_read_title">Live reading for keyboard bar changes</string>
     <string name="settings_accessibility_live_read_description">When enabled, TalkBack can announce language/layout and keyboard bar changes automatically.</string>
@@ -1222,7 +1226,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="nav_mode_action_expand_selection_word_right">WordSel→</string>
     <string name="nav_mode_action_page_start">DocStart</string>
     <string name="nav_mode_action_page_end">DocEnd</string>
-    <string name="nav_mode_action_toggle_pastierina">Pastierina</string>
+    <string name="nav_mode_action_toggle_slim">Slim</string>
     <string name="nav_mode_action_media_play_pause">Play/Pause</string>
     <string name="nav_mode_action_media_previous">Media Previous</string>
     <string name="nav_mode_action_media_next">Media Next</string>
@@ -1248,36 +1252,39 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="tutorial_finish">Finish</string>
     <string name="tutorial_whats_new_title">New in this version: %1$s</string>
     <string name="tutorial_whats_new_description">A few changes are worth knowing before you continue.</string>
-    <string name="tutorial_final_stable_title">Pastiera continues as Plektra</string>
-    <string name="about_final_nightly_notice">This is the final planned Pastiera Nightly with new features. Security-relevant issues will continue to be fixed and released as updates. New feature development continues as Plektra.</string>
-    <string name="tutorial_final_nightly_title">The final Pastiera Nightly</string>
+    <string name="tutorial_final_stable_title">Plektra update</string>
+    <string name="about_final_nightly_notice">Plektra Nightly build.</string>
+    <string name="tutorial_final_nightly_title">Plektra Nightly update</string>
     <string name="tutorial_whats_new_bug_fixes_title">Bug fixes</string>
-    <string name="tutorial_whats_new_docs_button">Open Pastiera docs</string>
+    <string name="tutorial_whats_new_docs_button">Open Plektra docs</string>
     <string name="tutorial_whats_new_continue_hint">Continue through the tutorial to review the most useful settings for this release.</string>
-    <string name="tutorial_page_welcome_title">Pastiera continues as Plektra</string>
-    <string name="tutorial_page_welcome_description">Pastiera 0.86 is the final planned Pastiera release with new features. You can keep using Pastiera; security-relevant issues will continue to receive updates. Plektra continues the project with the same principles and remains free, open-source software under the GPLv3 copyleft licence. When Plektra is ready, Pastiera will notify you and guide you through the one-time transfer of your settings.</string>
+    <string name="tutorial_page_welcome_title">Welcome to Plektra</string>
+    <string name="tutorial_page_welcome_description">Plektra is a free, open-source keyboard for Android devices with physical keys. Choose your hardware profile, layout, input surfaces, and shortcuts in Settings.</string>
     <string name="tutorial_t2e_title">Recommended for Titan 2 Elite</string>
-    <string name="tutorial_t2e_description">Pastiera 0.86 fits the status bar to the Elite’s rounded display.</string>
+    <string name="tutorial_t2e_description">Plektra fits its input surfaces to the Elite’s rounded display.</string>
     <string name="tutorial_t2e_bullet_rounded_corners">Keep rounded corners enabled so the outer controls follow the physical display curve.</string>
     <string name="tutorial_t2e_bullet_fill_corners">Enable filling of the lower display corners so the theme reaches the edge behind the rounded buttons.</string>
     <string name="tutorial_t2e_trackpad_note">Trackpad control still needs refinement and will continue to improve in Plektra.</string>
     <string name="tutorial_t2e_open_settings">Review Titan 2 Elite settings</string>
     <string name="tutorial_devs_choice_button">Dev\'s Choice</string>
     <string name="tutorial_devs_choice_applied">Dev\'s Choice settings applied.</string>
-    <string name="tutorial_page_enable_title">Enable Pastiera</string>
-    <string name="tutorial_page_enable_description">To get started, you need to enable Pastiera as an input method in Android Settings. Tap the button below to open settings.</string>
-    <string name="tutorial_page_select_title">Select Pastiera</string>
-    <string name="tutorial_page_select_description">To use Pastiera, select it among the input methods. The next step lets you choose whether Pastiera should use a virtual keyboard or hardware-keyboard mode.</string>
+    <string name="tutorial_page_enable_title">Enable Plektra</string>
+    <string name="tutorial_page_enable_description">To get started, you need to enable Plektra as an input method in Android Settings. Tap the button below to open settings.</string>
+    <string name="tutorial_page_select_title">Select Plektra</string>
+    <string name="tutorial_page_select_description">To use Plektra, select it among the input methods. The next step lets you choose whether Plektra should use a virtual keyboard or hardware-keyboard mode.</string>
+    <string name="tutorial_page_select_nightly_title">Select Plektra Nightly</string>
+    <string name="tutorial_page_select_nightly_description">Select Plektra Nightly among the input methods. The next step lets you choose whether it should use a virtual keyboard or hardware-keyboard mode.</string>
+    <string name="tutorial_select_nightly_button">Select Plektra Nightly</string>
     <string name="tutorial_page_software_keyboard_title">Keyboard Mode</string>
-    <string name="tutorial_page_software_keyboard_description">Pick the keyboard surface Pastiera should use here.</string>
+    <string name="tutorial_page_software_keyboard_description">Pick the keyboard surface Plektra should use here.</string>
     <string name="tutorial_software_keyboard_auto_bullet">Recommended: hardware mode on known PKB devices, virtual mode on touch devices.</string>
     <string name="tutorial_software_keyboard_virtual_bullet">Full on-screen keyboard for touch-first use. Still alpha.</string>
     <string name="tutorial_software_keyboard_hardware_bullet">Compact surface for devices with physical keys.</string>
     <string name="tutorial_software_keyboard_alpha_warning">Alpha feature: the virtual keyboard is still heavily under construction and is not recommended for daily use yet.</string>
     <string name="tutorial_android16_ime_caption_title">Hide IME caption bar</string>
-    <string name="tutorial_android16_ime_caption_description">Titan 2 devices can show an extra IME caption bar under Pastiera. This OEM setting hides it and keeps Pastiera compact.</string>
+    <string name="tutorial_android16_ime_caption_description">Titan 2 devices can show an extra IME caption bar under Plektra. This OEM setting hides it and keeps Plektra compact.</string>
     <string name="tutorial_android16_ime_caption_before">Before: extra caption bar</string>
-    <string name="tutorial_android16_ime_caption_after">After: compact Pastiera</string>
+    <string name="tutorial_android16_ime_caption_after">After: compact Plektra</string>
     <string name="tutorial_android16_ime_caption_check_android16">Android 16 or newer</string>
     <string name="tutorial_android16_ime_caption_check_titan2">Unihertz Titan 2 or Titan 2 Elite</string>
     <string name="tutorial_android16_ime_caption_check_setting">OEM gesture setting available</string>
@@ -1293,20 +1300,20 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="tutorial_software_keyboard_auto_reason_physical">Reason: this profile is treated as a physical-keyboard device, so Auto uses hardware-keyboard mode.</string>
     <string name="tutorial_software_keyboard_auto_reason_touch">Reason: this profile is not recognized as a physical-keyboard device, so Auto uses virtual-keyboard mode.</string>
     <string name="tutorial_page_led_title">Modifier indicators</string>
-    <string name="tutorial_page_led_description">To get the most out of Pastiera, set the Fn key to act as Ctrl from Android system settings. Pastiera can show modifier state in the bottom strip, menu bar, or Pastiera statusbar: active one-shot states use the active color, locked states use the locked color.</string>
+    <string name="tutorial_page_led_description">To get the most out of Plektra, set the Fn key to act as Ctrl from Android system settings. Plektra can show modifier state in the bottom strip, menu bar, or Plektra statusbar: active one-shot states use the active color, locked states use the locked color.</string>
     <string name="tutorial_page_nav_mode_title">Nav Mode</string>
     <string name="tutorial_page_nav_mode_description">Nav Mode turns letter keys into navigation and editing controls. Press Ctrl twice to latch it, or enable Ctrl-hold navigation below.</string>
     <string name="tutorial_nav_mode_bullet_selection">Selection actions can extend text selection left, right, or word by word.</string>
     <string name="tutorial_nav_mode_bullet_words">Word actions jump by whole words for faster cursor movement in text fields.</string>
-    <string name="tutorial_nav_mode_bullet_media">Mappings can also handle app shortcuts, media controls, Escape, Tab, Page Up/Down, and Pastierina.</string>
+    <string name="tutorial_nav_mode_bullet_media">Mappings can also handle app shortcuts, media controls, Escape, Tab, Page Up/Down, and Slim.</string>
     <string name="tutorial_page_customization_title">Customization</string>
-    <string name="tutorial_page_customization_description">Pastiera offers many customization options:\n• Customizable keyboard layouts\n• Launcher shortcuts &amp; Power Shortcuts\n• IME bar can act as a swipe bar to move the cursor\n• Custom mappings for Nav Mode\nExplore the settings to find the perfect configuration for you!</string>
+    <string name="tutorial_page_customization_description">Plektra offers many customization options:\n• Customizable keyboard layouts\n• Launcher shortcuts &amp; Power Shortcuts\n• IME bar can act as a swipe bar to move the cursor\n• Custom mappings for Nav Mode\nExplore the settings to find the perfect configuration for you!</string>
     <string name="tutorial_quick_launcher_title">QuickLauncher</string>
     <string name="tutorial_quick_launcher_description">Open apps from the keyboard without leaving your typing flow.</string>
     <string name="tutorial_quick_launcher_bullet_sym_space">Hold SYM and press Space to open QuickLauncher from anywhere.</string>
     <string name="tutorial_quick_launcher_bullet_text_fields">It also works while the cursor is inside a text field, so you can switch apps from typing context.</string>
     <string name="tutorial_quick_launcher_bullet_search">Type a few letters, abbreviations, or small typos to find the app you want.</string>
-    <string name="tutorial_quick_launcher_bullet_layout">Search can respect your active Pastiera layout, such as QWERTZ.</string>
+    <string name="tutorial_quick_launcher_bullet_layout">Search can respect your active Plektra layout, such as QWERTZ.</string>
     <string name="tutorial_quick_launcher_button">Open QuickLauncher settings</string>
     <string name="tutorial_quick_launcher_mapping_conflict_title">SYM + Space is assigned to something else</string>
     <string name="tutorial_quick_launcher_mapping_conflict_description">Space currently opens “%1$s”. Replace that mapping with QuickLauncher and enable it in text fields to try the new feature.</string>
@@ -1322,25 +1329,25 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="tutorial_typing_sound_demo_input_label">Try typing here</string>
     <string name="tutorial_sym_emoji_button">SYM / Emoji</string>
     <string name="tutorial_device_sym_layer_title">Device-specific characters use Device SYM</string>
-    <string name="tutorial_device_sym_layer_description">Pastiera now calls the device-specific secondary-character mapping the Device SYM Layer. Alt remains the modifier key that can trigger it; Emoji and Symbols are additional SYM layers.</string>
+    <string name="tutorial_device_sym_layer_description">Plektra now calls the device-specific secondary-character mapping the Device SYM Layer. Alt remains the modifier key that can trigger it; Emoji and Symbols are additional SYM layers.</string>
     <string name="tutorial_variations_button">Variations</string>
     <string name="tutorial_status_bar_button">Keyboard bar</string>
     <string name="tutorial_page_ready_title">Ready to Start</string>
-    <string name="tutorial_page_ready_description">You are now ready to use Pastiera! Remember that you can always return to settings to further customize the keyboard to your needs.</string>
-    <string name="tutorial_enable_button">Enable Pastiera</string>
-    <string name="tutorial_enabled_message">Pastiera is enabled!</string>
-    <string name="tutorial_select_button">Select Pastiera</string>
-    <string name="tutorial_enable_first_message">Enable Pastiera first on the previous page</string>
-    <string name="tutorial_selected_message">Pastiera is selected!</string>
+    <string name="tutorial_page_ready_description">You are now ready to use Plektra! Remember that you can always return to settings to further customize the keyboard to your needs.</string>
+    <string name="tutorial_enable_button">Enable Plektra</string>
+    <string name="tutorial_enabled_message">Plektra is enabled!</string>
+    <string name="tutorial_select_button">Select Plektra</string>
+    <string name="tutorial_enable_first_message">Enable Plektra first on the previous page</string>
+    <string name="tutorial_selected_message">Plektra is selected!</string>
     <string name="tutorial_show">Show Tutorial</string>
     <string name="tutorial_review_description">Review the introductory tutorial</string>
     <string name="tutorial_show_release_notes">Show release notes tutorial</string>
     <string name="tutorial_show_release_notes_description">Preview the update intro without installing an upgrade</string>
 
-    <string name="pastierina_mode_title">Pastierina Mode</string>
-    <string name="pastierina_mode_description">Toggle minimal ui</string>
+    <string name="slim_mode_title">Slim Mode</string>
+    <string name="slim_mode_description">Toggle minimal ui</string>
     <string name="software_keyboard_mode_title">Keyboard Mode</string>
-    <string name="software_keyboard_mode_description">Separate from Pastierina. Controls hardware vs virtual keyboard behaviour.</string>
+    <string name="software_keyboard_mode_description">Separate from Slim. Controls hardware vs virtual keyboard behaviour.</string>
     <string name="software_keyboard_mode_auto_current">Auto (current: %1$s)</string>
     <string name="software_keyboard_mode_virtual">Virtual</string>
     <string name="software_keyboard_mode_hardware">Hardware</string>
@@ -1384,7 +1391,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="backup_now">Backup now</string>
     <string name="backup_now_description">Export all settings and custom layouts to a ZIP</string>
     <string name="restore_from_file">Restore from file</string>
-    <string name="restore_from_file_description">Import a Pastiera backup ZIP</string>
+    <string name="restore_from_file_description">Import a Plektra backup ZIP</string>
     <string name="backup_completed">Backup completed</string>
     <string name="restore_completed">Restore completed</string>
     <string name="backup_failed">Backup failed: %1$s</string>
@@ -1573,7 +1580,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="trackpad_tutorial_how_it_works_title">How It Works</string>
     <string name="trackpad_tutorial_how_it_works_description">The trackpad is divided into three sections:\n\n• Left third → Accept left suggestion\n• Center third → Accept center suggestion\n• Right third → Accept right suggestion\n\nSimply swipe up in the corresponding area to insert that suggestion.</string>
     <string name="trackpad_tutorial_shizuku_required_title">Shizuku Required</string>
-    <string name="trackpad_tutorial_shizuku_required_description">This feature requires Shizuku to access trackpad events.\n\n1. Install Shizuku from GitHub releases\n2. Enable developer options in Android settings\n3. Plug your device into a PC with ADB installed\n4. Run the command that Shizuku shows in its app\n5. Grant permission to Pastiera in Shizuku\n\nThe feature will work automatically once Shizuku is running.</string>
+    <string name="trackpad_tutorial_shizuku_required_description">This feature requires Shizuku to access trackpad events.\n\n1. Install Shizuku from GitHub releases\n2. Enable developer options in Android settings\n3. Plug your device into a PC with ADB installed\n4. Run the command that Shizuku shows in its app\n5. Grant permission to Plektra in Shizuku\n\nThe feature will work automatically once Shizuku is running.</string>
     <string name="trackpad_tutorial_tips_title">Tips</string>
     <string name="trackpad_tutorial_tips_description">• Make sure your swipe is primarily vertical\n• The gesture works best with quick, deliberate swipes\n• If other fingers are on the keyboard, gestures may not be detected (hardware palm rejection)\n• The feature can be enabled/disabled in Advanced Settings</string>
     <string name="trackpad_tutorial_complete">Got It</string>
@@ -1585,12 +1592,16 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
 
     <!-- Status Bar Buttons Configuration -->
     <string name="status_bar_buttons_title">Keyboard bar</string>
-    <string name="status_bar_buttons_description">Choose suggestions, actions and indicator locations. Pastierina mode hides actions while keeping your choices.</string>
-    <string name="status_bar_style_section">Status bar style</string>
+    <string name="status_bar_buttons_description">Choose suggestions, actions and indicator locations. Slim mode hides actions while keeping your choices.</string>
+    <string name="status_bar_style_section">Keyboard bar presentation</string>
     <string name="extended_status_bar_title">Full keyboard bar</string>
+    <string name="keyboard_bar_suggestions">Suggestions</string>
+    <string name="keyboard_bar_actions">Variations and menu</string>
+    <string name="keyboard_bar_slim_description">Slim hides variations and menu controls. Suggestions and indicators follow the checkboxes above.</string>
+    <string name="keyboard_bar_indicator_settings">Configure all indicator locations in the keyboard bar settings.</string>
     <string name="extended_status_bar_features_section">Extended features</string>
     <string name="status_bar_buttons_section">Buttons</string>
-    <string name="pastierina_preview_suggestions">Suggestions</string>
+    <string name="slim_preview_suggestions">Suggestions</string>
     <string name="device_specific_interface_section">Device-specific interface</string>
     <string name="titan2_elite_rounded_corners_title">Titan 2 Elite rounded corners</string>
     <string name="titan2_elite_rounded_corners_description">Round the bottom corners of the keyboard bar to match the Elite’s rounded display corners.</string>
@@ -1601,10 +1612,10 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="status_bar_slot_right_2">Right Slot 2</string>
     <string name="status_bar_slots_left">Left buttons</string>
     <string name="status_bar_slots_right">Right buttons</string>
-    <string name="pastierina_status_bar_buttons_title">Pastierina mode</string>
-    <string name="pastierina_status_bar_buttons_description">Choose which buttons appear on the left and right edges of the compact Pastierina row.</string>
-    <string name="pastierina_status_bar_slots_left">Pastierina left buttons</string>
-    <string name="pastierina_status_bar_slots_right">Pastierina right buttons</string>
+    <string name="slim_status_bar_buttons_title">Slim mode</string>
+    <string name="slim_status_bar_buttons_description">Choose which buttons appear on the left and right edges of the compact Slim row.</string>
+    <string name="slim_status_bar_slots_left">Slim left buttons</string>
+    <string name="slim_status_bar_slots_right">Slim right buttons</string>
     <string name="status_bar_slot_add">Add keyboard bar button</string>
     <string name="status_bar_slot_remove">Remove keyboard bar button</string>
     <string name="status_bar_button_none">None</string>
@@ -1620,7 +1631,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="status_bar_button_language_state_description">Language %1$s, layout %2$s</string>
     <string name="status_bar_button_hamburger">Menu</string>
     <string name="status_bar_button_hamburger_description">Quick actions</string>
-    <string name="status_bar_button_minimal_ui">Pastierina</string>
+    <string name="status_bar_button_minimal_ui">Slim</string>
     <string name="status_bar_button_software_keyboard_mode">Keyboard mode</string>
     <string name="status_bar_button_software_keyboard_mode_description">Temporarily open / close the on-screen keyboard (Ctrl+B)</string>
     <string name="status_bar_button_close_menu_description">Close quick actions</string>
@@ -1642,11 +1653,11 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="modifier_indicators_title">Modifier indicators</string>
     <string name="modifier_indicators_description">Choose where Shift, Ctrl, Alt, and SYM state appears for the hardware keyboard.</string>
     <string name="modifier_indicators_bottom_strip">Bottom Strip LEDs</string>
-    <string name="modifier_indicators_bottom_strip_description">Colored modifier LEDs in the strip below Pastiera.</string>
+    <string name="modifier_indicators_bottom_strip_description">Colored modifier LEDs in the strip below Plektra.</string>
     <string name="modifier_indicators_menu_bar">Android status bar</string>
     <string name="modifier_indicators_menu_bar_description">One compact icon in Android\'s top statusbar.</string>
     <string name="modifier_indicators_status_bar">Beside suggestions</string>
-    <string name="modifier_indicators_status_bar_description">Compact symbols at the left edge of the Pastiera statusbar.</string>
+    <string name="modifier_indicators_status_bar_description">Compact symbols at the left edge of the Plektra statusbar.</string>
     <string name="modifier_indicators_off_state">All modifier indicators are off.</string>
     <string name="status_bar_state_on">On</string>
     <string name="status_bar_state_off">Off</string>
@@ -1710,7 +1721,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="kw_main_custom_input_styles">keyboard layout, layouts, input styles, languages, per language</string>
     <string name="kw_main_text_input">typing, text, punctuation, quotes, spacing, capitalization</string>
     <string name="kw_main_auto_correction">correction, autocorrect, spelling, suggestions, replacements, dictionaries</string>
-    <string name="kw_main_keyboard_theme">theme, themes, colors, dark, light, presets, hardware keyboard, on-screen keyboard, Pastiera Dark, Pastiera Light, Cloud Tap, Moon Tap, Classic Cloud, Classic Midnight</string>
+    <string name="kw_main_keyboard_theme">theme, themes, colors, dark, light, presets, hardware keyboard, on-screen keyboard, Plektra Dark, Plektra Light, Cloud Tap, Moon Tap, Classic Cloud, Classic Midnight</string>
     <string name="kw_main_app_language">language, app language, locale, translation</string>
     <string name="kw_main_customization">customize, customization, appearance</string>
     <string name="kw_main_advanced">advanced, backup, restore, debug, expert</string>
@@ -1736,7 +1747,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="kw_modifier_indicators">LED, LEDs, lights, indicators, where modifier state shows</string>
     <string name="kw_custom_input_styles_layout_mode">layout mode, per-app, switch</string>
     <string name="kw_about_support_ko_fi">support, donate, ko-fi, coffee, creator, Andrea Palumbo</string>
-    <string name="kw_about_support_open_collective">support, donate, open collective, Pastiera, Plektra</string>
+    <string name="kw_about_support_open_collective">support, donate, open collective, Plektra, Plektra</string>
     <string name="kw_about_plektra_github">Plektra, GitHub, star, source, successor</string>
     <string name="kw_theme_toggle_show_leds">LED, LEDs, lights, indicators, on-screen keyboard</string>
     <string name="kw_theme_toggle_distribute_spacing">spacing, gaps, keys</string>
@@ -1748,13 +1759,9 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="kw_theme_led_colors">LED, LEDs, inactive, active, locked, modifier, colors, indicators</string>
     <string name="kw_indicator_bottom_strip">LED, LEDs, lights, strip, bottom</string>
     <string name="kw_indicator_menu_bar">LED, lights, icon, status bar, indicators</string>
-    <string name="kw_indicator_status_bar">LED, lights, symbols, indicators, pastiera</string>
+    <string name="kw_indicator_status_bar">LED, lights, symbols, indicators, plektra</string>
     <string name="titan2_elite_top_corner_title">Upper button corners</string>
     <string name="titan2_elite_top_corner_description">Round only the upper corner facing the display edge. Corners facing inward and inner buttons stay unchanged.</string>
     <string name="titan2_elite_max_icon_shrink_title">Maximum icon reduction: %1$d%%</string>
     <string name="titan2_elite_max_icon_shrink_description">Automatically shrink outer button icons only as much as needed, up to this limit. 0% disables shrinking; positioning stays active.</string>
-    <string name="keyboard_bar_suggestions">Suggestions</string>
-    <string name="keyboard_bar_actions">Variations and menu</string>
-    <string name="keyboard_bar_indicator_settings">Configure all indicator locations in the keyboard bar settings.</string>
-    <string name="keyboard_bar_pastierina_description">Pastierina hides variations and menu controls. Suggestions and indicators follow the checkboxes above.</string>
 </resources>

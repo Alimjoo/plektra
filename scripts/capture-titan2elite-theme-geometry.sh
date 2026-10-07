@@ -7,12 +7,12 @@ OUTPUT_DIR="${2:-build/titan2elite-theme-geometry}"
 ADB_BIN="${ADB_BIN:-${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb}"
 MAESTRO_BIN="${MAESTRO_BIN:-$HOME/.maestro/bin/maestro}"
 FFMPEG_BIN="${FFMPEG_BIN:-ffmpeg}"
-PACKAGE="${PASTIERA_PACKAGE:-it.palsoftware.pastiera.nightly}"
+PACKAGE="${PLEKTRA_PACKAGE:-rocks.pkb.plektra.nightly}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 THEMES=(
-  "Pastiera Dark"
-  "Pastiera Light"
+  "Plektra Dark"
+  "Plektra Light"
   "Cloud Tap"
   "Moon Tap"
   "Classic Cloud"
@@ -43,14 +43,14 @@ mkdir -p "$OUTPUT_DIR/raw"
 "$ADB_BIN" -s "$SERIAL" shell settings put system font_scale 1.0
 
 "$ADB_BIN" -s "$SERIAL" shell am start -W -f 0x10008000 \
-  -n "$PACKAGE/it.palsoftware.pastiera.MainActivity"
+  -n "$PACKAGE/rocks.pkb.plektra.MainActivity"
 "$MAESTRO_BIN" --device "$SERIAL" test \
   "$ROOT_DIR/maestro/titan2elite/focus-ime-test-field.yaml"
 "$ADB_BIN" -s "$SERIAL" shell am start -W \
   -a android.intent.action.MAIN \
-  -n "$PACKAGE/it.palsoftware.pastiera.SettingsActivity" \
-  --es it.palsoftware.pastiera.SETTINGS_DESTINATION customization \
-  --es it.palsoftware.pastiera.CUSTOMIZATION_DESTINATION keyboard_theme
+  -n "$PACKAGE/rocks.pkb.plektra.SettingsActivity" \
+  --es rocks.pkb.plektra.SETTINGS_DESTINATION customization \
+  --es rocks.pkb.plektra.CUSTOMIZATION_DESTINATION keyboard_theme
 "$MAESTRO_BIN" --device "$SERIAL" test \
   "$ROOT_DIR/maestro/titan2elite/reset-hardware-theme-list.yaml"
 
@@ -63,15 +63,15 @@ for theme in "${THEMES[@]}"; do
   if [[ "$index" -gt 1 ]]; then
     "$ADB_BIN" -s "$SERIAL" shell am start -W \
       -a android.intent.action.MAIN \
-      -n "$PACKAGE/it.palsoftware.pastiera.SettingsActivity" \
-      --es it.palsoftware.pastiera.SETTINGS_DESTINATION customization \
-      --es it.palsoftware.pastiera.CUSTOMIZATION_DESTINATION keyboard_theme
+      -n "$PACKAGE/rocks.pkb.plektra.SettingsActivity" \
+      --es rocks.pkb.plektra.SETTINGS_DESTINATION customization \
+      --es rocks.pkb.plektra.CUSTOMIZATION_DESTINATION keyboard_theme
   fi
   "$MAESTRO_BIN" --device "$SERIAL" test -e "THEME_NAME=$theme" \
     "$ROOT_DIR/maestro/titan2elite/select-hardware-theme.yaml"
 
   "$ADB_BIN" -s "$SERIAL" shell am start -W -f 0x10008000 \
-    -n "$PACKAGE/it.palsoftware.pastiera.MainActivity"
+    -n "$PACKAGE/rocks.pkb.plektra.MainActivity"
   "$MAESTRO_BIN" --device "$SERIAL" test \
     "$ROOT_DIR/maestro/titan2elite/focus-ime-test-field.yaml"
 

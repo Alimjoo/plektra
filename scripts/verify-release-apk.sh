@@ -23,7 +23,7 @@ if [ -z "$APKSIGNER" ] || [ ! -x "$APKSIGNER" ]; then
   exit 1
 fi
 
-EXPECTED_SUBJECT="CN=Pastiera, OU=Development, O=PalSoftware, L=Italy, ST=Italy, C=IT"
+EXPECTED_SUBJECT="CN=Plektra, OU=Development, O=PalSoftware, L=Italy, ST=Italy, C=IT"
 EXPECTED_SHA256="d5c018b9c33e0cda7cef0b006ed739d4c6304c4ef4a0c4d9454a5302e7c4c3e7"
 
 VERIFY_OUTPUT="$("$APKSIGNER" verify --print-certs "$APK_PATH")"
@@ -39,8 +39,8 @@ printf 'Expected cert SHA-256: %s\n' "$EXPECTED_SHA256"
 printf 'Actual cert SHA-256:   %s\n' "$ACTUAL_SHA256"
 
 if [ "$ACTUAL_SUBJECT" = "$EXPECTED_SUBJECT" ] && [ "$ACTUAL_SHA256" = "$EXPECTED_SHA256" ]; then
-  echo "OK: APK matches the official Pastiera release signing certificate."
+  echo "OK: APK matches the official Plektra release signing certificate."
 else
-  echo "NOT OK: APK does not match the official Pastiera release signing certificate." >&2
+  echo "NOT OK: APK does not match the official Plektra release signing certificate." >&2
   exit 1
 fi

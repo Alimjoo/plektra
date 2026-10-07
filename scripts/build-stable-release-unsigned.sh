@@ -34,15 +34,15 @@ apkanalyzer="$sdk_root/cmdline-tools/latest/bin/apkanalyzer"
 cd "$root_dir"
 
 ./gradlew :app:testStableDebugUnitTest \
-  -PPASTIERA_VERSION_CODE="$version_code" \
-  -PPASTIERA_VERSION_NAME="$version_name" \
-  -PPASTIERA_SUCCESSOR_GITHUB_REPOSITORY="$successor_repository"
+  -PPLEKTRA_VERSION_CODE="$version_code" \
+  -PPLEKTRA_VERSION_NAME="$version_name" \
+  -PPLEKTRA_SUCCESSOR_GITHUB_REPOSITORY="$successor_repository"
 
 ./gradlew :app:assembleStableRelease \
-  -PPASTIERA_UNSIGNED_RELEASE_BUILD=true \
-  -PPASTIERA_VERSION_CODE="$version_code" \
-  -PPASTIERA_VERSION_NAME="$version_name" \
-  -PPASTIERA_SUCCESSOR_GITHUB_REPOSITORY="$successor_repository"
+  -PPLEKTRA_UNSIGNED_RELEASE_BUILD=true \
+  -PPLEKTRA_VERSION_CODE="$version_code" \
+  -PPLEKTRA_VERSION_NAME="$version_name" \
+  -PPLEKTRA_SUCCESSOR_GITHUB_REPOSITORY="$successor_repository"
 
 [[ -f "$apk" ]] || fail "Gradle did not create the expected unsigned APK"
 
@@ -55,14 +55,14 @@ actual_version_code=$("$apkanalyzer" manifest version-code "$apk")
 actual_version_name=$("$apkanalyzer" manifest version-name "$apk")
 actual_debuggable=$("$apkanalyzer" manifest debuggable "$apk")
 
-[[ "$actual_app_id" == "it.palsoftware.pastiera" ]] || fail "unexpected application ID: $actual_app_id"
+[[ "$actual_app_id" == "rocks.pkb.plektra" ]] || fail "unexpected application ID: $actual_app_id"
 [[ "$actual_version_code" == "$version_code" ]] || fail "unexpected version code: $actual_version_code"
 [[ "$actual_version_name" == "$version_name" ]] || fail "unexpected version name: $actual_version_name"
 [[ "$actual_debuggable" == "false" ]] || fail "release APK is debuggable"
 
 shasum -a 256 "$apk" >"$sha_file"
 
-printf 'Success: unsigned Pastiera stable release built and verified.\n'
+printf 'Success: unsigned Plektra stable release built and verified.\n'
 printf 'application_id=%s\n' "$actual_app_id"
 printf 'version_name=%s\n' "$actual_version_name"
 printf 'version_code=%s\n' "$actual_version_code"

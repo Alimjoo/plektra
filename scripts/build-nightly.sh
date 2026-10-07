@@ -15,6 +15,7 @@ NIGHTLY_SECRETS_FILE="${NIGHTLY_SECRETS_FILE:-$ROOT_DIR/release/nightly-secrets.
 KEYSTORE_PROPS_FILE="$ROOT_DIR/release/keystore.properties"
 VERSION_INFO="$("$ROOT_DIR/scripts/nightly-version.sh" "$BASE_VERSION")"
 TIMESTAMP="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^timestamp=/{print $2}')"
+NIGHTLY_SUFFIX="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^nightly_suffix=/{print $2}')"
 FULL_VERSION="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^full_version=/{print $2}')"
 TAG_NAME="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^tag_name=/{print $2}')"
 VERSION_CODE="$(printf '%s\n' "$VERSION_INFO" | awk -F= '/^version_code=/{print $2}')"
@@ -25,13 +26,13 @@ HIGHLIGHTS_PATH="${NIGHTLY_HIGHLIGHTS_FILE:-$ROOT_DIR/.github/release-templates/
 TMP_NOTES_PATH="$(mktemp)"
 EXPECTED_NIGHTLY_CERT_SHA256="${EXPECTED_NIGHTLY_CERT_SHA256:-9866536b5a6da5152b0ba30b12b3cffae54990c5200647f352f40edb0f04f51e}"
 GRADLE_ARGS=(
-  -PPASTIERA_VERSION_NAME="$BASE_VERSION"
-  -PPASTIERA_NIGHTLY_VERSION_CODE="$VERSION_CODE"
-  -PPASTIERA_NIGHTLY_VERSION_SUFFIX="-nightly.${TIMESTAMP}"
+  -PPLEKTRA_VERSION_NAME="$BASE_VERSION"
+  -PPLEKTRA_NIGHTLY_VERSION_CODE="$VERSION_CODE"
+  -PPLEKTRA_NIGHTLY_VERSION_SUFFIX="-nightly.${NIGHTLY_SUFFIX}"
 )
 
 if [ "$PUBLISH" = "--fdroid" ] || [ "$BUILD_MODE" = "--fdroid" ]; then
-  GRADLE_ARGS+=(-PPASTIERA_FDROID_BUILD=true)
+  GRADLE_ARGS+=(-PPLEKTRA_FDROID_BUILD=true)
 fi
 
 cleanup() {
@@ -68,10 +69,10 @@ first_non_empty_prop() {
 }
 
 configure_nightly_signing_env() {
-  if [ -n "${PASTIERA_NIGHTLY_KEYSTORE_PATH:-}" ] &&
-    [ -n "${PASTIERA_NIGHTLY_KEYSTORE_PASSWORD:-}" ] &&
-    [ -n "${PASTIERA_NIGHTLY_KEY_ALIAS:-}" ] &&
-    [ -n "${PASTIERA_NIGHTLY_KEY_PASSWORD:-}" ]; then
+  if [ -n "${PLEKTRA_NIGHTLY_KEYSTORE_PATH:-}" ] &&
+    [ -n "${PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD:-}" ] &&
+    [ -n "${PLEKTRA_NIGHTLY_KEY_ALIAS:-}" ] &&
+    [ -n "${PLEKTRA_NIGHTLY_KEY_PASSWORD:-}" ]; then
     return
   fi
 
@@ -85,20 +86,20 @@ configure_nightly_signing_env() {
   bash "$ROOT_DIR/scripts/materialize-signing-keystores.sh" "$KEYSTORE_PROPS_FILE" >/dev/null || true
 
   if [ -f "$KEYSTORE_PROPS_FILE" ]; then
-    if [ -z "${PASTIERA_NIGHTLY_KEYSTORE_PATH:-}" ]; then
+    if [ -z "${PLEKTRA_NIGHTLY_KEYSTORE_PATH:-}" ]; then
       local nightly_store_file
       nightly_store_file="$(first_non_empty_prop "nightlyStoreFile" "NIGHTLY_KEYSTORE_FILE" || true)"
       if [ -n "$nightly_store_file" ]; then
         if [ "${nightly_store_file#/}" != "$nightly_store_file" ]; then
-          export PASTIERA_NIGHTLY_KEYSTORE_PATH="$nightly_store_file"
+          export PLEKTRA_NIGHTLY_KEYSTORE_PATH="$nightly_store_file"
         else
-          export PASTIERA_NIGHTLY_KEYSTORE_PATH="$ROOT_DIR/release/$nightly_store_file"
+          export PLEKTRA_NIGHTLY_KEYSTORE_PATH="$ROOT_DIR/release/$nightly_store_file"
         fi
       fi
     fi
-    [ -n "${PASTIERA_NIGHTLY_KEYSTORE_PASSWORD:-}" ] || export PASTIERA_NIGHTLY_KEYSTORE_PASSWORD="$(first_non_empty_prop "nightlyStorePassword" "PASTIERA_NIGHTLY_KEYSTORE_PASSWORD" || true)"
-    [ -n "${PASTIERA_NIGHTLY_KEY_ALIAS:-}" ] || export PASTIERA_NIGHTLY_KEY_ALIAS="$(first_non_empty_prop "nightlyKeyAlias" "PASTIERA_NIGHTLY_KEY_ALIAS" || true)"
-    [ -n "${PASTIERA_NIGHTLY_KEY_PASSWORD:-}" ] || export PASTIERA_NIGHTLY_KEY_PASSWORD="$(first_non_empty_prop "nightlyKeyPassword" "PASTIERA_NIGHTLY_KEY_PASSWORD" || true)"
+    [ -n "${PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD:-}" ] || export PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD="$(first_non_empty_prop "nightlyStorePassword" "PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD" || true)"
+    [ -n "${PLEKTRA_NIGHTLY_KEY_ALIAS:-}" ] || export PLEKTRA_NIGHTLY_KEY_ALIAS="$(first_non_empty_prop "nightlyKeyAlias" "PLEKTRA_NIGHTLY_KEY_ALIAS" || true)"
+    [ -n "${PLEKTRA_NIGHTLY_KEY_PASSWORD:-}" ] || export PLEKTRA_NIGHTLY_KEY_PASSWORD="$(first_non_empty_prop "nightlyKeyPassword" "PLEKTRA_NIGHTLY_KEY_PASSWORD" || true)"
   fi
 }
 
@@ -186,7 +187,7 @@ verify_nightly_signing_cert
 if [ "$PUBLISH" = "--publish" ]; then
   gh release create "$TAG_NAME" "$APK_PATH" "$SHA_PATH" \
     --prerelease \
-    --title "Pastiera Nightly v${FULL_VERSION}" \
+    --title "Plektra Nightly v${FULL_VERSION}" \
     --notes-file "$TMP_NOTES_PATH"
 fi
 

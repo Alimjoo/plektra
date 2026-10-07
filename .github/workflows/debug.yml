@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version_name:
-        description: "Nightly version label, e.g. 0.86"
+        description: "Nightly CalVer month, e.g. 26.09"
         required: true
         type: string
       artifact_name:
@@ -13,7 +13,7 @@ on:
         default: nightly
         type: string
       nightly_timestamp:
-        description: "Optional shared timestamp, e.g. 20260820.220354"
+        description: "Optional UTC timestamp, e.g. 20260926.142900"
         required: false
         type: string
       publish_github_prerelease:
@@ -45,28 +45,28 @@ jobs:
 
       - name: Decode nightly keystore
         env:
-          PASTIERA_NIGHTLY_KEYSTORE_B64: ${{ secrets.PASTIERA_NIGHTLY_KEYSTORE_B64 }}
+          PLEKTRA_NIGHTLY_KEYSTORE_B64: ${{ secrets.PLEKTRA_NIGHTLY_KEYSTORE_B64 }}
         run: |
           mkdir -p release
-          echo "$PASTIERA_NIGHTLY_KEYSTORE_B64" | base64 -d > release/pastiera-nightly.jks
+          echo "$PLEKTRA_NIGHTLY_KEYSTORE_B64" | base64 -d > release/plektra-nightly.jks
 
       - name: Create nightly keystore.properties
         env:
-          PASTIERA_NIGHTLY_KEYSTORE_PASSWORD: ${{ secrets.PASTIERA_NIGHTLY_KEYSTORE_PASSWORD }}
-          PASTIERA_NIGHTLY_KEY_ALIAS: ${{ secrets.PASTIERA_NIGHTLY_KEY_ALIAS }}
-          PASTIERA_NIGHTLY_KEY_PASSWORD: ${{ secrets.PASTIERA_NIGHTLY_KEY_PASSWORD }}
+          PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD: ${{ secrets.PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD }}
+          PLEKTRA_NIGHTLY_KEY_ALIAS: ${{ secrets.PLEKTRA_NIGHTLY_KEY_ALIAS }}
+          PLEKTRA_NIGHTLY_KEY_PASSWORD: ${{ secrets.PLEKTRA_NIGHTLY_KEY_PASSWORD }}
         run: |
           cat > release/keystore.properties <<EOF
-          nightlyStoreFile=pastiera-nightly.jks
-          nightlyStorePassword=$PASTIERA_NIGHTLY_KEYSTORE_PASSWORD
-          nightlyKeyAlias=$PASTIERA_NIGHTLY_KEY_ALIAS
-          nightlyKeyPassword=$PASTIERA_NIGHTLY_KEY_PASSWORD
+          nightlyStoreFile=plektra-nightly.jks
+          nightlyStorePassword=$PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD
+          nightlyKeyAlias=$PLEKTRA_NIGHTLY_KEY_ALIAS
+          nightlyKeyPassword=$PLEKTRA_NIGHTLY_KEY_PASSWORD
           EOF
 
       - name: Compute nightly version metadata
         id: nightly_meta
         env:
-          PASTIERA_NIGHTLY_TIMESTAMP: ${{ inputs.nightly_timestamp }}
+          PLEKTRA_NIGHTLY_TIMESTAMP: ${{ inputs.nightly_timestamp }}
         run: |
           chmod +x ./scripts/nightly-version.sh
           ./scripts/nightly-version.sh "${{ inputs.version_name }}" >> "$GITHUB_OUTPUT"
@@ -74,16 +74,16 @@ jobs:
       - name: Run nightly debug-flavor unit tests
         run: |
           ./gradlew :app:testNightlyDebugUnitTest \
-            -PPASTIERA_VERSION_NAME=${{ inputs.version_name }} \
-            -PPASTIERA_NIGHTLY_VERSION_CODE=${{ steps.nightly_meta.outputs.version_code }} \
-            -PPASTIERA_NIGHTLY_VERSION_SUFFIX=-nightly.${{ steps.nightly_meta.outputs.timestamp }}
+            -PPLEKTRA_VERSION_NAME=${{ inputs.version_name }} \
+            -PPLEKTRA_NIGHTLY_VERSION_CODE=${{ steps.nightly_meta.outputs.version_code }} \
+            -PPLEKTRA_NIGHTLY_VERSION_SUFFIX=-nightly.${{ steps.nightly_meta.outputs.nightly_suffix }}
 
       - name: Build nightly APK
         run: |
           ./gradlew :app:assembleNightlyRelease \
-            -PPASTIERA_VERSION_NAME=${{ inputs.version_name }} \
-            -PPASTIERA_NIGHTLY_VERSION_CODE=${{ steps.nightly_meta.outputs.version_code }} \
-            -PPASTIERA_NIGHTLY_VERSION_SUFFIX=-nightly.${{ steps.nightly_meta.outputs.timestamp }}
+            -PPLEKTRA_VERSION_NAME=${{ inputs.version_name }} \
+            -PPLEKTRA_NIGHTLY_VERSION_CODE=${{ steps.nightly_meta.outputs.version_code }} \
+            -PPLEKTRA_NIGHTLY_VERSION_SUFFIX=-nightly.${{ steps.nightly_meta.outputs.nightly_suffix }}
 
       - name: Compute checksums
         run: sha256sum app/build/outputs/apk/nightly/release/app-nightly-release.apk | tee app/build/outputs/apk/nightly/release/app-nightly-release.apk.sha256
@@ -91,7 +91,7 @@ jobs:
       - name: Upload nightly APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pastiera-${{ inputs.artifact_name }}-${{ steps.nightly_meta.outputs.full_version }}
+          name: plektra-${{ inputs.artifact_name }}-${{ steps.nightly_meta.outputs.full_version }}
           path: |
             app/build/outputs/apk/nightly/release/app-nightly-release.apk
             app/build/outputs/apk/nightly/release/app-nightly-release.apk.sha256
@@ -113,7 +113,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.nightly_meta.outputs.tag_name }}
-          name: Pastiera Nightly v${{ steps.nightly_meta.outputs.full_version }}
+          name: Plektra Nightly v${{ steps.nightly_meta.outputs.full_version }}
           body_path: /tmp/nightly-prerelease-notes.md
           prerelease: true
           generate_release_notes: true

@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Pastiera</string>
-    <string name="input_method_name">Pastiera</string>
+    <string name="app_name">Plektra</string>
+    <string name="input_method_name">Plektra</string>
     <string name="input_method_name_en">English</string>
     <string name="input_method_name_it">Italiano</string>
     <string name="input_method_name_fr">Français</string>
@@ -63,13 +63,13 @@
     <string name="auto_space_punctuation_title">Διαστήματα στίξης</string>
     <string name="auto_space_punctuation_selected">Επιλεγμένα:</string>
     <string name="auto_space_punctuation_none_selected">κανένα</string>
-    <string name="auto_space_punctuation_dialog_instruction">Επιλέξτε αν το Pastiera αφαιρεί το δικό του αυτόματο διάστημα πριν από κάθε χαρακτήρα και εισάγει αναβλημένο διάστημα πριν από το επόμενο κείμενο.</string>
+    <string name="auto_space_punctuation_dialog_instruction">Επιλέξτε αν το Plektra αφαιρεί το δικό του αυτόματο διάστημα πριν από κάθε χαρακτήρα και εισάγει αναβλημένο διάστημα πριν από το επόμενο κείμενο.</string>
     <string name="auto_space_punctuation_character_column">Χαρακτήρας</string>
     <string name="auto_space_punctuation_before_column">Αφαίρεση πριν</string>
     <string name="auto_space_punctuation_after_column">Πριν το επόμενο κείμενο</string>
     <string name="auto_space_punctuation_help_action">Εξήγηση διαστημάτων στίξης</string>
     <string name="auto_space_punctuation_help_title">Πώς λειτουργούν τα διαστήματα στίξης</string>
-    <string name="auto_space_punctuation_help_text">Το “Αφαίρεση πριν” αφαιρεί μόνο διάστημα που εισήγαγε αυτόματα το Pastiera, όχι κάποιο που πληκτρολογήσατε χειροκίνητα.\n\nΤο “Πριν το επόμενο κείμενο” αναβάλλει το διάστημα μέχρι να πληκτρολογηθεί περισσότερο κείμενο. Έτσι το Enter ή η Αποστολή δεν αφήνει τελικό διάστημα.</string>
+    <string name="auto_space_punctuation_help_text">Το “Αφαίρεση πριν” αφαιρεί μόνο διάστημα που εισήγαγε αυτόματα το Plektra, όχι κάποιο που πληκτρολογήσατε χειροκίνητα.\n\nΤο “Πριν το επόμενο κείμενο” αναβάλλει το διάστημα μέχρι να πληκτρολογηθεί περισσότερο κείμενο. Έτσι το Enter ή η Αποστολή δεν αφήνει τελικό διάστημα.</string>
     <string name="auto_space_punctuation_choose">Επιλεγμένα:</string>
     <string name="auto_space_punctuation_choose_off">Ανενεργό</string>
     <string name="auto_space_punctuation_reset">Επαναφορά</string>
@@ -133,7 +133,7 @@
     <string name="info_description">Οι ρυθμίσεις αποθηκεύονται αυτόματα και εφαρμόζονται αμέσως στη μέθοδο εισαγωγής.</string>
 
     <!-- Main Activity -->
-    <string name="keyboard_title">Πληκτρολόγιο Pastiera</string>
+    <string name="keyboard_title">Πληκτρολόγιο Plektra</string>
     <string name="software_keyboard_accessibility_shift">Shift</string>
     <string name="software_keyboard_accessibility_backspace">Backspace</string>
     <string name="software_keyboard_accessibility_symbols">Σύμβολα</string>
@@ -154,15 +154,15 @@
     <!-- Installation Section -->
     <string name="installation_title">Εγκατάσταση</string>
     <string name="installation_step1">1. Πατήστε το κουμπί παρακάτω για να ανοίξετε τις ρυθμίσεις</string>
-    <string name="installation_step2">2. Ενεργοποιήστε το \'Pastiera Physical Keyboard\'</string>
+    <string name="installation_step2">2. Ενεργοποιήστε το \'Plektra Physical Keyboard\'</string>
     <string name="installation_step3">3. Επιστρέψτε εδώ και δοκιμάστε το πληκτρολόγιο</string>
     <string name="open_keyboard_settings">Άνοιγμα ρυθμίσεων πληκτρολογίου</string>
 
     <!-- Main Activity - Enable/Select IME -->
-    <string name="enable_pastiera">Ενεργοποίηση Pastiera</string>
-    <string name="pastiera_not_enabled">Το Pastiera δεν είναι ενεργοποιημένο</string>
+    <string name="enable_plektra">Ενεργοποίηση Plektra</string>
+    <string name="plektra_not_enabled">Το Plektra δεν είναι ενεργοποιημένο</string>
     <string name="choose_input_method">Επιλογή μεθόδου εισαγωγής</string>
-    <string name="pastiera_not_selected">Το Pastiera δεν είναι επιλεγμένο</string>
+    <string name="plektra_not_selected">Το Plektra δεν είναι επιλεγμένο</string>
 
     <!-- Test Section -->
     <string name="test_keyboard_title">Δοκιμή πληκτρολογίου</string>
@@ -206,7 +206,7 @@
     <string name="auto_correct_settings_title">Αντικαταστάσεις κειμένου</string>
     <string name="auto_correct_settings_description">Επιλέξτε ποια σύνολα κανόνων αντικατάστασης είναι ενεργά. Αυτοί οι ακριβείς κανόνες εκτελούνται πριν από την αυτόματη διόρθωση βάσει λεξικού.</string>
     <string name="auto_correct_system_language">Γλώσσα συστήματος</string>
-    <string name="auto_correct_ricette_pastiera_description">Προσαρμογές που ισχύουν για όλες τις αντικαταστάσεις</string>
+    <string name="auto_correct_ricette_plektra_description">Προσαρμογές που ισχύουν για όλες τις αντικαταστάσεις</string>
     <string name="auto_correct_other_languages">Άλλες αντικαταστάσεις</string>
     <string name="auto_correct_custom_languages">Προσαρμοσμένες αντικαταστάσεις</string>
     <string name="auto_correct_at_least_one_language_required">Απαιτείται τουλάχιστον μία αντικατάσταση για τη λειτουργία</string>
@@ -241,7 +241,7 @@
     <string name="auto_correct_max_distance_off">Ανενεργό</string>
     <string name="auto_correct_max_distance_description">Μέγιστος αριθμός διαφορών χαρακτήρων που επιτρέπονται για την αυτόματη διόρθωση. 0 = απενεργοποιημένο, 1-3 = αυξανόμενη ανοχή.</string>
     <string name="auto_correct_manage_user_dict_title">Προσωπικό λεξικό</string>
-    <string name="auto_correct_manage_user_dict_description">Λέξεις που το Pastiera πρέπει να γνωρίζει και να προτείνει, χωρίς δημιουργία κανόνων αντικατάστασης.</string>
+    <string name="auto_correct_manage_user_dict_description">Λέξεις που το Plektra πρέπει να γνωρίζει και να προτείνει, χωρίς δημιουργία κανόνων αντικατάστασης.</string>
     <string name="auto_correct_keyboard_proximity_title">Κατάταξη εγγύτητας πληκτρολογίου</string>
     <string name="auto_correct_keyboard_proximity_description">Φιλτράρει απίθανα λάθη βάσει απόστασης πλήκτρων (QWERTY/AZERTY/QWERTZ)</string>
     <string name="auto_correct_edit_type_ranking_title">Κατάταξη τύπου επεξεργασίας</string>
@@ -360,8 +360,8 @@
     <string name="typing_sound_import_success">Το πακέτο ήχων πληκτρολόγησης εισήχθη</string>
     <string name="typing_sound_import_failed">Δεν ήταν δυνατή η εισαγωγή αυτού του πακέτου ήχων. Χρησιμοποιήστε ZIP με αρχεία ήχου στους φακέλους normal/, space/, backspace/, enter/ και modifier/.</string>
     <string name="typing_sound_docs_title">Μορφή πακέτου ήχων</string>
-    <string name="typing_sound_docs_description">Άνοιγμα οδηγού εισαγωγής στο pastiera.eu</string>
-    <string name="typing_sound_docs_url">https://pastiera.eu/guides/typing-soundpacks/</string>
+    <string name="typing_sound_docs_description">Άνοιγμα οδηγού εισαγωγής στο pkb.rocks</string>
+    <string name="typing_sound_docs_url">https://pkb.rocks/guides/typing-soundpacks/</string>
     <string name="tap_haptic_system_title">Δόνηση πατήματος</string>
     <string name="tap_haptic_system_description">Χρησιμοποιεί απτική ανάδραση πληκτρολογίου Android για προτάσεις και παραλλαγές σε συμβατές συσκευές.</string>
     <string name="tap_haptic_duration_title">Προσαρμοσμένη δόνηση: %1$d ms</string>
@@ -465,11 +465,11 @@
     <string name="clicks_cursor_mode_title">Λειτουργία δρομέα</string>
     <string name="clicks_cursor_mode_description">Ενεργοποιεί τη λειτουργία πλοήγησης δρομέα του firmware του πληκτρολογίου.</string>
     <string name="clicks_recommended_settings_title">Εφαρμογή προτεινόμενων ρυθμίσεων</string>
-    <string name="clicks_recommended_settings_description">Επαναφέρει τις εγγενείς εξόδους Tab και Alt· αντιστοιχίζει το κουμπί μικροφώνου στην υπαγόρευση Pastiera· αντιστοιχίζει το κόκκινο κουμπί Clicks και το κουμπί Launcher απευθείας στο QuickLauncher· και απενεργοποιεί Caps Lock και Cursor Mode.</string>
+    <string name="clicks_recommended_settings_description">Επαναφέρει τις εγγενείς εξόδους Tab και Alt· αντιστοιχίζει το κουμπί μικροφώνου στην υπαγόρευση Plektra· αντιστοιχίζει το κόκκινο κουμπί Clicks και το κουμπί Launcher απευθείας στο QuickLauncher· και απενεργοποιεί Caps Lock και Cursor Mode.</string>
     <string name="clicks_recommended_settings_success">Οι προτεινόμενες ρυθμίσεις Clicks εφαρμόστηκαν.</string>
     <string name="clicks_recommended_settings_failure">Δεν ήταν δυνατή η πλήρης εφαρμογή των προτεινόμενων ρυθμίσεων.</string>
-    <string name="clicks_sticky_alt_help">Ελέγχει τη συμπεριφορά SYM Lock του firmware Clicks. Η ξεχωριστή συμπεριφορά Sticky Alt του Pastiera παραμένει ρυθμισμένη στους Τροποποιητές.</string>
-    <string name="clicks_sticky_shift_help">Ελέγχει τη συμπεριφορά Caps Lock του firmware Clicks. Η ξεχωριστή συμπεριφορά Sticky Shift του Pastiera παραμένει ρυθμισμένη στους Τροποποιητές.</string>
+    <string name="clicks_sticky_alt_help">Ελέγχει τη συμπεριφορά SYM Lock του firmware Clicks. Η ξεχωριστή συμπεριφορά Sticky Alt του Plektra παραμένει ρυθμισμένη στους Τροποποιητές.</string>
+    <string name="clicks_sticky_shift_help">Ελέγχει τη συμπεριφορά Caps Lock του firmware Clicks. Η ξεχωριστή συμπεριφορά Sticky Shift του Plektra παραμένει ρυθμισμένη στους Τροποποιητές.</string>
     <string name="clicks_cursor_mode_help">Το firmware Clicks χρησιμοποιεί τους συνδυασμούς SYM W, A, S και D για μετακίνηση δρομέα όταν είναι ενεργό το Cursor Mode.</string>
     <string name="clicks_soft_return_help">Αυτή είναι επιλογή firmware που εκθέτει το πληκτρολόγιο. Η ακριβής συμπεριφορά της δεν είναι ακόμη αξιόπιστα τεκμηριωμένη, οπότε αφήστε τη αμετάβλητη εκτός αν τη δοκιμάζετε.</string>
     <string name="clicks_backlight_brightness_title">Φωτεινότητα</string>
@@ -494,16 +494,16 @@
     <string name="clicks_remap_custom_value">Τρέχουσα προσαρμοσμένη αντιστοίχιση (%1$s)</string>
     <string name="clicks_button_bindings_title">Launcher και ειδικά κουμπιά</string>
     <string name="clicks_button_bindings_description">Ρυθμίστε το κόκκινο κουμπί Clicks, το κουμπί Launcher, το κουμπί Keyboard και το κουμπί μικροφώνου σε ένα σημείο.</string>
-    <string name="clicks_button_bindings_screen_description">Επιλέξτε αν κάθε φυσικό κουμπί διατηρεί την αρχική λειτουργία του, καλεί απευθείας μια λειτουργία Pastiera ή στέλνει πλήκτρο ή συνδυασμό πλήκτρων.</string>
+    <string name="clicks_button_bindings_screen_description">Επιλέξτε αν κάθε φυσικό κουμπί διατηρεί την αρχική λειτουργία του, καλεί απευθείας μια λειτουργία Plektra ή στέλνει πλήκτρο ή συνδυασμό πλήκτρων.</string>
     <string name="clicks_binding_category_original">Αρχική λειτουργία</string>
-    <string name="clicks_binding_category_function">Λειτουργία Pastiera</string>
-    <string name="clicks_binding_category_pastiera_shortcut">Συντόμευση Pastiera</string>
+    <string name="clicks_binding_category_function">Λειτουργία Plektra</string>
+    <string name="clicks_binding_category_plektra_shortcut">Συντόμευση Plektra</string>
     <string name="clicks_binding_category_key">Εισαγωγή πλήκτρου</string>
     <string name="clicks_binding_category_shortcut">Συνδυασμός πλήκτρων</string>
     <string name="clicks_function_language_switch">Αλλαγή γλώσσας (Ctrl+Space)</string>
-    <string name="clicks_function_language_switch_description">Στέλνει Ctrl+Space και ενεργοποιεί την αλλαγή γλώσσας Ctrl+Space του Pastiera.</string>
+    <string name="clicks_function_language_switch_description">Στέλνει Ctrl+Space και ενεργοποιεί την αλλαγή γλώσσας Ctrl+Space του Plektra.</string>
     <string name="clicks_function_dictation">Λειτουργία υπαγόρευσης (Alt+Ctrl)</string>
-    <string name="clicks_function_dictation_description">Στέλνει Alt+Ctrl και ξεκινά τη λειτουργία υπαγόρευσης του Pastiera αντί για Android Gemini. Η απαιτούμενη συντόμευση Pastiera ενεργοποιείται αυτόματα.</string>
+    <string name="clicks_function_dictation_description">Στέλνει Alt+Ctrl και ξεκινά τη λειτουργία υπαγόρευσης του Plektra αντί για Android Gemini. Η απαιτούμενη συντόμευση Plektra ενεργοποιείται αυτόματα.</string>
     <string name="clicks_red_button_title">κόκκινο κουμπί Clicks</string>
     <string name="clicks_red_button_hardware_description">Κόκκινο κουμπί C.</string>
     <string name="clicks_launcher_button_title">Κουμπί Launcher</string>
@@ -521,13 +521,13 @@
     <string name="clicks_microphone_native_action">Εγγενής φωνητική εισαγωγή</string>
     <string name="clicks_microphone_native_description">Χρησιμοποιεί την εγγενή ενέργεια φωνητικής εισαγωγής του Android.</string>
     <string name="clicks_binding_alt_output_description">Στέλνει πραγματικό τροποποιητή Alt απευθείας από το firmware του πληκτρολογίου.</string>
-    <string name="clicks_binding_shortcut_description">Στέλνει %1$s ως συνδυασμό πληκτρολογίου. Δεν συνδέεται έμμεσα με λειτουργία Pastiera.</string>
+    <string name="clicks_binding_shortcut_description">Στέλνει %1$s ως συνδυασμό πληκτρολογίου. Δεν συνδέεται έμμεσα με λειτουργία Plektra.</string>
     <string name="clicks_binding_custom_description">Διατηρεί τον τρέχοντα αποθηκευμένο προσαρμοσμένο συνδυασμό του firmware πληκτρολογίου.</string>
     <string name="clicks_button_binding_applying">Εφαρμογή…</string>
     <string name="clicks_button_binding_success">Η αντιστοίχιση κουμπιού εφαρμόστηκε.</string>
     <string name="clicks_button_binding_failure">Δεν ήταν δυνατή η εφαρμογή της αντιστοίχισης κουμπιού.</string>
     <string name="clicks_button_binding_pending">Θα εφαρμοστεί όταν είναι έτοιμη μια υποστηριζόμενη σύνδεση πληκτρολογίου.</string>
-    <string name="clicks_launcher_interception_service_label">Παρεμπόδιση κουμπιών Clicks από Pastiera</string>
+    <string name="clicks_launcher_interception_service_label">Παρεμπόδιση κουμπιών Clicks από Plektra</string>
     <string name="clicks_launcher_interception_service_description">Παρεμποδίζει μόνο ρητά ρυθμισμένα κουμπιά ενός υποστηριζόμενου Clicks Power Keyboard.</string>
     <string name="clicks_launcher_interception_title">Παρεμπόδιση κουμπιών Clicks Android</string>
     <string name="clicks_launcher_interception_enabled">Ενεργό · Φιλτράρονται μόνο ρητά ρυθμισμένα κουμπιά ενός υποστηριζόμενου Clicks Power Keyboard.</string>
@@ -535,19 +535,19 @@
     <string name="clicks_button_mode_native">Εγγενές</string>
     <string name="clicks_button_mode_native_description">Διατηρεί το αρχικό συμβάν πλήκτρου Android του κουμπιού.</string>
     <string name="clicks_button_mode_quick_launcher">QuickLauncher</string>
-    <string name="clicks_button_mode_quick_launcher_description">Ανοίγει απευθείας το Pastiera QuickLauncher και δεν περνά το συμβάν πλήκτρου στην εφαρμογή.</string>
-    <string name="clicks_button_mode_open_pastiera">Άνοιγμα Pastiera</string>
-    <string name="clicks_button_mode_open_pastiera_description">Ανοίγει απευθείας τις ρυθμίσεις Pastiera και δεν περνά το συμβάν πλήκτρου στην εφαρμογή.</string>
+    <string name="clicks_button_mode_quick_launcher_description">Ανοίγει απευθείας το Plektra QuickLauncher και δεν περνά το συμβάν πλήκτρου στην εφαρμογή.</string>
+    <string name="clicks_button_mode_open_plektra">Άνοιγμα Plektra</string>
+    <string name="clicks_button_mode_open_plektra_description">Ανοίγει απευθείας τις ρυθμίσεις Plektra και δεν περνά το συμβάν πλήκτρου στην εφαρμογή.</string>
     <string name="clicks_button_mode_toggle_keyboard_mode">Εναλλαγή λειτουργίας πληκτρολογίου</string>
     <string name="clicks_button_mode_toggle_keyboard_mode_description">Ανοίγει ή κλείνει προσωρινά το πληκτρολόγιο οθόνης μέχρι την επόμενη αλλαγή σύνδεσης hardware.</string>
     <string name="clicks_button_mode_toggle_emoji_picker">Εναλλαγή επιλογέα emoji</string>
-    <string name="clicks_button_mode_toggle_emoji_picker_description">Ανοίγει τον επιλογέα emoji του Pastiera ή τον κλείνει όταν είναι ήδη ορατός.</string>
+    <string name="clicks_button_mode_toggle_emoji_picker_description">Ανοίγει τον επιλογέα emoji του Plektra ή τον κλείνει όταν είναι ήδη ορατός.</string>
     <string name="clicks_button_mode_alt">Alt</string>
     <string name="clicks_button_mode_alt_description">Λειτουργεί ως πραγματικός κρατημένος τροποποιητής Alt.</string>
     <string name="clicks_button_mode_tab">Tab</string>
-    <string name="clicks_button_mode_tab_description">Στέλνει πραγματικό πλήκτρο Tab μέσω της κανονικής διαδρομής εισαγωγής του Pastiera.</string>
+    <string name="clicks_button_mode_tab_description">Στέλνει πραγματικό πλήκτρο Tab μέσω της κανονικής διαδρομής εισαγωγής του Plektra.</string>
     <string name="clicks_button_mode_sym">SYM</string>
-    <string name="clicks_button_mode_sym_description">Στέλνει πραγματικό τροποποιητή Android SYM στο Pastiera. Αυτό είναι ανεξάρτητο από το φυσικό επίπεδο SYM του firmware Clicks.</string>
+    <string name="clicks_button_mode_sym_description">Στέλνει πραγματικό τροποποιητή Android SYM στο Plektra. Αυτό είναι ανεξάρτητο από το φυσικό επίπεδο SYM του firmware Clicks.</string>
     <string name="clicks_gatt_error_disconnected">Το Clicks Power Keyboard αποσυνδέθηκε (GATT %1$d)</string>
     <string name="clicks_gatt_error_services">Δεν ήταν δυνατή η ανάγνωση των υπηρεσιών GATT.</string>
     <string name="clicks_gatt_error_control_service">Η Clicks Control Service δεν είναι διαθέσιμη.</string>
@@ -575,7 +575,7 @@
     <string name="clicks_firmware_updates_open_app">Ανοίξτε την εφαρμογή Clicks για έλεγχο και εγκατάσταση ενημερώσεων firmware.</string>
     <string name="clicks_firmware_updates_install_app">Εγκαταστήστε την εφαρμογή Clicks από το Google Play για ενημέρωση του firmware πληκτρολογίου.</string>
     <string name="clicks_bluetooth_permission_title">Να επιτραπεί η πρόσβαση σε κοντινές συσκευές;</string>
-    <string name="clicks_bluetooth_permission_description">Το Pastiera χρειάζεται πρόσβαση σε Κοντινές συσκευές για άμεση επικοινωνία με το συζευγμένο Clicks Power Keyboard. Έτσι μπορεί να διαβάζει την κατάσταση και τα δεδομένα μπαταρίας του πληκτρολογίου και να ελέγχει εκτεταμένες λειτουργίες όπως συμπεριφορά πλήκτρων, οπίσθιο φωτισμό, ανααντιστοίχιση και αυτοματισμό φόρτισης.</string>
+    <string name="clicks_bluetooth_permission_description">Το Plektra χρειάζεται πρόσβαση σε Κοντινές συσκευές για άμεση επικοινωνία με το συζευγμένο Clicks Power Keyboard. Έτσι μπορεί να διαβάζει την κατάσταση και τα δεδομένα μπαταρίας του πληκτρολογίου και να ελέγχει εκτεταμένες λειτουργίες όπως συμπεριφορά πλήκτρων, οπίσθιο φωτισμό, ανααντιστοίχιση και αυτοματισμό φόρτισης.</string>
     <string name="clicks_bluetooth_permission_continue">Συνέχεια</string>
     <string name="clicks_bluetooth_permission_not_now">Όχι τώρα</string>
     <string name="clicks_section_keyboard_behavior">Συμπεριφορά πληκτρολογίου</string>
@@ -597,7 +597,7 @@
     <string name="clicks_number_row_repeat_description">Επαναλαμβάνει έναν αριθμό όσο κρατιέται το φυσικό του πλήκτρο.</string>
     <string name="clicks_section_key_mappings">Αντιστοιχίσεις πλήκτρων</string>
     <string name="clicks_all_key_mappings_title">Ανααντιστοίχιση όλων των πλήκτρων</string>
-    <string name="clicks_all_key_mappings_description">Αντιστοιχίσεις Alt, Ctrl, τροποποιητών και ενεργειών στην πλευρά του Pastiera για κάθε πλήκτρο.</string>
+    <string name="clicks_all_key_mappings_description">Αντιστοιχίσεις Alt, Ctrl, τροποποιητών και ενεργειών στην πλευρά του Plektra για κάθε πλήκτρο.</string>
     <string name="clicks_section_backlight_power">Οπίσθιος φωτισμός και εξοικονόμηση ενέργειας</string>
     <string name="clicks_backlight_title">Οπίσθιος φωτισμός</string>
     <string name="clicks_backlight_description">Κατάσταση ενεργοποίησης και φωτεινότητα από 0–100%.</string>
@@ -609,7 +609,7 @@
     <string name="clicks_manual_wireless_charging_title">Φόρτιση για 15 λεπτά</string>
     <string name="clicks_manual_wireless_charging_description">Παρακάμπτει προσωρινά τα αυτόματα όρια.</string>
     <string name="clicks_charging_connection_boundary_title">Αξιολόγηση ενώ είναι συνδεδεμένο</string>
-    <string name="clicks_charging_connection_boundary_description">Το Pastiera δεν μπορεί να στείλει εντολές φόρτισης όταν το πληκτρολόγιο είναι κλειστό και αποσυνδεδεμένο. Η τρέχουσα κατάστασή του παραμένει αμετάβλητη· τα όρια και οι ληγμένες παρακάμψεις εφαρμόζονται αμέσως μετά την επανασύνδεση.</string>
+    <string name="clicks_charging_connection_boundary_description">Το Plektra δεν μπορεί να στείλει εντολές φόρτισης όταν το πληκτρολόγιο είναι κλειστό και αποσυνδεδεμένο. Η τρέχουσα κατάστασή του παραμένει αμετάβλητη· τα όρια και οι ληγμένες παρακάμψεις εφαρμόζονται αμέσως μετά την επανασύνδεση.</string>
     <string name="clicks_phone_battery_threshold_title">Όριο μπαταρίας τηλεφώνου</string>
     <string name="clicks_phone_battery_threshold_description">Ξεκινά τη φόρτιση μόνο όταν η μπαταρία του τηλεφώνου πέσει κάτω από επιλεγμένο ποσοστό.</string>
     <string name="clicks_charging_automation_title">Αυτόματη ασύρματη φόρτιση</string>
@@ -642,16 +642,16 @@
     <string name="alt_key_editor_matching_title">Όνομα και αντιστοίχιση συσκευής</string>
     <string name="alt_key_editor_matching_description">Ρυθμίστε μεταδεδομένα προφίλ και προαιρετική αντιστοίχιση ονόματος συσκευής.</string>
     <string name="alt_key_editor_mappings_title">Device SYM και αντιστοιχίσεις πλήκτρων</string>
-    <string name="alt_key_editor_mappings_description">Αντιστοιχίστε χαρακτήρες, τροποποιητές, συντομεύσεις και ενέργειες Pastiera.</string>
+    <string name="alt_key_editor_mappings_description">Αντιστοιχίστε χαρακτήρες, τροποποιητές, συντομεύσεις και ενέργειες Plektra.</string>
     <string name="alt_key_editor_transfer_title">Εισαγωγή και εξαγωγή</string>
-    <string name="alt_key_editor_transfer_description">Μοιραστείτε προσαρμοσμένα προφίλ και επαναφέρετέ τα με αντίγραφα ασφαλείας Pastiera.</string>
+    <string name="alt_key_editor_transfer_description">Μοιραστείτε προσαρμοσμένα προφίλ και επαναφέρετέ τα με αντίγραφα ασφαλείας Plektra.</string>
     <string name="settings_planned_label">ΠΡΟΓΡΑΜΜΑΤΙΣΜΕΝΟ</string>
     <string name="feature_status_construction_content_description">Υπό κατασκευή</string>
     <string name="feature_status_construction_hint">Αυτή η λειτουργία είναι σε εξέλιξη ή προγραμματισμένη. Μπορεί να είναι ημιτελής, μη διαθέσιμη ή να αλλάξει ακόμη.</string>
     <string name="feature_status_experimental_content_description">Πειραματική λειτουργία</string>
     <string name="feature_status_experimental_hint">Μπορεί ήδη να λειτουργεί, αλλά είναι νέα και ενδέχεται σύντομα να αλλάξει ή να βελτιωθεί. Οι αναφορές σφαλμάτων είναι ευπρόσδεκτες.</string>
     <string name="tutorial_feature_status_title">Σύμβολα κατάστασης λειτουργιών</string>
-    <string name="tutorial_feature_status_description">Το Pastiera επισημαίνει εργασίες σε εξέλιξη απευθείας στην εφαρμογή, ώστε να μη χρειάζεται να ψάχνετε κάθε GitHub issue.</string>
+    <string name="tutorial_feature_status_description">Το Plektra επισημαίνει εργασίες σε εξέλιξη απευθείας στην εφαρμογή, ώστε να μη χρειάζεται να ψάχνετε κάθε GitHub issue.</string>
     <string name="tutorial_feature_status_construction_title">Υπό κατασκευή</string>
     <string name="tutorial_feature_status_construction_description">Αυτή η λειτουργία είναι σε εξέλιξη ή προγραμματισμένη. Μπορεί να είναι ημιτελής, μη διαθέσιμη ή να αλλάξει ακόμη.</string>
     <string name="tutorial_feature_status_experimental_title">Πειραματικό</string>
@@ -660,25 +660,25 @@
 
     <!-- About Section -->
     <string name="about_github">GitHub</string>
-    <string name="about_build_info">Pastiera IME - Palsoftware 2026</string>
+    <string name="about_build_info">Plektra IME - Palsoftware 2026</string>
     <string name="settings_device_keyboard_info">Συσκευή: %1$s; Πληκτρολόγιο: %2$s</string>
     <string name="about_title">Σχετικά</string>
     <string name="about_credits_error">Δεν είναι δυνατή η φόρτωση πληροφοριών συντελεστών.</string>
 
     <!-- Launcher Shortcuts Section -->
-    <string name="starter_launcher_shortcuts_title">Pastiera-QuickLauncher</string>
+    <string name="starter_launcher_shortcuts_title">Plektra-QuickLauncher</string>
     <string name="starter_launcher_shortcuts_description">Γρήγορη εκκίνηση, συντομεύσεις SYM και αντιστοιχίσεις πλήκτρων launcher</string>
-    <string name="starter_launcher_shortcuts_intro">Αυτές οι ρυθμίσεις μοιράζονται μία λίστα αντιστοίχισης πλήκτρων launcher. Επιλέξτε πού θα ακούει το Pastiera για αυτά τα αντιστοιχισμένα πλήκτρα.</string>
+    <string name="starter_launcher_shortcuts_intro">Αυτές οι ρυθμίσεις μοιράζονται μία λίστα αντιστοίχισης πλήκτρων launcher. Επιλέξτε πού θα ακούει το Plektra για αυτά τα αντιστοιχισμένα πλήκτρα.</string>
     <string name="launcher_shortcuts_title">Συντομεύσεις αρχικής οθόνης</string>
     <string name="launcher_shortcuts_experimental">Πειραματικό</string>
     <string name="launcher_shortcuts_description">Χρησιμοποιήστε αντιστοιχισμένα πλήκτρα launcher απευθείας στον Android launcher ή στην αρχική οθόνη.</string>
     <string name="launcher_shortcuts_configure">Αντιστοιχισμένα πλήκτρα launcher</string>
     <string name="launcher_shortcuts_configure_description">Πατήστε ένα πλήκτρο για αντιστοίχιση ή αντικατάσταση εντολής. Τα αντιστοιχισμένα πλήκτρα μοιράζονται και από τους δύο τρόπους ενεργοποίησης.</string>
     <string name="launcher_shortcuts_configure_description_with_quick_launcher">Πατήστε ένα πλήκτρο για αντιστοίχιση ή αντικατάσταση εντολής. Ο Quick launcher είναι αυτήν τη στιγμή αντιστοιχισμένος στο %1$s.</string>
-    <string name="quick_launcher_default_blocked_hint">Νέο: Το SYM μπορεί να ανοίγει τον quick launcher. Το Pastiera κανονικά θα το αντιστοιχούσε στο Space, αλλά το Space έχει ήδη συντόμευση. Ανοίξτε τη σελίδα αντιστοιχίσεων και επιλέξτε “Άνοιγμα quick launcher” σε οποιοδήποτε πλήκτρο για να το δοκιμάσετε.</string>
+    <string name="quick_launcher_default_blocked_hint">Νέο: Το SYM μπορεί να ανοίγει τον quick launcher. Το Plektra κανονικά θα το αντιστοιχούσε στο Space, αλλά το Space έχει ήδη συντόμευση. Ανοίξτε τη σελίδα αντιστοιχίσεων και επιλέξτε “Άνοιγμα quick launcher” σε οποιοδήποτε πλήκτρο για να το δοκιμάσετε.</string>
 
     <!-- Launcher Shortcuts Screen -->
-    <string name="launcher_shortcuts_screen_title">Pastiera-QuickLauncher</string>
+    <string name="launcher_shortcuts_screen_title">Plektra-QuickLauncher</string>
     <string name="launcher_shortcuts_not_assigned">Δεν έχει αντιστοιχιστεί</string>
     <string name="launcher_shortcuts_remove">Αφαίρεση</string>
     <string name="launcher_shortcuts_app_name_unavailable">Εφαρμογή (όνομα μη διαθέσιμο)</string>
@@ -696,7 +696,7 @@
     <string name="launcher_shortcut_assignment_no_apps">Δεν βρέθηκαν εντολές</string>
     <string name="launcher_shortcut_assignment_no_results">Δεν υπάρχουν αποτελέσματα για \"%1$s\"</string>
     <string name="launcher_shortcut_assignment_key_name">Πλήκτρο %1$d</string>
-    <string name="quick_launcher_title">Pastiera-QuickLauncher</string>
+    <string name="quick_launcher_title">Plektra-QuickLauncher</string>
     <string name="quick_launcher_subtitle">Πληκτρολογήστε για αναζήτηση. Το Enter ανοίγει το πρώτο αποτέλεσμα.</string>
     <string name="quick_launcher_close">Κλείσιμο</string>
     <string name="quick_launcher_search_placeholder">Αρχίστε να πληκτρολογείτε...</string>
@@ -713,12 +713,12 @@
     <string name="quick_launcher_alt_shortcuts_outside_fields_title">Να επιτρέπονται συντομεύσεις Alt εκτός πεδίων κειμένου</string>
     <string name="quick_launcher_alt_shortcuts_outside_fields_description">Χρησιμοποιήστε Alt με αντιστοιχισμένο πλήκτρο για να εκκινήσετε την ίδια εφαρμογή ή ενέργεια με τη συντόμευση πλήκτρου SYM.</string>
     <string name="quick_launcher_respect_keyboard_layout_title">Χρήση ενεργής διάταξης πληκτρολογίου</string>
-    <string name="quick_launcher_respect_keyboard_layout_description">Όταν είναι ενεργό, η εισαγωγή αναζήτησης ακολουθεί την τρέχουσα διάταξη Pastiera αντί για την ακατέργαστη έξοδο πλήκτρων QWERTY του Android.</string>
+    <string name="quick_launcher_respect_keyboard_layout_description">Όταν είναι ενεργό, η εισαγωγή αναζήτησης ακολουθεί την τρέχουσα διάταξη Plektra αντί για την ακατέργαστη έξοδο πλήκτρων QWERTY του Android.</string>
     <string name="quick_launcher_typo_tolerant_ranking_title">Αναζήτηση με ανοχή σε λάθη</string>
     <string name="quick_launcher_typo_tolerant_ranking_description">Ταιριάζει επίσης ονόματα εφαρμογών με μικρά λάθη πληκτρολόγησης. Οι υπάρχουσες αντιστοιχίσεις προθέματος και συντομογραφίας εξακολουθούν να κατατάσσονται ψηλότερα.</string>
     <string name="quick_launcher_provider_title">Συμπεριφορά QuickLauncher</string>
-    <string name="quick_launcher_provider_description">Επιλέξτε αν η συντόμευση ανοίγει την αναζήτηση Pastiera ή την αναζήτηση Niagara Launcher. Το Niagara επιστρέφει στο Pastiera αν δεν είναι διαθέσιμο.</string>
-    <string name="quick_launcher_provider_pastiera">Pastiera QuickLauncher</string>
+    <string name="quick_launcher_provider_description">Επιλέξτε αν η συντόμευση ανοίγει την αναζήτηση Plektra ή την αναζήτηση Niagara Launcher. Το Niagara επιστρέφει στο Plektra αν δεν είναι διαθέσιμο.</string>
+    <string name="quick_launcher_provider_plektra">Plektra QuickLauncher</string>
     <string name="quick_launcher_provider_niagara">Αναζήτηση Niagara Launcher</string>
     <string name="quick_launcher_ranking_info_button">Πώς λειτουργεί η κατάταξη</string>
     <string name="quick_launcher_ranking_info_title">Κατάταξη QuickLauncher</string>
@@ -852,20 +852,20 @@
     <string name="alt_shortcuts_in_text_fields_description">Χρησιμοποιεί επίσης αντιστοιχισμένες συντομεύσεις Alt κατά την πληκτρολόγηση.</string>
     <string name="sym_shortcuts_compatibility_info">Σχετικά με τη συμβατότητα πλήκτρου SYM</string>
     <string name="sym_shortcuts_compatibility_title">Συμβατότητα πλήκτρου SYM</string>
-    <string name="sym_shortcuts_compatibility_description">Οι συντομεύσεις πλήκτρου SYM απαιτούν πληκτρολόγιο που εκθέτει το SYM ως τροποποιητή στο Android. Προς το παρόν δεν μπορούν να λειτουργήσουν με πληκτρολόγια των οποίων το firmware μετατρέπει τους συνδυασμούς SYM σε τελικούς χαρακτήρες ή συμβάντα πλοήγησης πριν τους λάβει το Pastiera. Αυτό περιλαμβάνει την τρέχουσα συμπεριφορά SYM του Clicks Power Keyboard.</string>
+    <string name="sym_shortcuts_compatibility_description">Οι συντομεύσεις πλήκτρου SYM απαιτούν πληκτρολόγιο που εκθέτει το SYM ως τροποποιητή στο Android. Προς το παρόν δεν μπορούν να λειτουργήσουν με πληκτρολόγια των οποίων το firmware μετατρέπει τους συνδυασμούς SYM σε τελικούς χαρακτήρες ή συμβάντα πλοήγησης πριν τους λάβει το Plektra. Αυτό περιλαμβάνει την τρέχουσα συμπεριφορά SYM του Clicks Power Keyboard.</string>
     <string name="power_shortcuts_press_key">Πατήστε πλήκτρο συντόμευσης για εκκίνηση</string>
 
     <!-- Notification Helper -->
-    <string name="notification_nav_mode_channel_name">Pastiera Nav Mode</string>
-    <string name="notification_nav_mode_channel_description">Ειδοποιήσεις για το nav mode του Pastiera</string>
+    <string name="notification_nav_mode_channel_name">Plektra Nav Mode</string>
+    <string name="notification_nav_mode_channel_description">Ειδοποιήσεις για το nav mode του Plektra</string>
     <string name="notification_nav_mode_activated_title">Το Nav Mode ενεργοποιήθηκε</string>
     <string name="notification_nav_mode_activated_text">Το Nav mode ενεργοποιήθηκε</string>
 
     <!-- Update Notifications -->
-    <string name="notification_update_channel_name">Ενημερώσεις Pastiera</string>
-    <string name="notification_update_channel_description">Ειδοποιήσεις για νέες εκδόσεις Pastiera</string>
-    <string name="notification_successor_release_title">Διαθέσιμη έκδοση του Plektra</string>
-    <string name="notification_successor_release_text">Το %1$s είναι διαθέσιμο ως διάδοχος του Pastiera.</string>
+    <string name="notification_update_channel_name">Ενημερώσεις Plektra</string>
+    <string name="notification_update_channel_description">Ειδοποιήσεις για νέες εκδόσεις Plektra</string>
+    <string name="notification_successor_release_title">Plektra update available</string>
+    <string name="notification_successor_release_text">%1$s is available.</string>
 
     <!-- Speech Recognition -->
     <string name="speech_recognition_prompt">Μιλήστε τώρα...</string>
@@ -905,7 +905,7 @@ QWERTZ σε φυσικό QWERTY
 Το Nav Mode χρησιμοποιεί τη φυσική θέση πλήκτρων ώστε η πλοήγηση να παραμένει σταθερή. Οι υποδείξεις διάταξης στα πλήκτρα δείχνουν πότε η ενεργή διάταξη κειμένου θα αντιμετώπιζε αυτό το φυσικό πλήκτρο ως διαφορετικό γράμμα, όπως Y/Z σε QWERTZ.
 
 Συντομεύσεις Ctrl εφαρμογών με επίγνωση διάταξης
-Όταν το κρατημένο Ctrl περνά στις εφαρμογές, αυτή η προαιρετική ρύθμιση μπορεί πρώτα να μεταφράζει Ctrl+γράμμα μέσω της ενεργής διάταξης Pastiera. Επηρεάζει τις συντομεύσεις εφαρμογών, όχι το φυσικό πλέγμα Nav Mode.
+Όταν το κρατημένο Ctrl περνά στις εφαρμογές, αυτή η προαιρετική ρύθμιση μπορεί πρώτα να μεταφράζει Ctrl+γράμμα μέσω της ενεργής διάταξης Plektra. Επηρεάζει τις συντομεύσεις εφαρμογών, όχι το φυσικό πλέγμα Nav Mode.
 
 Παρακάμψεις
 Κάθε πλήκτρο μπορεί να ρυθμιστεί ως Keycode, Action, Native Ctrl ή None. Χρησιμοποιήστε παρακάμψεις για να λύσετε συγκρούσεις συγκεκριμένων εφαρμογών χωρίς να αλλάξετε ολόκληρη τη λειτουργία.</string>
@@ -914,10 +914,10 @@ QWERTZ σε φυσικό QWERTY
     <string name="nav_mode_ctrl_hold_title">Πλοήγηση με κρατημένο Ctrl</string>
     <string name="nav_mode_ctrl_hold_description">Όταν είναι ενεργή, τα πεδία κειμένου χρησιμοποιούν τις αντιστοιχίσεις Nav Mode όσο κρατιέται το Ctrl. Όταν είναι ανενεργή, οι συντομεύσεις Ctrl περνούν στην εφαρμογή. Τα πλήκτρα που έχουν οριστεί σε Native Ctrl περνούν πάντα ως πραγματικές συντομεύσεις Ctrl.</string>
     <string name="layout_aware_ctrl_shortcuts_title">Συντομεύσεις Ctrl εφαρμογών με επίγνωση διάταξης</string>
-    <string name="layout_aware_ctrl_shortcuts_description">Όταν το κρατημένο Ctrl περνά στις εφαρμογές, μεταφράζει πρώτα το Ctrl+γράμμα μέσω της ενεργής διάταξης Pastiera.</string>
+    <string name="layout_aware_ctrl_shortcuts_description">Όταν το κρατημένο Ctrl περνά στις εφαρμογές, μεταφράζει πρώτα το Ctrl+γράμμα μέσω της ενεργής διάταξης Plektra.</string>
     <string name="layout_aware_ctrl_shortcuts_disabled_description">Απενεργοποιημένο όσο η πλοήγηση με κρατημένο Ctrl είναι ενεργή, επειδή το κρατημένο Ctrl το χειρίζεται το Nav Mode αντί για την εφαρμογή.</string>
     <string name="layout_aware_ctrl_shortcuts_info_title">Συντομεύσεις Ctrl και Nav Mode</string>
-    <string name="layout_aware_ctrl_shortcuts_info_text">Υπάρχουν δύο διαδρομές για κρατημένο Ctrl. Αν η πλοήγηση με κρατημένο Ctrl είναι ενεργή, το Pastiera χειρίζεται Ctrl+πλήκτρο με τις αντιστοιχίσεις Nav Mode που φαίνονται παρακάτω. Αν η πλοήγηση με κρατημένο Ctrl είναι ανενεργή, το Pastiera περνά Ctrl+πλήκτρο στην εφαρμογή. Αυτή η επιλογή επηρεάζει μόνο εκείνη τη διαδρομή εφαρμογής: όταν είναι ενεργή, το Ctrl+γράμμα μεταφράζεται πρώτα μέσω της ενεργής διάταξης Pastiera, ώστε οι συντομεύσεις να μπορούν να ακολουθούν τα γράμματα που πληκτρολογείτε. Όταν είναι ανενεργή, οι εφαρμογές λαμβάνουν τις αρχικές φυσικές θέσεις πλήκτρων.</string>
+    <string name="layout_aware_ctrl_shortcuts_info_text">Υπάρχουν δύο διαδρομές για κρατημένο Ctrl. Αν η πλοήγηση με κρατημένο Ctrl είναι ενεργή, το Plektra χειρίζεται Ctrl+πλήκτρο με τις αντιστοιχίσεις Nav Mode που φαίνονται παρακάτω. Αν η πλοήγηση με κρατημένο Ctrl είναι ανενεργή, το Plektra περνά Ctrl+πλήκτρο στην εφαρμογή. Αυτή η επιλογή επηρεάζει μόνο εκείνη τη διαδρομή εφαρμογής: όταν είναι ενεργή, το Ctrl+γράμμα μεταφράζεται πρώτα μέσω της ενεργής διάταξης Plektra, ώστε οι συντομεύσεις να μπορούν να ακολουθούν τα γράμματα που πληκτρολογείτε. Όταν είναι ανενεργή, οι εφαρμογές λαμβάνουν τις αρχικές φυσικές θέσεις πλήκτρων.</string>
     <string name="nav_mode_key_mappings">Αντιστοιχίσεις πλήκτρων</string>
     <string name="nav_mode_revert_to_default">Επαναφορά προεπιλογής</string>
     <string name="nav_mode_note">Σημείωση: Η τροποποίηση πλήκτρων nav mode επηρεάζει επίσης τους συνδυασμούς Ctrl+πλήκτρο σε πεδία κειμένου.</string>
@@ -965,7 +965,7 @@ QWERTZ σε φυσικό QWERTY
     <string name="app_enter_behaviour_title">Συμπεριφορά πλήκτρου Enter</string>
     <string name="app_enter_behaviour_description">Ρυθμίστε χειρισμό Enter και νέας γραμμής ανά εφαρμογή</string>
     <string name="app_enter_behaviour_enable_title">Συμπεριφορά Enter ανά εφαρμογή</string>
-    <string name="app_enter_behaviour_enable_description">Χρησιμοποιεί παρακάμψεις Pastiera για επιλεγμένες εφαρμογές μηνυμάτων. Οι δοκιμασμένες εφαρμογές δείχνουν τη στρατηγική που χρησιμοποιεί πραγματικά το Pastiera.</string>
+    <string name="app_enter_behaviour_enable_description">Χρησιμοποιεί παρακάμψεις Plektra για επιλεγμένες εφαρμογές μηνυμάτων. Οι δοκιμασμένες εφαρμογές δείχνουν τη στρατηγική που χρησιμοποιεί πραγματικά το Plektra.</string>
     <string name="app_enter_behaviour_preset_title">Προρύθμιση μηνυμάτων</string>
     <string name="app_enter_behaviour_preset_description">Εφαρμόζει συνεπή προεπιλογή σε εγκατεστημένες γνωστές εφαρμογές μηνυμάτων.</string>
     <string name="app_enter_behaviour_preset_app_default">Προεπιλογή εφαρμογής</string>
@@ -985,12 +985,12 @@ QWERTZ σε φυσικό QWERTY
     <string name="app_enter_behaviour_option_send_shift_newline">Enter στέλνει, Shift+Enter νέα γραμμή</string>
     <string name="app_enter_behaviour_option_newline_ctrl_send">Enter νέα γραμμή, Ctrl+Enter στέλνει</string>
     <string name="app_enter_behaviour_option_enter_newline">Enter νέα γραμμή</string>
-    <string name="app_enter_behaviour_status_app_default">Το Pastiera δεν παρεμβαίνει.</string>
+    <string name="app_enter_behaviour_status_app_default">Το Plektra δεν παρεμβαίνει.</string>
     <string name="app_enter_behaviour_status_whatsapp_active">Ενεργό: %1$s.</string>
     <string name="app_enter_behaviour_status_partial_active">Μερικώς ενεργό: %1$s.</string>
     <string name="app_enter_behaviour_status_experimental_active">Πειραματικά ενεργό: %1$s.</string>
     <string name="app_enter_behaviour_status_not_active">Δεν είναι ακόμη ενεργό: %1$s είναι προγραμματισμένο.</string>
-    <string name="app_enter_behaviour_status_native_result">Προεπιλογή εφαρμογής: Το Pastiera δεν παρεμβαίνει.</string>
+    <string name="app_enter_behaviour_status_native_result">Προεπιλογή εφαρμογής: Το Plektra δεν παρεμβαίνει.</string>
     <string name="app_enter_behaviour_status_strategy_result">Ενεργό: %1$s.</string>
     <string name="app_enter_behaviour_status_experimental_result">Πειραματικά ενεργό: %1$s.</string>
     <string name="app_enter_behaviour_strategy_none_label">Χωρίς παράκαμψη</string>
@@ -998,12 +998,12 @@ QWERTZ σε φυσικό QWERTY
     <string name="app_enter_behaviour_strategy_plain_enter_label">Απλό Enter</string>
     <string name="app_enter_behaviour_strategy_unconfigured_label">Δεν έχει ρυθμιστεί</string>
     <string name="app_enter_behaviour_strategy_app_default_detail">Η εφαρμογή αποφασίζει αν το Enter στέλνει ή εισάγει νέα γραμμή.</string>
-    <string name="app_enter_behaviour_strategy_whatsapp_newline_ctrl_send">Το Pastiera εισάγει νέες γραμμές απευθείας και στέλνει μέσω της ενέργειας αποστολής της εφαρμογής.</string>
-    <string name="app_enter_behaviour_strategy_whatsapp_send_shift_newline">Το Pastiera στέλνει μέσω της ενέργειας αποστολής της εφαρμογής. Το Shift+Enter εισάγεται απευθείας ως νέα γραμμή.</string>
-    <string name="app_enter_behaviour_strategy_whatsapp_newline_only">Δοκιμασμένο: Το Pastiera εισάγει το Enter απευθείας ως νέα γραμμή και δεν ενεργοποιεί αποστολή.</string>
-    <string name="app_enter_behaviour_strategy_discord_app_default_detail">Δοκιμασμένο: Το Discord ήδη συμπεριφέρεται σωστά για Enter ως αποστολή και Shift+Enter ως νέα γραμμή. Το Pastiera δεν παρεμβαίνει εδώ.</string>
+    <string name="app_enter_behaviour_strategy_whatsapp_newline_ctrl_send">Το Plektra εισάγει νέες γραμμές απευθείας και στέλνει μέσω της ενέργειας αποστολής της εφαρμογής.</string>
+    <string name="app_enter_behaviour_strategy_whatsapp_send_shift_newline">Το Plektra στέλνει μέσω της ενέργειας αποστολής της εφαρμογής. Το Shift+Enter εισάγεται απευθείας ως νέα γραμμή.</string>
+    <string name="app_enter_behaviour_strategy_whatsapp_newline_only">Δοκιμασμένο: Το Plektra εισάγει το Enter απευθείας ως νέα γραμμή και δεν ενεργοποιεί αποστολή.</string>
+    <string name="app_enter_behaviour_strategy_discord_app_default_detail">Δοκιμασμένο: Το Discord ήδη συμπεριφέρεται σωστά για Enter ως αποστολή και Shift+Enter ως νέα γραμμή. Το Plektra δεν παρεμβαίνει εδώ.</string>
     <string name="app_enter_behaviour_strategy_discord_partial_detail">Δοκιμασμένο: Οι νέες γραμμές εισάγονται απευθείας. Το Ctrl+Enter στέλνει απλό Enter χωρίς Ctrl meta επειδή η ενέργεια εφαρμογής του Discord απλώς κρύβει το πληκτρολόγιο.</string>
-    <string name="app_enter_behaviour_strategy_experimental_detail">Μη επιβεβαιωμένο: Το Pastiera δοκιμάζει την ενέργεια αποστολής της εφαρμογής και άμεση εισαγωγή νέας γραμμής.</string>
+    <string name="app_enter_behaviour_strategy_experimental_detail">Μη επιβεβαιωμένο: Το Plektra δοκιμάζει την ενέργεια αποστολής της εφαρμογής και άμεση εισαγωγή νέας γραμμής.</string>
     <string name="app_enter_behaviour_strategy_not_tested_detail">Η τεχνική στρατηγική χρειάζεται ακόμη δοκιμή για αυτήν την εφαρμογή.</string>
     <string name="app_enter_behaviour_desired_label">Επιθυμητή συμπεριφορά</string>
     <string name="app_enter_behaviour_strategy_label">Στρατηγική αποστολής</string>
@@ -1047,17 +1047,17 @@ QWERTZ σε φυσικό QWERTY
     <string name="settings_support_open_collective">Open Collective</string>
     <string name="settings_nav_mode_configure">Ρύθμιση αντιστοιχίσεων πλήκτρων λειτουργίας πλοήγησης</string>
     <string name="settings_update_section_title">Plektra</string>
-    <string name="settings_update_section_description">Έλεγχος για ενημερώσεις ασφαλείας του Pastiera και νυχτερινές εκδόσεις του Plektra.</string>
-    <string name="settings_update_checking">Έλεγχος ενημερώσεων ασφαλείας του Pastiera και νυχτερινών εκδόσεων του Plektra…</string>
-    <string name="settings_update_up_to_date">Δεν βρέθηκε ενημέρωση ασφαλείας του Pastiera ή νυχτερινή έκδοση του Plektra.</string>
+    <string name="settings_update_section_description">Check for Plektra Nightly updates.</string>
+    <string name="settings_update_checking">Checking for Plektra Nightly updates…</string>
+    <string name="settings_update_up_to_date">No newer Plektra Nightly found.</string>
     <string name="settings_update_check_failed">Δεν είναι δυνατή η σύνδεση με το GitHub.</string>
-    <string name="successor_dialog_title">Το Pastiera έχει διάδοχο</string>
-    <string name="successor_dialog_message">Το Plektra διαδέχεται το Pastiera. Το %1$s είναι διαθέσιμο στο GitHub.</string>
-    <string name="successor_dialog_open_release">Προβολή έκδοσης Plektra</string>
+    <string name="successor_dialog_title">Plektra update available</string>
+    <string name="successor_dialog_message">%1$s is available on GitHub.</string>
+    <string name="successor_dialog_open_release">View release</string>
     <string name="successor_dialog_later">Αργότερα</string>
 
     <!-- Auto Correct Settings -->
-    <string name="auto_correct_ricette_pastiera_name">Ricette Pastiera</string>
+    <string name="auto_correct_ricette_plektra_name">Ricette Plektra</string>
 
     <!-- Settings Categories -->
     <string name="settings_category_text_input">Έξυπνες λειτουργίες</string>
@@ -1073,7 +1073,7 @@ QWERTZ σε φυσικό QWERTY
     <string name="settings_group_customization">Διεπαφή</string>
     <string name="settings_group_system">Για προχωρημένους</string>
     <string name="settings_group_utility">Βοηθητικά</string>
-    <string name="settings_group_pastiera">Σχετικά</string>
+    <string name="settings_group_plektra">Σχετικά</string>
     <string name="settings_about_version_summary">v%1$s</string>
     <string name="settings_accessibility_live_read_title">Ζωντανή ανάγνωση για αλλαγές γραμμής κατάστασης</string>
     <string name="settings_accessibility_live_read_description">Όταν είναι ενεργό, το TalkBack μπορεί να ανακοινώνει αυτόματα αλλαγές γλώσσας/διάταξης και γραμμής κατάστασης.</string>
@@ -1198,7 +1198,7 @@ QWERTZ σε φυσικό QWERTY
     <string name="nav_mode_action_expand_selection_word_right">ΛέξηΕπ.→</string>
     <string name="nav_mode_action_page_start">ΑρχήΕγγρ.</string>
     <string name="nav_mode_action_page_end">ΤέλοςΕγγρ.</string>
-    <string name="nav_mode_action_toggle_pastierina">Pastierina</string>
+    <string name="nav_mode_action_toggle_slim">Slim</string>
     <string name="nav_mode_action_media_play_pause">Αναπ./Παύση</string>
     <string name="nav_mode_action_media_previous">Προηγ. μέσο</string>
     <string name="nav_mode_action_media_next">Επόμ. μέσο</string>
@@ -1225,26 +1225,26 @@ QWERTZ σε φυσικό QWERTY
     <string name="tutorial_whats_new_title">Νέα σε αυτήν την έκδοση: %1$s</string>
     <string name="tutorial_whats_new_description">Αξίζει να γνωρίζετε μερικές αλλαγές πριν συνεχίσετε.</string>
     <string name="tutorial_whats_new_bug_fixes_title">Διορθώσεις σφαλμάτων</string>
-    <string name="tutorial_whats_new_docs_button">Άνοιγμα τεκμηρίωσης Pastiera</string>
+    <string name="tutorial_whats_new_docs_button">Άνοιγμα τεκμηρίωσης Plektra</string>
     <string name="tutorial_whats_new_continue_hint">Συνεχίστε το tutorial για να δείτε τις πιο χρήσιμες ρυθμίσεις αυτής της έκδοσης.</string>
-    <string name="tutorial_page_welcome_title">Το Pastiera συνεχίζεται ως Plektra</string>
-    <string name="tutorial_page_welcome_description">Το Pastiera 0.86 είναι η τελευταία προγραμματισμένη έκδοση με νέες λειτουργίες. Μπορείτε να συνεχίσετε να χρησιμοποιείτε το Pastiera· τα ζητήματα ασφαλείας θα συνεχίσουν να λαμβάνουν ενημερώσεις. Το Plektra συνεχίζει το έργο με τις ίδιες αρχές και παραμένει ελεύθερο λογισμικό ανοικτού κώδικα με την άδεια copyleft GPLv3. Όταν το Plektra είναι έτοιμο, το Pastiera θα σας ενημερώσει και θα σας καθοδηγήσει στην εφάπαξ μεταφορά των ρυθμίσεών σας.</string>
+    <string name="tutorial_page_welcome_title">Welcome to Plektra</string>
+    <string name="tutorial_page_welcome_description">Plektra is a free, open-source keyboard for Android devices with physical keys. Choose your hardware profile, layout, input surfaces, and shortcuts in Settings.</string>
     <string name="tutorial_devs_choice_button">Επιλογή προγραμματιστή</string>
     <string name="tutorial_devs_choice_applied">Οι ρυθμίσεις Επιλογής προγραμματιστή εφαρμόστηκαν.</string>
-    <string name="tutorial_page_enable_title">Ενεργοποίηση Pastiera</string>
-    <string name="tutorial_page_enable_description">Για να ξεκινήσετε, πρέπει να ενεργοποιήσετε το Pastiera ως μέθοδο εισαγωγής στις Ρυθμίσεις Android. Πατήστε το παρακάτω κουμπί για να ανοίξετε τις ρυθμίσεις.</string>
-    <string name="tutorial_page_select_title">Επιλογή Pastiera</string>
-    <string name="tutorial_page_select_description">Για να χρησιμοποιήσετε το Pastiera, επιλέξτε το ανάμεσα στις μεθόδους εισαγωγής. Το επόμενο βήμα σάς επιτρέπει να επιλέξετε αν το Pastiera θα χρησιμοποιεί εικονικό πληκτρολόγιο ή λειτουργία hardware πληκτρολογίου.</string>
+    <string name="tutorial_page_enable_title">Ενεργοποίηση Plektra</string>
+    <string name="tutorial_page_enable_description">Για να ξεκινήσετε, πρέπει να ενεργοποιήσετε το Plektra ως μέθοδο εισαγωγής στις Ρυθμίσεις Android. Πατήστε το παρακάτω κουμπί για να ανοίξετε τις ρυθμίσεις.</string>
+    <string name="tutorial_page_select_title">Επιλογή Plektra</string>
+    <string name="tutorial_page_select_description">Για να χρησιμοποιήσετε το Plektra, επιλέξτε το ανάμεσα στις μεθόδους εισαγωγής. Το επόμενο βήμα σάς επιτρέπει να επιλέξετε αν το Plektra θα χρησιμοποιεί εικονικό πληκτρολόγιο ή λειτουργία hardware πληκτρολογίου.</string>
     <string name="tutorial_page_software_keyboard_title">Λειτουργία πληκτρολογίου</string>
-    <string name="tutorial_page_software_keyboard_description">Επιλέξτε εδώ την επιφάνεια πληκτρολογίου που θα χρησιμοποιεί το Pastiera.</string>
+    <string name="tutorial_page_software_keyboard_description">Επιλέξτε εδώ την επιφάνεια πληκτρολογίου που θα χρησιμοποιεί το Plektra.</string>
     <string name="tutorial_software_keyboard_auto_bullet">Προτεινόμενο: hardware mode σε γνωστές συσκευές PKB, virtual mode σε συσκευές αφής.</string>
     <string name="tutorial_software_keyboard_virtual_bullet">Πλήρες πληκτρολόγιο οθόνης για χρήση με προτεραιότητα την αφή. Ακόμη alpha.</string>
     <string name="tutorial_software_keyboard_hardware_bullet">Συμπαγής επιφάνεια για συσκευές με φυσικά πλήκτρα.</string>
     <string name="tutorial_software_keyboard_alpha_warning">Λειτουργία alpha: το εικονικό πληκτρολόγιο είναι ακόμη σε έντονη ανάπτυξη και δεν συνιστάται ακόμη για καθημερινή χρήση.</string>
     <string name="tutorial_android16_ime_caption_title">Απόκρυψη γραμμής λεζάντας IME</string>
-    <string name="tutorial_android16_ime_caption_description">Οι συσκευές Titan 2 μπορούν να εμφανίζουν μια επιπλέον γραμμή λεζάντας IME κάτω από το Pastiera. Αυτή η ρύθμιση OEM την κρύβει και κρατά το Pastiera συμπαγές.</string>
+    <string name="tutorial_android16_ime_caption_description">Οι συσκευές Titan 2 μπορούν να εμφανίζουν μια επιπλέον γραμμή λεζάντας IME κάτω από το Plektra. Αυτή η ρύθμιση OEM την κρύβει και κρατά το Plektra συμπαγές.</string>
     <string name="tutorial_android16_ime_caption_before">Πριν: επιπλέον γραμμή λεζάντας</string>
-    <string name="tutorial_android16_ime_caption_after">Μετά: συμπαγές Pastiera</string>
+    <string name="tutorial_android16_ime_caption_after">Μετά: συμπαγές Plektra</string>
     <string name="tutorial_android16_ime_caption_check_android16">Android 16 ή νεότερο</string>
     <string name="tutorial_android16_ime_caption_check_titan2">Unihertz Titan 2 ή Titan 2 Elite</string>
     <string name="tutorial_android16_ime_caption_check_setting">Διαθέσιμη ρύθμιση χειρονομιών OEM</string>
@@ -1260,20 +1260,20 @@ QWERTZ σε φυσικό QWERTY
     <string name="tutorial_software_keyboard_auto_reason_physical">Αιτία: αυτό το προφίλ αντιμετωπίζεται ως συσκευή φυσικού πληκτρολογίου, οπότε το Auto χρησιμοποιεί hardware-keyboard mode.</string>
     <string name="tutorial_software_keyboard_auto_reason_touch">Αιτία: αυτό το προφίλ δεν αναγνωρίζεται ως συσκευή φυσικού πληκτρολογίου, οπότε το Auto χρησιμοποιεί virtual-keyboard mode.</string>
     <string name="tutorial_page_led_title">Ενδείξεις τροποποιητών</string>
-    <string name="tutorial_page_led_description">Για να αξιοποιήσετε καλύτερα το Pastiera, ορίστε το πλήκτρο Fn να λειτουργεί ως Ctrl από τις ρυθμίσεις συστήματος Android. Το Pastiera μπορεί να δείχνει την κατάσταση τροποποιητών στην κάτω λωρίδα, στη γραμμή μενού ή στη statusbar Pastiera: οι ενεργές one-shot καταστάσεις χρησιμοποιούν το ενεργό χρώμα, οι κλειδωμένες καταστάσεις χρησιμοποιούν το κλειδωμένο χρώμα.</string>
+    <string name="tutorial_page_led_description">Για να αξιοποιήσετε καλύτερα το Plektra, ορίστε το πλήκτρο Fn να λειτουργεί ως Ctrl από τις ρυθμίσεις συστήματος Android. Το Plektra μπορεί να δείχνει την κατάσταση τροποποιητών στην κάτω λωρίδα, στη γραμμή μενού ή στη statusbar Plektra: οι ενεργές one-shot καταστάσεις χρησιμοποιούν το ενεργό χρώμα, οι κλειδωμένες καταστάσεις χρησιμοποιούν το κλειδωμένο χρώμα.</string>
     <string name="tutorial_page_nav_mode_title">Nav Mode</string>
     <string name="tutorial_page_nav_mode_description">Το Nav Mode μετατρέπει τα πλήκτρα γραμμάτων σε στοιχεία πλοήγησης και επεξεργασίας. Πατήστε Ctrl δύο φορές για να το κλειδώσετε ή ενεργοποιήστε παρακάτω την πλοήγηση με κρατημένο Ctrl.</string>
     <string name="tutorial_nav_mode_bullet_selection">Οι ενέργειες επιλογής μπορούν να επεκτείνουν την επιλογή κειμένου αριστερά, δεξιά ή λέξη προς λέξη.</string>
     <string name="tutorial_nav_mode_bullet_words">Οι ενέργειες λέξεων μετακινούνται ανά ολόκληρες λέξεις για ταχύτερη μετακίνηση δρομέα σε πεδία κειμένου.</string>
-    <string name="tutorial_nav_mode_bullet_media">Οι αντιστοιχίσεις μπορούν επίσης να χειρίζονται συντομεύσεις εφαρμογών, στοιχεία ελέγχου media, Escape, Tab, Page Up/Down και Pastierina.</string>
+    <string name="tutorial_nav_mode_bullet_media">Οι αντιστοιχίσεις μπορούν επίσης να χειρίζονται συντομεύσεις εφαρμογών, στοιχεία ελέγχου media, Escape, Tab, Page Up/Down και Slim.</string>
     <string name="tutorial_page_customization_title">Προσαρμογή</string>
-    <string name="tutorial_page_customization_description">Το Pastiera προσφέρει πολλές επιλογές προσαρμογής:\n• Προσαρμόσιμες διατάξεις πληκτρολογίου\n• Συντομεύσεις launcher &amp; Power Shortcuts\n• Η γραμμή IME μπορεί να λειτουργεί ως γραμμή σάρωσης για μετακίνηση του δρομέα\n• Προσαρμοσμένες αντιστοιχίσεις για Nav Mode\nΕξερευνήστε τις ρυθμίσεις για να βρείτε την ιδανική διαμόρφωση για εσάς!</string>
+    <string name="tutorial_page_customization_description">Το Plektra προσφέρει πολλές επιλογές προσαρμογής:\n• Προσαρμόσιμες διατάξεις πληκτρολογίου\n• Συντομεύσεις launcher &amp; Power Shortcuts\n• Η γραμμή IME μπορεί να λειτουργεί ως γραμμή σάρωσης για μετακίνηση του δρομέα\n• Προσαρμοσμένες αντιστοιχίσεις για Nav Mode\nΕξερευνήστε τις ρυθμίσεις για να βρείτε την ιδανική διαμόρφωση για εσάς!</string>
     <string name="tutorial_quick_launcher_title">QuickLauncher</string>
     <string name="tutorial_quick_launcher_description">Ανοίξτε εφαρμογές από το πληκτρολόγιο χωρίς να βγείτε από τη ροή πληκτρολόγησης.</string>
     <string name="tutorial_quick_launcher_bullet_sym_space">Κρατήστε SYM και πατήστε Space για να ανοίξετε το QuickLauncher από οπουδήποτε.</string>
     <string name="tutorial_quick_launcher_bullet_text_fields">Λειτουργεί επίσης ενώ ο δρομέας βρίσκεται μέσα σε πεδίο κειμένου, ώστε να αλλάζετε εφαρμογές από το περιβάλλον πληκτρολόγησης.</string>
     <string name="tutorial_quick_launcher_bullet_search">Πληκτρολογήστε λίγα γράμματα, συντομογραφίες ή μικρά λάθη για να βρείτε την εφαρμογή που θέλετε.</string>
-    <string name="tutorial_quick_launcher_bullet_layout">Η αναζήτηση μπορεί να σέβεται την ενεργή διάταξη Pastiera, όπως QWERTZ.</string>
+    <string name="tutorial_quick_launcher_bullet_layout">Η αναζήτηση μπορεί να σέβεται την ενεργή διάταξη Plektra, όπως QWERTZ.</string>
     <string name="tutorial_quick_launcher_button">Άνοιγμα ρυθμίσεων QuickLauncher</string>
     <string name="tutorial_quick_launcher_mapping_conflict_title">Το SYM + Space είναι αντιστοιχισμένο σε κάτι άλλο</string>
     <string name="tutorial_quick_launcher_mapping_conflict_description">Το Space αυτήν τη στιγμή ανοίγει “%1$s”. Αντικαταστήστε αυτήν την αντιστοίχιση με QuickLauncher και ενεργοποιήστε το σε πεδία κειμένου για να δοκιμάσετε τη νέα λειτουργία.</string>
@@ -1289,25 +1289,25 @@ QWERTZ σε φυσικό QWERTY
     <string name="tutorial_typing_sound_demo_input_label">Δοκιμάστε να πληκτρολογήσετε εδώ</string>
     <string name="tutorial_sym_emoji_button">SYM / Emoji</string>
     <string name="tutorial_device_sym_layer_title">Οι χαρακτήρες ανά συσκευή χρησιμοποιούν Device SYM</string>
-    <string name="tutorial_device_sym_layer_description">Το Pastiera τώρα ονομάζει την αντιστοίχιση δευτερευόντων χαρακτήρων ανά συσκευή Επίπεδο Device SYM. Το Alt παραμένει το πλήκτρο τροποποιητή που μπορεί να το ενεργοποιεί· Emoji και Symbols είναι πρόσθετα επίπεδα SYM.</string>
+    <string name="tutorial_device_sym_layer_description">Το Plektra τώρα ονομάζει την αντιστοίχιση δευτερευόντων χαρακτήρων ανά συσκευή Επίπεδο Device SYM. Το Alt παραμένει το πλήκτρο τροποποιητή που μπορεί να το ενεργοποιεί· Emoji και Symbols είναι πρόσθετα επίπεδα SYM.</string>
     <string name="tutorial_variations_button">Παραλλαγές</string>
     <string name="tutorial_status_bar_button">Γραμμή κατάστασης</string>
     <string name="tutorial_page_ready_title">Έτοιμο για έναρξη</string>
-    <string name="tutorial_page_ready_description">Είστε πλέον έτοιμοι να χρησιμοποιήσετε το Pastiera! Θυμηθείτε ότι μπορείτε πάντα να επιστρέψετε στις ρυθμίσεις για να προσαρμόσετε περισσότερο το πληκτρολόγιο στις ανάγκες σας.</string>
-    <string name="tutorial_enable_button">Ενεργοποίηση Pastiera</string>
-    <string name="tutorial_enabled_message">Το Pastiera είναι ενεργοποιημένο!</string>
-    <string name="tutorial_select_button">Επιλογή Pastiera</string>
-    <string name="tutorial_enable_first_message">Ενεργοποιήστε πρώτα το Pastiera στην προηγούμενη σελίδα</string>
-    <string name="tutorial_selected_message">Το Pastiera είναι επιλεγμένο!</string>
+    <string name="tutorial_page_ready_description">Είστε πλέον έτοιμοι να χρησιμοποιήσετε το Plektra! Θυμηθείτε ότι μπορείτε πάντα να επιστρέψετε στις ρυθμίσεις για να προσαρμόσετε περισσότερο το πληκτρολόγιο στις ανάγκες σας.</string>
+    <string name="tutorial_enable_button">Ενεργοποίηση Plektra</string>
+    <string name="tutorial_enabled_message">Το Plektra είναι ενεργοποιημένο!</string>
+    <string name="tutorial_select_button">Επιλογή Plektra</string>
+    <string name="tutorial_enable_first_message">Ενεργοποιήστε πρώτα το Plektra στην προηγούμενη σελίδα</string>
+    <string name="tutorial_selected_message">Το Plektra είναι επιλεγμένο!</string>
     <string name="tutorial_show">Εμφάνιση tutorial</string>
     <string name="tutorial_review_description">Επανεξέταση του εισαγωγικού tutorial</string>
     <string name="tutorial_show_release_notes">Εμφάνιση tutorial σημειώσεων έκδοσης</string>
     <string name="tutorial_show_release_notes_description">Προεπισκόπηση της εισαγωγής ενημέρωσης χωρίς εγκατάσταση αναβάθμισης</string>
 
-    <string name="pastierina_mode_title">Λειτουργία Pastierina</string>
-    <string name="pastierina_mode_description">Εναλλαγή ελάχιστου UI</string>
+    <string name="slim_mode_title">Λειτουργία Slim</string>
+    <string name="slim_mode_description">Εναλλαγή ελάχιστου UI</string>
     <string name="software_keyboard_mode_title">Λειτουργία πληκτρολογίου</string>
-    <string name="software_keyboard_mode_description">Ξεχωριστά από το Pastierina. Ελέγχει τη συμπεριφορά hardware έναντι virtual πληκτρολογίου.</string>
+    <string name="software_keyboard_mode_description">Ξεχωριστά από το Slim. Ελέγχει τη συμπεριφορά hardware έναντι virtual πληκτρολογίου.</string>
     <string name="software_keyboard_mode_auto_current">Auto (τρέχον: %1$s)</string>
     <string name="software_keyboard_mode_virtual">Εικονικό</string>
     <string name="software_keyboard_mode_hardware">Φυσικό</string>
@@ -1351,7 +1351,7 @@ QWERTZ σε φυσικό QWERTY
     <string name="backup_now">Δημιουργία αντιγράφου τώρα</string>
     <string name="backup_now_description">Εξαγωγή όλων των ρυθμίσεων και προσαρμοσμένων διατάξεων σε ZIP</string>
     <string name="restore_from_file">Επαναφορά από αρχείο</string>
-    <string name="restore_from_file_description">Εισαγωγή αντιγράφου ασφαλείας ZIP του Pastiera</string>
+    <string name="restore_from_file_description">Εισαγωγή αντιγράφου ασφαλείας ZIP του Plektra</string>
     <string name="backup_completed">Το αντίγραφο ασφαλείας ολοκληρώθηκε</string>
     <string name="restore_completed">Η επαναφορά ολοκληρώθηκε</string>
     <string name="backup_failed">Το αντίγραφο ασφαλείας απέτυχε: %1$s</string>
@@ -1538,7 +1538,7 @@ QWERTZ σε φυσικό QWERTY
     <string name="trackpad_tutorial_how_it_works_title">Πώς λειτουργεί</string>
     <string name="trackpad_tutorial_how_it_works_description">Το trackpad χωρίζεται σε τρεις ενότητες:\n\n• Αριστερό τρίτο → Αποδοχή αριστερής πρότασης\n• Κεντρικό τρίτο → Αποδοχή κεντρικής πρότασης\n• Δεξί τρίτο → Αποδοχή δεξιάς πρότασης\n\nΑπλώς σαρώστε προς τα πάνω στην αντίστοιχη περιοχή για να εισαγάγετε αυτήν την πρόταση.</string>
     <string name="trackpad_tutorial_shizuku_required_title">Απαιτείται Shizuku</string>
-    <string name="trackpad_tutorial_shizuku_required_description">Αυτή η λειτουργία απαιτεί Shizuku για πρόσβαση σε συμβάντα trackpad.\n\n1. Εγκαταστήστε το Shizuku από τις εκδόσεις GitHub\n2. Ενεργοποιήστε τις επιλογές προγραμματιστή στις ρυθμίσεις Android\n3. Συνδέστε τη συσκευή σας σε PC με εγκατεστημένο ADB\n4. Εκτελέστε την εντολή που εμφανίζει το Shizuku στην εφαρμογή του\n5. Δώστε άδεια στο Pastiera μέσα στο Shizuku\n\nΗ λειτουργία θα δουλεύει αυτόματα μόλις εκτελείται το Shizuku.</string>
+    <string name="trackpad_tutorial_shizuku_required_description">Αυτή η λειτουργία απαιτεί Shizuku για πρόσβαση σε συμβάντα trackpad.\n\n1. Εγκαταστήστε το Shizuku από τις εκδόσεις GitHub\n2. Ενεργοποιήστε τις επιλογές προγραμματιστή στις ρυθμίσεις Android\n3. Συνδέστε τη συσκευή σας σε PC με εγκατεστημένο ADB\n4. Εκτελέστε την εντολή που εμφανίζει το Shizuku στην εφαρμογή του\n5. Δώστε άδεια στο Plektra μέσα στο Shizuku\n\nΗ λειτουργία θα δουλεύει αυτόματα μόλις εκτελείται το Shizuku.</string>
     <string name="trackpad_tutorial_tips_title">Συμβουλές</string>
     <string name="trackpad_tutorial_tips_description">• Βεβαιωθείτε ότι η σάρωση είναι κυρίως κάθετη\n• Η χειρονομία λειτουργεί καλύτερα με γρήγορες, σκόπιμες σαρώσεις\n• Αν άλλα δάχτυλα βρίσκονται στο πληκτρολόγιο, οι χειρονομίες μπορεί να μην εντοπιστούν (hardware palm rejection)\n• Η λειτουργία μπορεί να ενεργοποιηθεί/απενεργοποιηθεί στις Ρυθμίσεις για προχωρημένους</string>
     <string name="trackpad_tutorial_complete">Το κατάλαβα</string>
@@ -1550,24 +1550,24 @@ QWERTZ σε φυσικό QWERTY
 
     <!-- Status Bar Buttons Configuration -->
     <string name="status_bar_buttons_title">Γραμμή κατάστασης</string>
-    <string name="status_bar_buttons_description">Ρυθμίστε τη γραμμή κατάστασης και το Pastierina Mode.</string>
+    <string name="status_bar_buttons_description">Ρυθμίστε τη γραμμή κατάστασης και το Slim Mode.</string>
     <string name="status_bar_style_section">Στυλ γραμμής κατάστασης</string>
     <string name="extended_status_bar_title">Εκτεταμένη γραμμή κατάστασης</string>
     <string name="extended_status_bar_features_section">Εκτεταμένες λειτουργίες</string>
     <string name="status_bar_buttons_section">Κουμπιά</string>
-    <string name="pastierina_preview_suggestions">Προτάσεις</string>
+    <string name="slim_preview_suggestions">Προτάσεις</string>
     <string name="device_specific_interface_section">Διεπαφή συγκεκριμένης συσκευής</string>
     <string name="titan2_elite_rounded_corners_title">Στρογγυλεμένες γωνίες Titan 2 Elite</string>
-    <string name="titan2_elite_rounded_corners_description">Κρατά τα στοιχεία ελέγχου Pastierina και εκτεταμένης γραμμής κατάστασης μέσα στις στρογγυλεμένες γωνίες οθόνης του Elite.</string>
+    <string name="titan2_elite_rounded_corners_description">Κρατά τα στοιχεία ελέγχου Slim και εκτεταμένης γραμμής κατάστασης μέσα στις στρογγυλεμένες γωνίες οθόνης του Elite.</string>
     <string name="status_bar_slot_left">Αριστερό slot</string>
     <string name="status_bar_slot_right_1">Δεξί slot 1</string>
     <string name="status_bar_slot_right_2">Δεξί slot 2</string>
     <string name="status_bar_slots_left">Αριστερά κουμπιά</string>
     <string name="status_bar_slots_right">Δεξιά κουμπιά</string>
-    <string name="pastierina_status_bar_buttons_title">Λειτουργία Pastierina</string>
-    <string name="pastierina_status_bar_buttons_description">Επιλέξτε ποια κουμπιά εμφανίζονται στα αριστερά και δεξιά άκρα της συμπαγούς γραμμής Pastierina.</string>
-    <string name="pastierina_status_bar_slots_left">Αριστερά κουμπιά Pastierina</string>
-    <string name="pastierina_status_bar_slots_right">Δεξιά κουμπιά Pastierina</string>
+    <string name="slim_status_bar_buttons_title">Λειτουργία Slim</string>
+    <string name="slim_status_bar_buttons_description">Επιλέξτε ποια κουμπιά εμφανίζονται στα αριστερά και δεξιά άκρα της συμπαγούς γραμμής Slim.</string>
+    <string name="slim_status_bar_slots_left">Αριστερά κουμπιά Slim</string>
+    <string name="slim_status_bar_slots_right">Δεξιά κουμπιά Slim</string>
     <string name="status_bar_slot_add">Προσθήκη κουμπιού γραμμής κατάστασης</string>
     <string name="status_bar_slot_remove">Αφαίρεση κουμπιού γραμμής κατάστασης</string>
     <string name="status_bar_button_none">Κανένα</string>
@@ -1583,7 +1583,7 @@ QWERTZ σε φυσικό QWERTY
     <string name="status_bar_button_language_state_description">Γλώσσα %1$s, διάταξη %2$s</string>
     <string name="status_bar_button_hamburger">Μενού</string>
     <string name="status_bar_button_hamburger_description">Γρήγορες ενέργειες</string>
-    <string name="status_bar_button_minimal_ui">Pastierina</string>
+    <string name="status_bar_button_minimal_ui">Slim</string>
     <string name="status_bar_button_software_keyboard_mode">Λειτουργία πληκτρολογίου</string>
     <string name="status_bar_button_software_keyboard_mode_description">Προσωρινό άνοιγμα / κλείσιμο πληκτρολογίου οθόνης (Ctrl+B)</string>
     <string name="status_bar_button_close_menu_description">Κλείσιμο γρήγορων ενεργειών</string>
@@ -1605,11 +1605,11 @@ QWERTZ σε φυσικό QWERTY
     <string name="modifier_indicators_title">Ενδείξεις τροποποιητών</string>
     <string name="modifier_indicators_description">Επιλέξτε πού εμφανίζεται η κατάσταση Shift, Ctrl, Alt και SYM για το hardware πληκτρολόγιο.</string>
     <string name="modifier_indicators_bottom_strip">LED κάτω λωρίδας</string>
-    <string name="modifier_indicators_bottom_strip_description">Χρωματιστά LED τροποποιητών στη λωρίδα κάτω από το Pastiera.</string>
+    <string name="modifier_indicators_bottom_strip_description">Χρωματιστά LED τροποποιητών στη λωρίδα κάτω από το Plektra.</string>
     <string name="modifier_indicators_menu_bar">Γραμμή μενού</string>
     <string name="modifier_indicators_menu_bar_description">Ένα συμπαγές εικονίδιο στην επάνω statusbar του Android.</string>
     <string name="modifier_indicators_status_bar">Γραμμή κατάστασης</string>
-    <string name="modifier_indicators_status_bar_description">Συμπαγή σύμβολα στο αριστερό άκρο της statusbar Pastiera.</string>
+    <string name="modifier_indicators_status_bar_description">Συμπαγή σύμβολα στο αριστερό άκρο της statusbar Plektra.</string>
     <string name="modifier_indicators_off_state">Όλες οι ενδείξεις τροποποιητών είναι ανενεργές.</string>
     <string name="status_bar_state_on">Ενεργό</string>
     <string name="status_bar_state_off">Ανενεργό</string>
@@ -1673,7 +1673,7 @@ QWERTZ σε φυσικό QWERTY
     <string name="kw_main_custom_input_styles">διάταξη πληκτρολογίου, διατάξεις, στυλ εισαγωγής, γλώσσες, ανά γλώσσα, keyboard layout, layouts, input styles, languages</string>
     <string name="kw_main_text_input">πληκτρολόγηση, κείμενο, στίξη, εισαγωγικά, διαστήματα, κεφαλαία, typing, text, punctuation, quotes, spacing, capitalization</string>
     <string name="kw_main_auto_correction">διόρθωση, αυτόματη διόρθωση, ορθογραφία, προτάσεις, αντικαταστάσεις, λεξικά, correction, autocorrect, spelling, suggestions, replacements, dictionaries</string>
-    <string name="kw_main_keyboard_theme">θέμα, θέματα, χρώματα, σκοτεινό, φωτεινό, προρυθμίσεις, hardware πληκτρολόγιο, πληκτρολόγιο οθόνης, theme, colors, dark, light, presets, Pastiera Dark, Pastiera Light, Cloud Tap, Moon Tap, Classic Cloud, Classic Midnight</string>
+    <string name="kw_main_keyboard_theme">θέμα, θέματα, χρώματα, σκοτεινό, φωτεινό, προρυθμίσεις, hardware πληκτρολόγιο, πληκτρολόγιο οθόνης, theme, colors, dark, light, presets, Plektra Dark, Plektra Light, Cloud Tap, Moon Tap, Classic Cloud, Classic Midnight</string>
     <string name="kw_main_app_language">γλώσσα, γλώσσα εφαρμογής, locale, μετάφραση, language, app language, translation</string>
     <string name="kw_main_customization">προσαρμογή, εμφάνιση, customize, customization, appearance</string>
     <string name="kw_main_advanced">για προχωρημένους, αντίγραφο ασφαλείας, επαναφορά, debug, ειδικός, advanced, backup, restore, expert</string>
@@ -1709,5 +1709,5 @@ QWERTZ σε φυσικό QWERTY
     <string name="kw_theme_led_colors">LED, LEDs, ανενεργό, ενεργό, κλειδωμένο, τροποποιητής, χρώματα, ενδείξεις, inactive, active, locked, modifier, colors</string>
     <string name="kw_indicator_bottom_strip">LED, LEDs, φώτα, λωρίδα, κάτω, strip, bottom</string>
     <string name="kw_indicator_menu_bar">LED, φώτα, εικονίδιο, γραμμή κατάστασης, ενδείξεις, icon, status bar, indicators</string>
-    <string name="kw_indicator_status_bar">LED, φώτα, σύμβολα, ενδείξεις, pastiera, lights, symbols, indicators</string>
+    <string name="kw_indicator_status_bar">LED, φώτα, σύμβολα, ενδείξεις, plektra, lights, symbols, indicators</string>
 </resources>

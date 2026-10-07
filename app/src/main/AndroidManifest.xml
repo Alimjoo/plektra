@@ -45,33 +45,83 @@
     </queries>
 
     <application
-        android:name=".PastieraApplication"
+        android:name=".PlektraApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="${appIcon}"
         android:label="${appLabel}"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="${appRoundIcon}"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Pastiera">
+        android:theme="@style/Theme.Plektra">
         <activity
             android:name=".TutorialActivity"
             android:exported="false"
             android:label="${appLabel}"
-            android:theme="@style/Theme.Pastiera" />
+            android:theme="@style/Theme.Plektra" />
         
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboard|keyboardHidden|navigation"
             android:exported="true"
             android:label="${appLabel}"
-            android:theme="@style/Theme.Pastiera">
+            android:theme="@style/Theme.Plektra" />
+
+        <activity-alias
+            android:name=".OrangeLauncherAlias"
+            android:enabled="${closedOrangeLauncherEnabled}"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="${appLabel}"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".OpenOrangeLauncherAlias"
+            android:enabled="${openOrangeLauncherEnabled}"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_open"
+            android:label="${appLabel}"
+            android:roundIcon="@mipmap/ic_launcher_open_round"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".BlueLauncherAlias"
+            android:enabled="${closedBlueLauncherEnabled}"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_nightly"
+            android:label="${appLabel}"
+            android:roundIcon="@mipmap/ic_launcher_nightly_round"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".OpenBlueLauncherAlias"
+            android:enabled="${openBlueLauncherEnabled}"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_nightly_open"
+            android:label="${appLabel}"
+            android:roundIcon="@mipmap/ic_launcher_nightly_open_round"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <activity
             android:name=".SoftwareKeyboardModeActionActivity"
@@ -83,7 +133,7 @@
             android:noHistory="true"
             android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
-                <action android:name="it.palsoftware.pastiera.action.TOGGLE_SOFTWARE_KEYBOARD_MODE" />
+                <action android:name="rocks.pkb.plektra.action.TOGGLE_SOFTWARE_KEYBOARD_MODE" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -93,12 +143,12 @@
             android:name=".SymCustomizationActivity"
             android:exported="false"
             android:label="@string/sym_customize_title"
-            android:theme="@style/Theme.Pastiera" />
+            android:theme="@style/Theme.Plektra" />
         
-        <activity android:name=".KeyboardLayoutActivity" android:exported="false" android:theme="@style/Theme.Pastiera" />
+        <activity android:name=".KeyboardLayoutActivity" android:exported="false" android:theme="@style/Theme.Plektra" />
 
         <activity android:name=".CornerCalibrationActivity" android:exported="false"
-            android:label="Displaykurve kalibrieren" android:theme="@style/Theme.Pastiera" />
+            android:label="Displaykurve kalibrieren" android:theme="@style/Theme.Plektra" />
 
         <!-- Activity per le impostazioni -->
         <activity
@@ -106,10 +156,10 @@
             android:configChanges="keyboard|keyboardHidden|navigation"
             android:exported="true"
             android:label="@string/settings_title"
-            android:theme="@style/Theme.Pastiera">
+            android:theme="@style/Theme.Plektra">
             <!-- Settings links only navigate and highlight; they never change values.
-                 Keep the pastiera scheme and pastiera.eu alias after the Plektra rename.
-                 Future: if multiple Stable/Nightly or Pastiera/Plektra apps are installed,
+                 Keep the plektra scheme and verified pkb.rocks links.
+                 Future: if multiple Stable/Nightly or Plektra/Plektra apps are installed,
                  consider an in-app choice with explicit forwarding to the selected package.
                  Verified overlapping App Links do not guarantee an Android chooser. -->
             <intent-filter>
@@ -119,7 +169,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="pastiera"
+                    android:scheme="plektra"
                     android:host="setting" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
@@ -131,15 +181,6 @@
                     android:host="pkb.rocks"
                     android:pathPrefix="/settings/" />
             </intent-filter>
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="pastiera.eu"
-                    android:pathPrefix="/settings/" />
-            </intent-filter>
         </activity>
         
         <!-- Activity per gestire le lingue degli input method subtypes -->
@@ -147,19 +188,19 @@
             android:name=".LanguagesActivity"
             android:exported="false"
             android:label="@string/languages_title"
-            android:theme="@style/Theme.Pastiera" />
+            android:theme="@style/Theme.Plektra" />
         
         <activity
             android:name=".dictionaries.InstalledDictionariesActivity"
             android:exported="false"
             android:label="@string/installed_dictionaries_title"
-            android:theme="@style/Theme.Pastiera.InstalledDictionariesAnimation" />
+            android:theme="@style/Theme.Plektra.InstalledDictionariesAnimation" />
 
         <activity
             android:name=".layout.OnlineLayoutsActivity"
             android:exported="false"
             android:label="@string/online_layouts_title"
-            android:theme="@style/Theme.Pastiera" />
+            android:theme="@style/Theme.Plektra" />
 
         <!-- Activity for trackpad debug -->
         <activity
@@ -218,7 +259,7 @@
         <!-- Attività per assegnare scorciatoie del launcher -->
         <activity
             android:name=".inputmethod.LauncherShortcutAssignmentActivity"
-            android:theme="@style/Theme.Pastiera.OverlayDialog"
+            android:theme="@style/Theme.Plektra.OverlayDialog"
             android:exported="false"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
@@ -228,7 +269,7 @@
 
         <activity
             android:name=".inputmethod.AddSubstitutionActivity"
-            android:theme="@style/Theme.Pastiera.OverlayDialog"
+            android:theme="@style/Theme.Plektra.OverlayDialog"
             android:exported="false"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
@@ -238,7 +279,7 @@
 
         <activity
             android:name=".inputmethod.QuickLauncherActivity"
-            android:theme="@style/Theme.Pastiera.QuickLauncherOverlay"
+            android:theme="@style/Theme.Plektra.QuickLauncherOverlay"
             android:exported="false"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"

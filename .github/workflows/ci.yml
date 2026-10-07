@@ -23,19 +23,19 @@ jobs:
 
       - name: Run core modifier regression tests
         run: |
-          ./gradlew :app:testStableDebugUnitTest --tests it.palsoftware.pastiera.core.ModifierStateControllerTest
+          ./gradlew :app:testStableDebugUnitTest --tests rocks.pkb.plektra.core.ModifierStateControllerTest
 
       - name: Run input router modifier E2E tests
         run: |
-          ./gradlew :app:testStableDebugUnitTest --tests it.palsoftware.pastiera.inputmethod.InputEventRouterModifierE2ETest
+          ./gradlew :app:testStableDebugUnitTest --tests rocks.pkb.plektra.inputmethod.InputEventRouterModifierE2ETest
 
       - name: Run input router forward-delete tests
         run: |
-          ./gradlew :app:testStableDebugUnitTest --tests it.palsoftware.pastiera.inputmethod.InputEventRouterForwardDeleteAlternativesTest
+          ./gradlew :app:testStableDebugUnitTest --tests rocks.pkb.plektra.inputmethod.InputEventRouterForwardDeleteAlternativesTest
 
       - name: Run IME device behaviour tests
         run: |
-          ./gradlew :app:testStableDebugUnitTest --tests it.palsoftware.pastiera.inputmethod.PhysicalKeyboardInputMethodServiceDeviceBehaviorTest
+          ./gradlew :app:testStableDebugUnitTest --tests rocks.pkb.plektra.inputmethod.PhysicalKeyboardInputMethodServiceDeviceBehaviorTest
 
       - name: Run stable debug unit tests
         run: |
@@ -43,11 +43,15 @@ jobs:
 
       - name: Run stable release unit tests (F-Droid path)
         run: |
-          ./gradlew :app:testStableReleaseUnitTest -PPASTIERA_FDROID_BUILD=true
+          ./gradlew :app:testStableReleaseUnitTest -PPLEKTRA_FDROID_BUILD=true
 
       - name: Run nightly debug unit tests
         run: |
           ./gradlew :app:testNightlyDebugUnitTest
+
+      - name: Compile and test Google Play variants
+        run: |
+          ./gradlew :app:testPlayStableDebugUnitTest :app:testPlayNightlyDebugUnitTest
 
       - name: Run nightly release unit tests
         run: |

@@ -72,43 +72,49 @@ fun shouldValidateStableSigning(taskNames: List<String>): Boolean {
     }
 }
 
+fun shouldValidatePlaySigning(taskNames: List<String>): Boolean =
+    taskNames.any { task ->
+        task.contains("PlayStableRelease", ignoreCase = true) ||
+            task.contains("PlayNightlyRelease", ignoreCase = true)
+    }
+
 android {
-    namespace = "it.palsoftware.pastiera"
+    namespace = "rocks.pkb.plektra"
     compileSdk = 36
 
-    val defaultVersionCode = 86
-    val defaultVersionName = "0.86"
-    val ciVersionCode = providers.gradleProperty("PASTIERA_VERSION_CODE").orNull?.toIntOrNull()
-    val ciVersionName = providers.gradleProperty("PASTIERA_VERSION_NAME").orNull
-    val nightlyVersionCode = providers.gradleProperty("PASTIERA_NIGHTLY_VERSION_CODE").orNull?.toIntOrNull()
-    val nightlyVersionNameSuffix = providers.gradleProperty("PASTIERA_NIGHTLY_VERSION_SUFFIX").orNull ?: "-nightly"
-    val isFdroidBuild = gradleBooleanProperty("PASTIERA_FDROID_BUILD")
-    val isUnsignedReleaseBuild = gradleBooleanProperty("PASTIERA_UNSIGNED_RELEASE_BUILD")
-    val successorGithubRepository = providers.gradleProperty("PASTIERA_SUCCESSOR_GITHUB_REPOSITORY")
+    val defaultVersionCode = 26090000
+    val defaultVersionName = "26.09"
+    val ciVersionCode = providers.gradleProperty("PLEKTRA_VERSION_CODE").orNull?.toIntOrNull()
+    val ciVersionName = providers.gradleProperty("PLEKTRA_VERSION_NAME").orNull
+    val nightlyVersionCode = providers.gradleProperty("PLEKTRA_NIGHTLY_VERSION_CODE").orNull?.toIntOrNull()
+    val nightlyVersionNameSuffix = providers.gradleProperty("PLEKTRA_NIGHTLY_VERSION_SUFFIX").orNull ?: "-nightly"
+    val isFdroidBuild = gradleBooleanProperty("PLEKTRA_FDROID_BUILD")
+    val isUnsignedReleaseBuild = gradleBooleanProperty("PLEKTRA_UNSIGNED_RELEASE_BUILD")
+    val githubRepository = providers.gradleProperty("PLEKTRA_GITHUB_REPOSITORY")
         .orNull ?: "pkb-rocks/plektra"
-    if (!successorGithubRepository.matches(Regex("[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"))) {
+    if (!githubRepository.matches(Regex("[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"))) {
         throw GradleException(
-            "PASTIERA_SUCCESSOR_GITHUB_REPOSITORY must have the form owner/repository"
+            "PLEKTRA_GITHUB_REPOSITORY must have the form owner/repository"
         )
     }
 
     defaultConfig {
-        applicationId = "it.palsoftware.pastiera"
+        applicationId = "rocks.pkb.plektra"
         minSdk = 29
         targetSdk = 36
         versionCode = ciVersionCode ?: defaultVersionCode
         versionName = ciVersionName ?: defaultVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "SUCCESSOR_GITHUB_REPOSITORY", "\"$successorGithubRepository\"")
+        buildConfigField("String", "GITHUB_REPOSITORY", "\"$githubRepository\"")
     }
 
     signingConfigs {
         create("release") {
-            val storePath = signingProp("storeFile", "PASTIERA_KEYSTORE_PATH")
-            val storePass = signingProp("storePassword", "PASTIERA_KEYSTORE_PASSWORD")
-            val alias = signingProp("keyAlias", "PASTIERA_KEY_ALIAS")
-            val keyPass = signingProp("keyPassword", "PASTIERA_KEY_PASSWORD")
+            val storePath = signingProp("storeFile", "PLEKTRA_KEYSTORE_PATH")
+            val storePass = signingProp("storePassword", "PLEKTRA_KEYSTORE_PASSWORD")
+            val alias = signingProp("keyAlias", "PLEKTRA_KEY_ALIAS")
+            val keyPass = signingProp("keyPassword", "PLEKTRA_KEY_PASSWORD")
 
             // Only configure signing if all credentials are provided
             if (hasSigningConfig(storePath, storePass, alias, keyPass)) {
@@ -120,10 +126,24 @@ android {
             }
         }
         create("nightly") {
-            val storePath = signingProp("nightlyStoreFile", "PASTIERA_NIGHTLY_KEYSTORE_PATH")
-            val storePass = signingProp("nightlyStorePassword", "PASTIERA_NIGHTLY_KEYSTORE_PASSWORD")
-            val alias = signingProp("nightlyKeyAlias", "PASTIERA_NIGHTLY_KEY_ALIAS")
-            val keyPass = signingProp("nightlyKeyPassword", "PASTIERA_NIGHTLY_KEY_PASSWORD")
+            val storePath = signingProp("nightlyStoreFile", "PLEKTRA_NIGHTLY_KEYSTORE_PATH")
+            val storePass = signingProp("nightlyStorePassword", "PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD")
+            val alias = signingProp("nightlyKeyAlias", "PLEKTRA_NIGHTLY_KEY_ALIAS")
+            val keyPass = signingProp("nightlyKeyPassword", "PLEKTRA_NIGHTLY_KEY_PASSWORD")
+
+            if (hasSigningConfig(storePath, storePass, alias, keyPass)) {
+                val resolvedStoreFile = resolveSigningStoreFile(storePath!!)
+                storeFile = resolvedStoreFile
+                storePassword = storePass
+                keyAlias = alias
+                keyPassword = keyPass
+            }
+        }
+        create("playUpload") {
+            val storePath = signingProp("playUploadStoreFile", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PATH")
+            val storePass = signingProp("playUploadStorePassword", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PASSWORD")
+            val alias = signingProp("playUploadKeyAlias", "PLEKTRA_PLAY_UPLOAD_KEY_ALIAS")
+            val keyPass = signingProp("playUploadKeyPassword", "PLEKTRA_PLAY_UPLOAD_KEY_PASSWORD")
 
             if (hasSigningConfig(storePath, storePass, alias, keyPass)) {
                 val resolvedStoreFile = resolveSigningStoreFile(storePath!!)
@@ -140,11 +160,25 @@ android {
     productFlavors {
         create("stable") {
             dimension = "channel"
-            manifestPlaceholders["appLabel"] = "Pastiera"
-            manifestPlaceholders["imeLabel"] = "Pastiera"
+            manifestPlaceholders["appLabel"] = "Plektra"
+            manifestPlaceholders["imeLabel"] = "Plektra"
+            manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher"
+            manifestPlaceholders["appRoundIcon"] = "@mipmap/ic_launcher_round"
+            manifestPlaceholders["closedOrangeLauncherEnabled"] = "true"
+            manifestPlaceholders["openOrangeLauncherEnabled"] = "false"
+            manifestPlaceholders["closedBlueLauncherEnabled"] = "false"
+            manifestPlaceholders["openBlueLauncherEnabled"] = "false"
             buildConfigField("String", "RELEASE_CHANNEL", "\"stable\"")
+            buildConfigField("String", "DISTRIBUTION_CHANNEL", "\"direct\"")
             buildConfigField("boolean", "IS_FDROID_BUILD", if (isFdroidBuild) "true" else "false")
             buildConfigField("boolean", "ENABLE_GITHUB_UPDATE_CHECKS", if (isFdroidBuild) "false" else "true")
+            val storePath = signingProp("storeFile", "PLEKTRA_KEYSTORE_PATH")
+            val storePass = signingProp("storePassword", "PLEKTRA_KEYSTORE_PASSWORD")
+            val alias = signingProp("keyAlias", "PLEKTRA_KEY_ALIAS")
+            val keyPass = signingProp("keyPassword", "PLEKTRA_KEY_PASSWORD")
+            if (!isUnsignedReleaseBuild && hasSigningConfig(storePath, storePass, alias, keyPass)) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         create("nightly") {
             dimension = "channel"
@@ -153,17 +187,74 @@ android {
                 versionCode = nightlyVersionCode
             }
             versionNameSuffix = nightlyVersionNameSuffix
-            manifestPlaceholders["appLabel"] = "Pastiera Nightly"
-            manifestPlaceholders["imeLabel"] = "Pastiera Nightly"
+            manifestPlaceholders["appLabel"] = "Plektra Nightly"
+            manifestPlaceholders["imeLabel"] = "Plektra Nightly"
+            manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_nightly"
+            manifestPlaceholders["appRoundIcon"] = "@mipmap/ic_launcher_nightly_round"
+            manifestPlaceholders["closedOrangeLauncherEnabled"] = "false"
+            manifestPlaceholders["openOrangeLauncherEnabled"] = "false"
+            manifestPlaceholders["closedBlueLauncherEnabled"] = "true"
+            manifestPlaceholders["openBlueLauncherEnabled"] = "false"
             buildConfigField("String", "RELEASE_CHANNEL", "\"nightly\"")
+            buildConfigField("String", "DISTRIBUTION_CHANNEL", "\"direct\"")
             buildConfigField("boolean", "IS_FDROID_BUILD", if (isFdroidBuild) "true" else "false")
             buildConfigField("boolean", "ENABLE_GITHUB_UPDATE_CHECKS", if (isFdroidBuild) "false" else "true")
-            val storePath = signingProp("nightlyStoreFile", "PASTIERA_NIGHTLY_KEYSTORE_PATH")
-            val storePass = signingProp("nightlyStorePassword", "PASTIERA_NIGHTLY_KEYSTORE_PASSWORD")
-            val alias = signingProp("nightlyKeyAlias", "PASTIERA_NIGHTLY_KEY_ALIAS")
-            val keyPass = signingProp("nightlyKeyPassword", "PASTIERA_NIGHTLY_KEY_PASSWORD")
+            val storePath = signingProp("nightlyStoreFile", "PLEKTRA_NIGHTLY_KEYSTORE_PATH")
+            val storePass = signingProp("nightlyStorePassword", "PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD")
+            val alias = signingProp("nightlyKeyAlias", "PLEKTRA_NIGHTLY_KEY_ALIAS")
+            val keyPass = signingProp("nightlyKeyPassword", "PLEKTRA_NIGHTLY_KEY_PASSWORD")
             if (!isUnsignedReleaseBuild && hasSigningConfig(storePath, storePass, alias, keyPass)) {
                 signingConfig = signingConfigs.getByName("nightly")
+            }
+        }
+        create("playStable") {
+            dimension = "channel"
+            applicationIdSuffix = ".unsovereign"
+            manifestPlaceholders["appLabel"] = "Plektra"
+            manifestPlaceholders["imeLabel"] = "Plektra"
+            manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher"
+            manifestPlaceholders["appRoundIcon"] = "@mipmap/ic_launcher_round"
+            manifestPlaceholders["closedOrangeLauncherEnabled"] = "true"
+            manifestPlaceholders["openOrangeLauncherEnabled"] = "false"
+            manifestPlaceholders["closedBlueLauncherEnabled"] = "false"
+            manifestPlaceholders["openBlueLauncherEnabled"] = "false"
+            buildConfigField("String", "RELEASE_CHANNEL", "\"stable\"")
+            buildConfigField("String", "DISTRIBUTION_CHANNEL", "\"play\"")
+            buildConfigField("boolean", "IS_FDROID_BUILD", "false")
+            buildConfigField("boolean", "ENABLE_GITHUB_UPDATE_CHECKS", "false")
+            val storePath = signingProp("playUploadStoreFile", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PATH")
+            val storePass = signingProp("playUploadStorePassword", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PASSWORD")
+            val alias = signingProp("playUploadKeyAlias", "PLEKTRA_PLAY_UPLOAD_KEY_ALIAS")
+            val keyPass = signingProp("playUploadKeyPassword", "PLEKTRA_PLAY_UPLOAD_KEY_PASSWORD")
+            if (hasSigningConfig(storePath, storePass, alias, keyPass)) {
+                signingConfig = signingConfigs.getByName("playUpload")
+            }
+        }
+        create("playNightly") {
+            dimension = "channel"
+            applicationIdSuffix = ".unsovereign.nightly"
+            if (nightlyVersionCode != null) {
+                versionCode = nightlyVersionCode
+            }
+            versionNameSuffix = nightlyVersionNameSuffix
+            manifestPlaceholders["appLabel"] = "Plektra Nightly"
+            manifestPlaceholders["imeLabel"] = "Plektra Nightly"
+            manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_nightly"
+            manifestPlaceholders["appRoundIcon"] = "@mipmap/ic_launcher_nightly_round"
+            manifestPlaceholders["closedOrangeLauncherEnabled"] = "false"
+            manifestPlaceholders["openOrangeLauncherEnabled"] = "false"
+            manifestPlaceholders["closedBlueLauncherEnabled"] = "true"
+            manifestPlaceholders["openBlueLauncherEnabled"] = "false"
+            buildConfigField("String", "RELEASE_CHANNEL", "\"nightly\"")
+            buildConfigField("String", "DISTRIBUTION_CHANNEL", "\"play\"")
+            buildConfigField("boolean", "IS_FDROID_BUILD", "false")
+            buildConfigField("boolean", "ENABLE_GITHUB_UPDATE_CHECKS", "false")
+            val storePath = signingProp("playUploadStoreFile", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PATH")
+            val storePass = signingProp("playUploadStorePassword", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PASSWORD")
+            val alias = signingProp("playUploadKeyAlias", "PLEKTRA_PLAY_UPLOAD_KEY_ALIAS")
+            val keyPass = signingProp("playUploadKeyPassword", "PLEKTRA_PLAY_UPLOAD_KEY_PASSWORD")
+            if (hasSigningConfig(storePath, storePass, alias, keyPass)) {
+                signingConfig = signingConfigs.getByName("playUpload")
             }
         }
     }
@@ -175,15 +266,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Only use signing config if it's properly configured
-            val storePath = signingProp("storeFile", "PASTIERA_KEYSTORE_PATH")
-            val storePass = signingProp("storePassword", "PASTIERA_KEYSTORE_PASSWORD")
-            val alias = signingProp("keyAlias", "PASTIERA_KEY_ALIAS")
-            val keyPass = signingProp("keyPassword", "PASTIERA_KEY_PASSWORD")
-            
-            if (!isFdroidBuild && !isUnsignedReleaseBuild && hasSigningConfig(storePath, storePass, alias, keyPass)) {
-                signingConfig = signingConfigs.getByName("release")
-            }
             // Disable lint for release to avoid file lock issues
             isDebuggable = false
         }
@@ -201,17 +283,17 @@ android {
                     logger.lifecycle("Skipping stable signing validation for non-packaging task(s): ${gradle.startParameter.taskNames}")
                     return@doFirst
                 }
-                val storePath = signingProp("storeFile", "PASTIERA_KEYSTORE_PATH")
-                val storePass = signingProp("storePassword", "PASTIERA_KEYSTORE_PASSWORD")
-                val alias = signingProp("keyAlias", "PASTIERA_KEY_ALIAS")
-                val keyPass = signingProp("keyPassword", "PASTIERA_KEY_PASSWORD")
+                val storePath = signingProp("storeFile", "PLEKTRA_KEYSTORE_PATH")
+                val storePass = signingProp("storePassword", "PLEKTRA_KEYSTORE_PASSWORD")
+                val alias = signingProp("keyAlias", "PLEKTRA_KEY_ALIAS")
+                val keyPass = signingProp("keyPassword", "PLEKTRA_KEY_PASSWORD")
 
                 if (!hasSigningConfig(storePath, storePass, alias, keyPass)) {
                     throw GradleException(
                         "Missing signing config for release build. Define storeFile, storePassword, keyAlias e keyPassword in " +
-                            "keystore.properties (non tracciato) o nelle variabili d'ambiente PASTIERA_KEYSTORE_PATH, " +
-                            "PASTIERA_KEYSTORE_PASSWORD, PASTIERA_KEY_ALIAS, PASTIERA_KEY_PASSWORD. " +
-                            "Use -PPASTIERA_FDROID_BUILD=true only for the unsigned stable F-Droid release path."
+                            "keystore.properties (non tracciato) o nelle variabili d'ambiente PLEKTRA_KEYSTORE_PATH, " +
+                            "PLEKTRA_KEYSTORE_PASSWORD, PLEKTRA_KEY_ALIAS, PLEKTRA_KEY_PASSWORD. " +
+                            "Use -PPLEKTRA_FDROID_BUILD=true only for the unsigned stable F-Droid release path."
                     )
                 }
             }
@@ -226,16 +308,34 @@ android {
                     logger.lifecycle("Skipping nightly signing validation for non-packaging task(s): ${gradle.startParameter.taskNames}")
                     return@doFirst
                 }
-                val storePath = signingProp("nightlyStoreFile", "PASTIERA_NIGHTLY_KEYSTORE_PATH")
-                val storePass = signingProp("nightlyStorePassword", "PASTIERA_NIGHTLY_KEYSTORE_PASSWORD")
-                val alias = signingProp("nightlyKeyAlias", "PASTIERA_NIGHTLY_KEY_ALIAS")
-                val keyPass = signingProp("nightlyKeyPassword", "PASTIERA_NIGHTLY_KEY_PASSWORD")
+                val storePath = signingProp("nightlyStoreFile", "PLEKTRA_NIGHTLY_KEYSTORE_PATH")
+                val storePass = signingProp("nightlyStorePassword", "PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD")
+                val alias = signingProp("nightlyKeyAlias", "PLEKTRA_NIGHTLY_KEY_ALIAS")
+                val keyPass = signingProp("nightlyKeyPassword", "PLEKTRA_NIGHTLY_KEY_PASSWORD")
 
                 if (!hasSigningConfig(storePath, storePass, alias, keyPass)) {
                     throw GradleException(
                         "Missing signing config for nightly build. Define nightlyStoreFile, nightlyStorePassword, nightlyKeyAlias e nightlyKeyPassword in " +
-                            "keystore.properties (non tracciato) o nelle variabili d'ambiente PASTIERA_NIGHTLY_KEYSTORE_PATH, " +
-                            "PASTIERA_NIGHTLY_KEYSTORE_PASSWORD, PASTIERA_NIGHTLY_KEY_ALIAS, PASTIERA_NIGHTLY_KEY_PASSWORD."
+                            "keystore.properties (non tracciato) o nelle variabili d'ambiente PLEKTRA_NIGHTLY_KEYSTORE_PATH, " +
+                            "PLEKTRA_NIGHTLY_KEYSTORE_PASSWORD, PLEKTRA_NIGHTLY_KEY_ALIAS, PLEKTRA_NIGHTLY_KEY_PASSWORD."
+                    )
+                }
+            }
+        }
+        if (
+            name.equals("prePlayStableReleaseBuild", ignoreCase = true) ||
+            name.equals("prePlayNightlyReleaseBuild", ignoreCase = true)
+        ) {
+            doFirst {
+                if (!shouldValidatePlaySigning(gradle.startParameter.taskNames)) return@doFirst
+                val storePath = signingProp("playUploadStoreFile", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PATH")
+                val storePass = signingProp("playUploadStorePassword", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PASSWORD")
+                val alias = signingProp("playUploadKeyAlias", "PLEKTRA_PLAY_UPLOAD_KEY_ALIAS")
+                val keyPass = signingProp("playUploadKeyPassword", "PLEKTRA_PLAY_UPLOAD_KEY_PASSWORD")
+                if (!hasSigningConfig(storePath, storePass, alias, keyPass)) {
+                    throw GradleException(
+                        "Missing Google Play upload-key configuration. Define the playUpload* properties " +
+                            "in ignored keystore.properties or the PLEKTRA_PLAY_UPLOAD_* environment variables."
                     )
                 }
             }
@@ -280,7 +380,7 @@ val generateStableReleaseSbom = tasks.register("generateStableReleaseSbom") {
     outputs.dir(stableSbomAssets)
     doLast {
         val versionName = android.defaultConfig.versionName ?: "unknown"
-        val appRef = "pkg:generic/pastiera@$versionName"
+        val appRef = "pkg:generic/plektra@$versionName"
         val libraries = stableRuntimeClasspath.get().resolvedConfiguration.resolvedArtifacts
             .map { artifact ->
                 val id = artifact.moduleVersion.id
@@ -319,7 +419,7 @@ val generateStableReleaseSbom = tasks.register("generateStableReleaseSbom") {
             "version" to 1,
             "metadata" to mapOf("component" to mapOf(
                 "type" to "application",
-                "name" to "Pastiera",
+                "name" to "Plektra",
                 "version" to versionName,
                 "bom-ref" to appRef,
                 "purl" to appRef,
@@ -334,7 +434,7 @@ val generateStableReleaseSbom = tasks.register("generateStableReleaseSbom") {
                 "dependsOn" to components.map { it["bom-ref"] }
             ))
         )
-        stableSbomAssets.get().file("pastiera-sbom.cdx.json").asFile.apply {
+        stableSbomAssets.get().file("plektra-sbom.cdx.json").asFile.apply {
             parentFile.mkdirs()
             writeText(JsonOutput.prettyPrint(JsonOutput.toJson(bom)) + "\n")
         }

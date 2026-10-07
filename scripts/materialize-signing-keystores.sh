@@ -81,10 +81,10 @@ materialize_b64_keystore() {
 }
 
 materialize_b64_keystore \
-  "storeFile" "PASTIERA_KEYSTORE_FILE" \
-  "storeFileB64" "PASTIERA_KEYSTORE_B64" "PASTIERA_KEYSTORE_B64" \
-  "pastiera-release.jks"
+  "storeFile" "PLEKTRA_KEYSTORE_FILE" \
+  "storeFileB64" "PLEKTRA_KEYSTORE_B64" "PLEKTRA_KEYSTORE_B64" \
+  "plektra-release.jks"
 materialize_b64_keystore \
   "nightlyStoreFile" "NIGHTLY_KEYSTORE_FILE" \
-  "nightlyStoreFileB64" "PASTIERA_NIGHTLY_KEYSTORE_B64" "PASTIERA_NIGHTLY_KEYSTORE_B64" \
-  "pastiera-nightly.jks"
+  "nightlyStoreFileB64" "PLEKTRA_NIGHTLY_KEYSTORE_B64" "PLEKTRA_NIGHTLY_KEYSTORE_B64" \
+  "plektra-nightly.jks"

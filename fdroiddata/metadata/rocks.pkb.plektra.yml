@@ -1,0 +1,22 @@
+Categories:
+  - Writing
+License: GPL-3.0-only
+SourceCode: https://github.com/pkb-rocks/plektra
+IssueTracker: https://github.com/pkb-rocks/plektra/issues
+Changelog: https://github.com/pkb-rocks/plektra/releases
+AutoName: Plektra
+
+RepoType: git
+Repo: https://github.com/pkb-rocks/plektra.git
+
+Builds:
+  - versionName: '26.10'
+    versionCode: 26100000
+    commit: v26.10
+    gradle:
+      - stable
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '26.10'
+CurrentVersionCode: 26100000

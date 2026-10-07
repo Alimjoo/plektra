@@ -49,17 +49,18 @@ gradle_apk="$root_dir/app/build/outputs/apk/nightly/release/app-nightly-release-
 mkdir -p "$(dirname -- "$output_apk")"
 [[ ! -e "$output_apk" ]] || fail "output already exists: $output_apk"
 
-version_info=$(PASTIERA_NIGHTLY_TIMESTAMP="$timestamp" "$root_dir/scripts/nightly-version.sh" "$base_version")
+version_info=$(PLEKTRA_NIGHTLY_TIMESTAMP="$timestamp" "$root_dir/scripts/nightly-version.sh" "$base_version")
+nightly_suffix=$(printf '%s\n' "$version_info" | awk -F= '/^nightly_suffix=/{print $2}')
 version_code=$(printf '%s\n' "$version_info" | awk -F= '/^version_code=/{print $2}')
 full_version=$(printf '%s\n' "$version_info" | awk -F= '/^full_version=/{print $2}')
 gradle_args=(
-  -PPASTIERA_UNSIGNED_RELEASE_BUILD=true
-  -PPASTIERA_VERSION_NAME="$base_version"
-  -PPASTIERA_NIGHTLY_VERSION_CODE="$version_code"
-  -PPASTIERA_NIGHTLY_VERSION_SUFFIX="-nightly.${timestamp}"
+  -PPLEKTRA_UNSIGNED_RELEASE_BUILD=true
+  -PPLEKTRA_VERSION_NAME="$base_version"
+  -PPLEKTRA_NIGHTLY_VERSION_CODE="$version_code"
+  -PPLEKTRA_NIGHTLY_VERSION_SUFFIX="-nightly.${nightly_suffix}"
 )
 if [[ "$fdroid" == true ]]; then
-  gradle_args+=(-PPASTIERA_FDROID_BUILD=true)
+  gradle_args+=(-PPLEKTRA_FDROID_BUILD=true)
 fi
 
 cd "$root_dir"
@@ -75,7 +76,7 @@ actual_app_id=$("$apkanalyzer" manifest application-id "$gradle_apk")
 actual_version_code=$("$apkanalyzer" manifest version-code "$gradle_apk")
 actual_version_name=$("$apkanalyzer" manifest version-name "$gradle_apk")
 actual_debuggable=$("$apkanalyzer" manifest debuggable "$gradle_apk")
-[[ "$actual_app_id" == "it.palsoftware.pastiera.nightly" ]] || fail "unexpected application ID: $actual_app_id"
+[[ "$actual_app_id" == "rocks.pkb.plektra.nightly" ]] || fail "unexpected application ID: $actual_app_id"
 [[ "$actual_version_code" == "$version_code" ]] || fail "unexpected version code: $actual_version_code"
 [[ "$actual_version_name" == "$full_version" ]] || fail "unexpected version name: $actual_version_name"
 [[ "$actual_debuggable" == "false" ]] || fail "release APK is debuggable"
@@ -83,7 +84,7 @@ actual_debuggable=$("$apkanalyzer" manifest debuggable "$gradle_apk")
 cp -- "$gradle_apk" "$output_apk"
 shasum -a 256 "$output_apk" >"${output_apk}.sha256"
 
-printf 'Success: unsigned Pastiera Nightly release built and verified.\n'
+printf 'Success: unsigned Plektra Nightly release built and verified.\n'
 printf 'delivery=%s\n' "$([[ "$fdroid" == true ]] && printf fdroid || printf github)"
 printf 'application_id=%s\n' "$actual_app_id"
 printf 'version_name=%s\n' "$actual_version_name"

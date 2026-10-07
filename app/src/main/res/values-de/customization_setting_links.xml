@@ -7,7 +7,7 @@
     <string name="setting_link_quick_launcher_entries">QuickLauncher-Einträge</string>
     <string name="setting_link_quick_launcher_customize_entries">QuickLauncher-Einträge anpassen</string>
     <string name="setting_link_quick_launcher_source_apps">Apps</string>
-    <string name="setting_link_quick_launcher_source_pastiera">Pastiera-Aktionen</string>
+    <string name="setting_link_quick_launcher_source_plektra">Plektra-Aktionen</string>
     <string name="setting_link_quick_launcher_source_appactions">App-Aktionen</string>
     <string name="setting_link_quick_launcher_source_devicecontrol">Gerätesteuerung</string>
     <string name="setting_link_quick_launcher_source_navactions">Navigationsaktionen</string>
@@ -18,8 +18,8 @@
     <string name="setting_link_theme_assignment">Designzuordnung</string>
     <string name="setting_link_status_extended_left">Erweiterte Statusleiste: linke Schaltflächen</string>
     <string name="setting_link_status_extended_right">Erweiterte Statusleiste: rechte Schaltflächen</string>
-    <string name="setting_link_status_pastierina_left">Pastierina: linke Schaltflächen</string>
-    <string name="setting_link_status_pastierina_right">Pastierina: rechte Schaltflächen</string>
+    <string name="setting_link_status_slim_left">Slim: linke Schaltflächen</string>
+    <string name="setting_link_status_slim_right">Slim: rechte Schaltflächen</string>
     <string name="setting_link_theme_hardware_chrome_rounding">Hardwaretastatur: Rundung von Vorschlägen und Varianten</string>
     <string name="setting_link_theme_hardware_suggestions_height">Hardwaretastatur: Höhe der Vorschläge</string>
     <string name="setting_link_theme_hardware_variations_height">Hardwaretastatur: Höhe der Varianten</string>

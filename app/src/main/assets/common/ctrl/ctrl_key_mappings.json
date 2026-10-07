@@ -93,7 +93,7 @@
     },
     "KEYCODE_B": {
       "type": "command",
-      "command": "pastiera.toggle_software_keyboard_mode"
+      "command": "plektra.toggle_software_keyboard_mode"
     },
     "KEYCODE_N": {
       "type": "action",

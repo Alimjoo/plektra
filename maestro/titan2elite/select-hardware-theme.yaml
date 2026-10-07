@@ -1,4 +1,4 @@
-appId: it.palsoftware.pastiera.nightly
+appId: rocks.pkb.plektra.nightly
 name: Select hardware keyboard theme
 ---
 - scrollUntilVisible:
