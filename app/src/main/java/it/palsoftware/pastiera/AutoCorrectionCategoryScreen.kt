@@ -403,43 +403,16 @@ fun AutoCorrectionCategoryScreen(
                                 }
                             }
 
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(64.dp)
-                                .settingRow(SettingLinkIds.AUTO_CORRECTION_SUGGESTIONS)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.TextFields,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.auto_correct_suggestions_toggle_title),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Medium,
-                                            maxLines = 1
-                                        )
-                                    }
-                                    Switch(
-                                        checked = suggestionsEnabled,
-                                        onCheckedChange = { enabled ->
-                                            suggestionsEnabled = enabled
-                                            SettingsManager.setSuggestionsEnabled(context, enabled)
-                                        },
-                                        enabled = experimentalSuggestionsEnabled
-                                    )
-                                }
+                        TextButton(
+                            modifier = Modifier.fillMaxWidth().settingRow(SettingLinkIds.AUTO_CORRECTION_SUGGESTIONS),
+                            onClick = {
+                                context.startActivity(android.content.Intent(context, SettingsActivity::class.java).apply {
+                                    putExtra(SettingsActivity.EXTRA_DESTINATION, SettingsActivity.DESTINATION_CUSTOMIZATION)
+                                    putExtra(SettingsActivity.EXTRA_CUSTOMIZATION_DESTINATION,
+                                        SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS)
+                                })
                             }
+                        ) { Text(stringResource(R.string.status_bar_buttons_title)) }
 
                         Surface(
                             modifier = Modifier

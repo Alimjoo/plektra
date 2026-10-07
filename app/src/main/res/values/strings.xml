@@ -809,7 +809,7 @@
     <string name="off">Off</string>
     <string name="keyboard_theme_accent">Accent</string>
     <string name="keyboard_theme_suggestions">Suggestions</string>
-    <string name="keyboard_theme_status_bar_buttons">Status bar buttons</string>
+    <string name="keyboard_theme_status_bar_buttons">Keyboard bar buttons</string>
     <string name="keyboard_theme_cursor_swipe">Cursor swipe</string>
     <string name="keyboard_theme_key_popup">Key popup</string>
     <string name="keyboard_theme_key_popup_selected">Selected popup key</string>
@@ -1099,8 +1099,8 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="settings_group_utility">Utility</string>
     <string name="settings_group_pastiera">About</string>
     <string name="settings_about_version_summary">v%1$s</string>
-    <string name="settings_accessibility_live_read_title">Live reading for status bar changes</string>
-    <string name="settings_accessibility_live_read_description">When enabled, TalkBack can announce language/layout and status bar changes automatically.</string>
+    <string name="settings_accessibility_live_read_title">Live reading for keyboard bar changes</string>
+    <string name="settings_accessibility_live_read_description">When enabled, TalkBack can announce language/layout and keyboard bar changes automatically.</string>
     <string name="settings_accessibility_second_row_title">Read second row (quick settings and variations)</string>
     <string name="settings_accessibility_second_row_description">When disabled, TalkBack will skip the lower row and keep word suggestions separate.</string>
     <string name="settings_accessibility_suggestions_delay_title">Suggestions read delay</string>
@@ -1324,7 +1324,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="tutorial_device_sym_layer_title">Device-specific characters use Device SYM</string>
     <string name="tutorial_device_sym_layer_description">Pastiera now calls the device-specific secondary-character mapping the Device SYM Layer. Alt remains the modifier key that can trigger it; Emoji and Symbols are additional SYM layers.</string>
     <string name="tutorial_variations_button">Variations</string>
-    <string name="tutorial_status_bar_button">Status bar</string>
+    <string name="tutorial_status_bar_button">Keyboard bar</string>
     <string name="tutorial_page_ready_title">Ready to Start</string>
     <string name="tutorial_page_ready_description">You are now ready to use Pastiera! Remember that you can always return to settings to further customize the keyboard to your needs.</string>
     <string name="tutorial_enable_button">Enable Pastiera</string>
@@ -1584,16 +1584,16 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="trackpad_debug_service_description">Displays trackpad events in a small overlay for debugging purposes</string>
 
     <!-- Status Bar Buttons Configuration -->
-    <string name="status_bar_buttons_title">Status Bar</string>
-    <string name="status_bar_buttons_description">Configure the Status Bar and Pastierina Mode.</string>
+    <string name="status_bar_buttons_title">Keyboard bar</string>
+    <string name="status_bar_buttons_description">Choose suggestions, actions and indicator locations. Pastierina mode hides actions while keeping your choices.</string>
     <string name="status_bar_style_section">Status bar style</string>
-    <string name="extended_status_bar_title">Extended Status Bar</string>
+    <string name="extended_status_bar_title">Full keyboard bar</string>
     <string name="extended_status_bar_features_section">Extended features</string>
     <string name="status_bar_buttons_section">Buttons</string>
     <string name="pastierina_preview_suggestions">Suggestions</string>
     <string name="device_specific_interface_section">Device-specific interface</string>
     <string name="titan2_elite_rounded_corners_title">Titan 2 Elite rounded corners</string>
-    <string name="titan2_elite_rounded_corners_description">Round the bottom corners of the status bar to match the Elite’s rounded display corners.</string>
+    <string name="titan2_elite_rounded_corners_description">Round the bottom corners of the keyboard bar to match the Elite’s rounded display corners.</string>
     <string name="titan2_elite_fill_bottom_corners_title">Fill lower display corners</string>
     <string name="titan2_elite_fill_bottom_corners_description">Keep the outer buttons rounded while extending the theme background to the physical display edge.</string>
     <string name="status_bar_slot_left">Left Slot</string>
@@ -1605,8 +1605,8 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="pastierina_status_bar_buttons_description">Choose which buttons appear on the left and right edges of the compact Pastierina row.</string>
     <string name="pastierina_status_bar_slots_left">Pastierina left buttons</string>
     <string name="pastierina_status_bar_slots_right">Pastierina right buttons</string>
-    <string name="status_bar_slot_add">Add status bar button</string>
-    <string name="status_bar_slot_remove">Remove status bar button</string>
+    <string name="status_bar_slot_add">Add keyboard bar button</string>
+    <string name="status_bar_slot_remove">Remove keyboard bar button</string>
     <string name="status_bar_button_none">None</string>
     <string name="status_bar_button_none_description">Empty</string>
     <string name="status_bar_button_clipboard">Clipboard</string>
@@ -1633,19 +1633,19 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="status_bar_button_redo">Redo</string>
     <string name="status_bar_button_redo_description">Send Ctrl+Y</string>
     <string name="status_bar_variations_visible_title">Show variations</string>
-    <string name="status_bar_variations_visible_description">Show the configured variation row between the status bar buttons. When off, buttons use the full status bar; swipe cursor control still works.</string>
-    <string name="status_bar_swipe_cursor_info">Swipe across the status bar to move the cursor.</string>
+    <string name="status_bar_variations_visible_description">Show the configured variation row between the keyboard bar buttons. When off, buttons use the full keyboard bar; swipe cursor control still works.</string>
+    <string name="status_bar_swipe_cursor_info">Swipe across the keyboard bar to move the cursor.</string>
     <string name="dynamic_variation_slot_count_title">Dynamic variation slots</string>
-    <string name="dynamic_variation_slot_count_description">Aim to show %1$d dynamic entries between the status bar buttons.</string>
+    <string name="dynamic_variation_slot_count_description">Aim to show %1$d dynamic entries between the keyboard bar buttons.</string>
     <string name="dynamic_variation_resize_to_content_title">Resize dynamic variations</string>
     <string name="dynamic_variation_resize_to_content_description">When enabled, dynamic entries fill the available row based on how many are shown. When off, entries keep the slot size from the slider and stay left-aligned.</string>
     <string name="modifier_indicators_title">Modifier indicators</string>
     <string name="modifier_indicators_description">Choose where Shift, Ctrl, Alt, and SYM state appears for the hardware keyboard.</string>
     <string name="modifier_indicators_bottom_strip">Bottom Strip LEDs</string>
     <string name="modifier_indicators_bottom_strip_description">Colored modifier LEDs in the strip below Pastiera.</string>
-    <string name="modifier_indicators_menu_bar">Menubar</string>
+    <string name="modifier_indicators_menu_bar">Android status bar</string>
     <string name="modifier_indicators_menu_bar_description">One compact icon in Android\'s top statusbar.</string>
-    <string name="modifier_indicators_status_bar">Statusbar</string>
+    <string name="modifier_indicators_status_bar">Beside suggestions</string>
     <string name="modifier_indicators_status_bar_description">Compact symbols at the left edge of the Pastiera statusbar.</string>
     <string name="modifier_indicators_off_state">All modifier indicators are off.</string>
     <string name="status_bar_state_on">On</string>
@@ -1753,4 +1753,8 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="titan2_elite_top_corner_description">Round only the upper corner facing the display edge. Corners facing inward and inner buttons stay unchanged.</string>
     <string name="titan2_elite_max_icon_shrink_title">Maximum icon reduction: %1$d%%</string>
     <string name="titan2_elite_max_icon_shrink_description">Automatically shrink outer button icons only as much as needed, up to this limit. 0% disables shrinking; positioning stays active.</string>
+    <string name="keyboard_bar_suggestions">Suggestions</string>
+    <string name="keyboard_bar_actions">Variations and menu</string>
+    <string name="keyboard_bar_indicator_settings">Configure all indicator locations in the keyboard bar settings.</string>
+    <string name="keyboard_bar_pastierina_description">Pastierina hides variations and menu controls. Suggestions and indicators follow the checkboxes above.</string>
 </resources>

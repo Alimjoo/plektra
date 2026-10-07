@@ -524,7 +524,8 @@ object SettingLinkRegistry {
         entry(
             SettingLinkIds.AUTO_CORRECTION_SUGGESTIONS,
             R.string.auto_correct_suggestions_toggle_title,
-            destination = SettingsDestination.AutoCorrection
+            destination = SettingsDestination.Customization,
+            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
         ),
         entry(
             SettingLinkIds.AUTO_CORRECTION_ACCENT_MATCHING,
@@ -709,7 +710,8 @@ object SettingLinkRegistry {
             SettingLinkIds.MODIFIERS_INDICATORS,
             R.string.modifier_indicators_title,
             R.string.modifier_indicators_description,
-            destination = SettingsDestination.Modifiers
+            destination = SettingsDestination.Customization,
+            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
         ),
         entry(
             SettingLinkIds.MODIFIERS_SYM_LAYERS,
@@ -826,9 +828,7 @@ object SettingLinkRegistry {
             SettingLinkIds.KEYBOARD_THEME_TOGGLE_SHOW_LEDS,
             R.string.keyboard_theme_show_leds,
             destination = SettingsDestination.Customization,
-            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_KEYBOARD_THEME,
-            keyboardThemeTarget = SettingsManager.KeyboardThemeTarget.SOFTWARE,
-            keyboardThemeTab = KeyboardThemeEditorTab.Keys
+            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
         ),
         entry(
             SettingLinkIds.KEYBOARD_THEME_TOGGLE_DISTRIBUTE_SPACING,
@@ -892,20 +892,23 @@ object SettingLinkRegistry {
             SettingLinkIds.MODIFIERS_INDICATOR_BOTTOM_STRIP,
             R.string.modifier_indicators_bottom_strip,
             R.string.modifier_indicators_bottom_strip_description,
-            destination = SettingsDestination.Modifiers
+            destination = SettingsDestination.Customization,
+            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
         ),
         entry(
             SettingLinkIds.MODIFIERS_INDICATOR_MENU_BAR,
             R.string.modifier_indicators_menu_bar,
             R.string.modifier_indicators_menu_bar_description,
-            destination = SettingsDestination.Modifiers
+            destination = SettingsDestination.Customization,
+            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
         ),
         entry(
             SettingLinkIds.MODIFIERS_INDICATOR_STATUS_BAR,
             R.string.modifier_indicators_status_bar,
             R.string.modifier_indicators_status_bar_description,
-            destination = SettingsDestination.Modifiers
-        )
+            destination = SettingsDestination.Customization,
+            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
+        ),
     ) + customizationSettingEntries() + inputDeviceSettingEntries() + systemSettingEntries()
 
     private val entriesById: Map<String, SettingEntry> =
@@ -964,7 +967,12 @@ object SettingLinkRegistry {
         SettingLinkIds.MODIFIERS_INDICATOR_STATUS_BAR to R.string.kw_indicator_status_bar
     )
 
-    fun byId(id: String): SettingEntry? = entriesById[id]
+    fun byId(id: String): SettingEntry? = entriesById[
+        when (id) {
+            "status_bar.pastierina_left", "status_bar.pastierina_right" -> "status_bar.presentation"
+            else -> id
+        }
+    ]
 
     /**
      * Returns an addressable row that is actually present for the current settings.

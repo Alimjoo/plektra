@@ -72,10 +72,27 @@ class KeyboardVisibilityController(
         SoftwareKeyboardAutoDetector.updateSystemInputViewDecision(shouldShowInputView)
         // The stable backend deliberately uses an input view even for the compact hardware row.
         // Keep evaluation pure: a show from here re-enters Android's unfinished show operation.
-        return !usesCandidatesView()
+        return !usesCandidatesView() && hasConfiguredContent()
     }
 
-    private fun canShow() = isInputViewActive() && currentInputConnection() != null && !isNavModeLatched()
+    private fun hasConfiguredContent(): Boolean = it.palsoftware.pastiera.KeyboardBarConfiguration.read(context)
+            .presentation(candidatesBarController.isPastierinaModeActive()).hasPersistentContent ||
+            SettingsManager.resolveEffectiveSoftwareKeyboardMode(context) == SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL ||
+            symLayoutController.currentSymPage() > 0 || candidatesBarController.hasTransientContent()
+
+    private fun canShow(): Boolean = hasConfiguredContent() && isInputViewActive() &&
+        currentInputConnection() != null && !isNavModeLatched()
+
+    fun onKeyboardBarConfigurationChanged() {
+        if (hasConfiguredContent()) {
+            ensureImeSurfaceVisible()
+        } else {
+            cancelPendingSurfaceTransition()
+            setCandidatesViewShown(false)
+            hideInputWindow()
+            requestHideInputView()
+        }
+    }
 
     fun ensureImeSurfaceVisible() {
         if (!canShow() || waitingForBackendHide) return

@@ -255,7 +255,7 @@ private fun createVirtualKeyboardThemePreviewView(
         themeOverride = colors
     }
     root.addView(keyboardContainer)
-    if (theme.showLeds) {
+    if (SettingsManager.getModifierIndicatorShowsBottomStrip(context)) {
         root.addView(leds.ensureView())
         leds.update(virtualPreviewLedSnapshot())
     }
@@ -336,7 +336,7 @@ private fun updateVirtualKeyboardThemePreviewView(view: android.view.View, theme
     (root.getTag(R.id.keyboard_theme_preview_led_view) as? LedStatusView)?.apply {
         themeOverride = colors
         val ledView = ensureView()
-        if (theme.showLeds) {
+        if (SettingsManager.getModifierIndicatorShowsBottomStrip(ledView.context)) {
             if (ledView.parent !== root) {
                 root.addView(ledView)
             }
@@ -924,7 +924,7 @@ private fun virtualKeyboardPreviewHeightPx(
     return dpToPx(context, suggestionsPreviewHeightDp(theme)) +
         dpToPx(context, variationsPreviewHeightDp(theme)) +
         virtualKeyboardSurfaceHeightPx(context, theme) +
-        if (theme.showLeds) dpToPx(context, SOFTWARE_PREVIEW_LED_HEIGHT_DP) else 0
+        if (SettingsManager.getModifierIndicatorShowsBottomStrip(context)) dpToPx(context, SOFTWARE_PREVIEW_LED_HEIGHT_DP) else 0
 }
 
 private fun virtualKeyboardSurfaceHeightPx(

@@ -9,7 +9,7 @@ import android.graphics.PointF
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.view.View
-import it.palsoftware.pastiera.inputmethod.StatusBarController
+import it.palsoftware.pastiera.inputmethod.ImeChromeLayout
 import kotlin.math.PI
 
 /** Draws the button and its border inside the display contour without shrinking its touch target. */
@@ -59,8 +59,8 @@ internal class CurvedCornerButtonDrawable(
                 bottomRadius, bottomRadius, bottomRadius, bottomRadius), Path.Direction.CW
         )
         var ancestor = view.parent
-        while (ancestor != null && ancestor !is StatusBarController.ImeChromeLayout) ancestor = ancestor.parent
-        val chrome = ancestor as? StatusBarController.ImeChromeLayout
+        while (ancestor != null && ancestor !is ImeChromeLayout) ancestor = ancestor.parent
+        val chrome = ancestor as? ImeChromeLayout
         val radii = chrome?.bottomCornerRadiiPx
         if (chrome != null && radii != null) {
             view.getLocationInWindow(location)
@@ -98,7 +98,8 @@ internal class CurvedCornerButtonDrawable(
             val tangentY = 0.1f / tangentLength
             val available = if (leftEdge) rect.right - outerX else outerX - rect.left
             val startX = (boundary(rect.top) + topRadius).coerceAtMost(available - bottomRadius)
-            val handle = (joinY - rect.top) * 0.55f
+            val handle = minOf((joinY - rect.top) * 0.55228475f,
+                (startX - joinX).coerceAtLeast(0f) + topRadius * 0.25f)
             fun screenX(localX: Float) = outerX + if (leftEdge) localX else -localX
             val blend = Path().apply {
                 moveTo(screenX(startX), rect.top)
@@ -128,8 +129,8 @@ internal class CurvedCornerButtonDrawable(
         val topRadius = (cornerRadius * multiplier)
             .coerceAtMost(minOf(rect.width() - bottomRadius, rect.height() - bottomRadius))
         var ancestor = view.parent
-        while (ancestor != null && ancestor !is StatusBarController.ImeChromeLayout) ancestor = ancestor.parent
-        val chrome = ancestor as? StatusBarController.ImeChromeLayout ?: return null
+        while (ancestor != null && ancestor !is ImeChromeLayout) ancestor = ancestor.parent
+        val chrome = ancestor as? ImeChromeLayout ?: return null
         val radii = chrome.bottomCornerRadiiPx ?: return null
         view.getLocationInWindow(location)
         chrome.getLocationInWindow(chromeLocation)
@@ -156,7 +157,8 @@ internal class CurvedCornerButtonDrawable(
         val tangentY = 0.1f / tangentLength
         val available = if (leftEdge) rect.right - outerX else outerX - rect.left
         val startX = (boundary(rect.top) + topRadius).coerceAtMost(available - bottomRadius)
-        val handle = (joinY - rect.top) * 0.55f
+        val handle = minOf((joinY - rect.top) * 0.55228475f,
+            (startX - joinX).coerceAtLeast(0f) + topRadius * 0.25f)
         fun screenX(localX: Float) = outerX + if (leftEdge) localX else -localX
         val p0 = PointF(screenX(startX), rect.top)
         val p1 = PointF(screenX(startX - handle), rect.top)

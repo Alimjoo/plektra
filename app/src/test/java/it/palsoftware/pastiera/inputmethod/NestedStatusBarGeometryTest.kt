@@ -21,7 +21,7 @@ class NestedStatusBarGeometryTest {
     @Test
     fun statusRowNestsInsideIndicatorsAndRestoresWhenDisabledOrExpanded() {
         val context = RuntimeEnvironment.getApplication()
-        val chrome = StatusBarController.ImeChromeLayout(context).apply {
+        val chrome = ImeChromeLayout(context).apply {
             orientation = LinearLayout.VERTICAL
         }
         val row = FrameLayout(context)
@@ -87,7 +87,7 @@ class NestedStatusBarGeometryTest {
     @Test
     fun expandedKeyboardOverlaysCornerLightsInsteadOfReservingCornerHeight() {
         val context = RuntimeEnvironment.getApplication()
-        val chrome = StatusBarController.ImeChromeLayout(context).apply { orientation = LinearLayout.VERTICAL }
+        val chrome = ImeChromeLayout(context).apply { orientation = LinearLayout.VERTICAL }
         val surface = FrameLayout(context)
         val stack = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
         val content = FrameLayout(context)
@@ -114,7 +114,7 @@ class NestedStatusBarGeometryTest {
     @Test
     fun contourIntegratedIndicatorsLetTheRegularRowUseTheFullCenterHeight() {
         val context = RuntimeEnvironment.getApplication()
-        val chrome = StatusBarController.ImeChromeLayout(context).apply {
+        val chrome = ImeChromeLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             bottomCornerRadiiPx = 100 to 100
             contourIntegratedIndicators = true
@@ -141,7 +141,7 @@ class NestedStatusBarGeometryTest {
     @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun statusRowSideFillRemainsOutsideContourWhenLowerCornerFillIsDisabled() {
         val context = RuntimeEnvironment.getApplication()
-        val chrome = StatusBarController.ImeChromeLayout(context).apply {
+        val chrome = ImeChromeLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             bottomCornerRadiiPx = 100 to 100
             fillDisplayCorners = false

@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,6 +31,20 @@ import it.palsoftware.pastiera.R
 
 private enum class StatusBarEditorMode { Extended, Pastierina }
 
+@Composable
+private fun KeyboardBarCheckRow(label: String, checked: Boolean, linkId: String, onChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().settingRow(linkId)
+            .toggleable(value = checked, role = Role.Checkbox, onValueChange = onChange)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface)
+        Checkbox(checked = checked, onCheckedChange = null)
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatusBarButtonsScreen(
@@ -40,12 +56,8 @@ fun StatusBarButtonsScreen(
     val context = LocalContext.current
     var leftSlots by remember { mutableStateOf(SettingsManager.getStatusBarSlotsLeft(context)) }
     var rightSlots by remember { mutableStateOf(SettingsManager.getStatusBarSlotsRight(context)) }
-    var pastierinaLeftSlots by remember {
-        mutableStateOf(SettingsManager.getPastierinaStatusBarSlotsLeft(context))
-    }
-    var pastierinaRightSlots by remember {
-        mutableStateOf(SettingsManager.getPastierinaStatusBarSlotsRight(context))
-    }
+    var suggestionsEnabled by remember { mutableStateOf(SettingsManager.getSuggestionsEnabled(context)) }
+    var indicators by remember { mutableStateOf(SettingsManager.getModifierIndicators(context)) }
     var variationsVisible by remember {
         mutableStateOf(SettingsManager.areStatusBarVariationsEnabled(context))
     }
@@ -100,27 +112,6 @@ fun StatusBarButtonsScreen(
         SettingsManager.setStatusBarSlotsRight(context, rightSlots)
     }
 
-    fun selectPastierinaButton(buttonId: String, targetSide: String, targetIndex: Int) {
-        if (buttonId != SettingsManager.STATUS_BAR_BUTTON_NONE) {
-            pastierinaLeftSlots = pastierinaLeftSlots.mapIndexed { index, current ->
-                if (current == buttonId && !(targetSide == "left" && targetIndex == index)) {
-                    SettingsManager.STATUS_BAR_BUTTON_NONE
-                } else current
-            }
-            pastierinaRightSlots = pastierinaRightSlots.mapIndexed { index, current ->
-                if (current == buttonId && !(targetSide == "right" && targetIndex == index)) {
-                    SettingsManager.STATUS_BAR_BUTTON_NONE
-                } else current
-            }
-        }
-        if (targetSide == "left") {
-            pastierinaLeftSlots = pastierinaLeftSlots.toMutableList().also { it[targetIndex] = buttonId }
-        } else {
-            pastierinaRightSlots = pastierinaRightSlots.toMutableList().also { it[targetIndex] = buttonId }
-        }
-        SettingsManager.setPastierinaStatusBarSlotsLeft(context, pastierinaLeftSlots)
-        SettingsManager.setPastierinaStatusBarSlotsRight(context, pastierinaRightSlots)
-    }
 
     Column(
         modifier = modifier
@@ -159,8 +150,6 @@ fun StatusBarButtonsScreen(
                         leftSlots = listOf(defaults.left)
                         rightSlots = listOf(defaults.right1, defaults.right2)
                         SettingsManager.resetPastierinaStatusBarSlotsToDefault(context)
-                        pastierinaLeftSlots = SettingsManager.getPastierinaStatusBarSlotsLeft(context)
-                        pastierinaRightSlots = SettingsManager.getPastierinaStatusBarSlotsRight(context)
                         variationsVisible = SettingsManager.areStatusBarVariationsEnabled(context)
                         dynamicVariationSlotCount = SettingsManager.getDynamicVariationBarSlotCount(context)
                         dynamicVariationsResizeToContent = SettingsManager.getDynamicVariationBarResizeToContent(context)
@@ -184,41 +173,25 @@ fun StatusBarButtonsScreen(
             )
         }
 
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .settingRow(SettingLinkIds.MODIFIERS_INDICATORS, onOpenModifiers)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.modifier_keys_24),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.modifier_indicators_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        text = stringResource(R.string.modifier_indicators_description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        KeyboardBarCheckRow(stringResource(R.string.keyboard_bar_suggestions), suggestionsEnabled,
+            SettingLinkIds.AUTO_CORRECTION_SUGGESTIONS) {
+            suggestionsEnabled = it
+            SettingsManager.setSuggestionsEnabled(context, it)
+        }
+        KeyboardBarCheckRow(stringResource(R.string.keyboard_bar_actions), variationsVisible,
+            "status_bar.variations_visible") {
+            variationsVisible = it
+            SettingsManager.setStatusBarVariationsEnabled(context, it)
+        }
+        SettingsSectionDivider(stringResource(R.string.modifiers_section_indicators))
+        listOf(
+            SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP to R.string.modifier_indicators_bottom_strip,
+            SettingsManager.MODIFIER_INDICATOR_MENU_BAR to R.string.modifier_indicators_menu_bar,
+            SettingsManager.MODIFIER_INDICATOR_STATUS_BAR to R.string.modifier_indicators_status_bar
+        ).forEach { (id, label) ->
+            KeyboardBarCheckRow(stringResource(label), id in indicators, "modifiers.indicator_$id") { enabled ->
+                indicators = if (enabled) indicators + id else indicators - id
+                SettingsManager.setModifierIndicators(context, indicators)
             }
         }
 
@@ -259,8 +232,8 @@ fun StatusBarButtonsScreen(
         }
 
         StatusBarLayoutPreview(
-            leftSlots = if (editorMode == StatusBarEditorMode.Extended) leftSlots else pastierinaLeftSlots,
-            rightSlots = if (editorMode == StatusBarEditorMode.Extended) rightSlots else pastierinaRightSlots,
+            leftSlots = if (editorMode == StatusBarEditorMode.Extended && variationsVisible) leftSlots else emptyList(),
+            rightSlots = if (editorMode == StatusBarEditorMode.Extended && variationsVisible) rightSlots else emptyList(),
             centerText = if (editorMode == StatusBarEditorMode.Extended && variationsVisible) {
                 "· · ·"
             } else if (editorMode == StatusBarEditorMode.Pastierina) {
@@ -355,53 +328,7 @@ fun StatusBarButtonsScreen(
 
         if (editorMode == StatusBarEditorMode.Extended) {
             SettingsSectionDivider(stringResource(R.string.extended_status_bar_features_section))
-            Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.variations_visible")) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.status_bar_variations_visible_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = stringResource(R.string.status_bar_variations_visible_description),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = variationsVisible,
-                        onCheckedChange = { visible ->
-                            variationsVisible = visible
-                            SettingsManager.setStatusBarVariationsEnabled(context, visible)
-                        }
-                    )
-                }
-            }
 
-            Surface(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.status_bar_swipe_cursor_info),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
 
             if (variationsVisible) {
                 Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.variation_slots")) {
@@ -529,43 +456,10 @@ fun StatusBarButtonsScreen(
                 }
             )
         } else {
-            SettingsSectionDivider(stringResource(R.string.pastierina_status_bar_buttons_title))
             Text(
-                text = stringResource(R.string.pastierina_status_bar_buttons_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-            SettingsSectionDivider(stringResource(R.string.status_bar_buttons_section))
-            SlotGroup(
-                title = stringResource(R.string.status_bar_slots_left),
-                linkId = "status_bar.pastierina_left",
-                slots = pastierinaLeftSlots,
-                slotPrefix = "L",
-                onSlotSelected = { index, buttonId -> selectPastierinaButton(buttonId, "left", index) },
-                onAddSlot = {
-                    pastierinaLeftSlots = pastierinaLeftSlots + SettingsManager.STATUS_BAR_BUTTON_NONE
-                    SettingsManager.setPastierinaStatusBarSlotsLeft(context, pastierinaLeftSlots)
-                },
-                onRemoveSlot = { index ->
-                    pastierinaLeftSlots = pastierinaLeftSlots.toMutableList().also { it.removeAt(index) }
-                    SettingsManager.setPastierinaStatusBarSlotsLeft(context, pastierinaLeftSlots)
-                }
-            )
-            SlotGroup(
-                title = stringResource(R.string.status_bar_slots_right),
-                linkId = "status_bar.pastierina_right",
-                slots = pastierinaRightSlots,
-                slotPrefix = "R",
-                onSlotSelected = { index, buttonId -> selectPastierinaButton(buttonId, "right", index) },
-                onAddSlot = {
-                    pastierinaRightSlots = pastierinaRightSlots + SettingsManager.STATUS_BAR_BUTTON_NONE
-                    SettingsManager.setPastierinaStatusBarSlotsRight(context, pastierinaRightSlots)
-                },
-                onRemoveSlot = { index ->
-                    pastierinaRightSlots = pastierinaRightSlots.toMutableList().also { it.removeAt(index) }
-                    SettingsManager.setPastierinaStatusBarSlotsRight(context, pastierinaRightSlots)
-                }
+                text = stringResource(R.string.keyboard_bar_pastierina_description),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                style = MaterialTheme.typography.bodyMedium
             )
         }
 
@@ -682,121 +576,7 @@ private fun SlotGroup(
     }
 }
 
-@Composable
-fun ModifierIndicatorMultiSelect(
-    modifier: Modifier = Modifier,
-    selectedIndicators: Set<String>,
-    onIndicatorsSelected: (Set<String>) -> Unit
-) {
-    val options = listOf(
-        SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP,
-        SettingsManager.MODIFIER_INDICATOR_MENU_BAR,
-        SettingsManager.MODIFIER_INDICATOR_STATUS_BAR
-    )
-    Column(modifier = modifier) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            options.forEach { indicator ->
-                val selected = indicator in selectedIndicators
-                val linkId = when (indicator) {
-                    SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP ->
-                        SettingLinkIds.MODIFIERS_INDICATOR_BOTTOM_STRIP
-                    SettingsManager.MODIFIER_INDICATOR_MENU_BAR ->
-                        SettingLinkIds.MODIFIERS_INDICATOR_MENU_BAR
-                    SettingsManager.MODIFIER_INDICATOR_STATUS_BAR ->
-                        SettingLinkIds.MODIFIERS_INDICATOR_STATUS_BAR
-                    else -> null
-                }
-                Surface(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(42.dp)
-                        .settingRow(linkId) {
-                            onIndicatorsSelected(
-                                if (selected) selectedIndicators - indicator else selectedIndicators + indicator
-                            )
-                        },
-                    color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
-                    },
-                    contentColor = if (selected) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    shape = MaterialTheme.shapes.small,
-                    border = BorderStroke(
-                        1.dp,
-                        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = getModifierIndicatorLabel(indicator),
-                            style = if (
-                                indicator == SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP ||
-                                indicator == SettingsManager.MODIFIER_INDICATOR_STATUS_BAR
-                            ) {
-                                MaterialTheme.typography.labelSmall
-                            } else {
-                                MaterialTheme.typography.labelMedium
-                            },
-                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                            maxLines = 1
-                        )
-                        if (
-                            indicator == SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP ||
-                            indicator == SettingsManager.MODIFIER_INDICATOR_STATUS_BAR
-                        ) {
-                            Text(
-                                text = "WIP",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        if (selectedIndicators.isEmpty()) {
-            Text(
-                text = stringResource(R.string.modifier_indicators_off_state),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
-            )
-        }
-    }
-}
 
-@Composable
-private fun getModifierIndicatorLabel(indicator: String): String {
-    return when (indicator) {
-        SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP -> stringResource(R.string.modifier_indicators_bottom_strip)
-        SettingsManager.MODIFIER_INDICATOR_MENU_BAR -> stringResource(R.string.modifier_indicators_menu_bar)
-        SettingsManager.MODIFIER_INDICATOR_STATUS_BAR -> stringResource(R.string.modifier_indicators_status_bar)
-        else -> indicator
-    }
-}
-
-@Composable
-private fun getModifierIndicatorDescription(indicator: String): String {
-    return when (indicator) {
-        SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP -> stringResource(R.string.modifier_indicators_bottom_strip_description)
-        SettingsManager.MODIFIER_INDICATOR_MENU_BAR -> stringResource(R.string.modifier_indicators_menu_bar_description)
-        SettingsManager.MODIFIER_INDICATOR_STATUS_BAR -> stringResource(R.string.modifier_indicators_status_bar_description)
-        else -> ""
-    }
-}
 
 @Composable
 private fun SlotPreview(

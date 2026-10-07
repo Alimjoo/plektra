@@ -471,26 +471,6 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         unavailableFallbackId = "status_bar.presentation"
     ),
     SettingEntry(
-        id = "status_bar.pastierina_left",
-        titleRes = R.string.setting_link_status_pastierina_left,
-        route = SettingRoute(
-            destination = SettingsDestination.Customization,
-            customizationDestination = "status_bar_buttons"
-        ),
-        availabilityCheck = { !(SettingsManager.getStatusBarPresentationMode(it) != SettingsManager.StatusBarPresentationMode.PASTIERINA) },
-        unavailableFallbackId = "status_bar.presentation"
-    ),
-    SettingEntry(
-        id = "status_bar.pastierina_right",
-        titleRes = R.string.setting_link_status_pastierina_right,
-        route = SettingRoute(
-            destination = SettingsDestination.Customization,
-            customizationDestination = "status_bar_buttons"
-        ),
-        availabilityCheck = { !(SettingsManager.getStatusBarPresentationMode(it) != SettingsManager.StatusBarPresentationMode.PASTIERINA) },
-        unavailableFallbackId = "status_bar.presentation"
-    ),
-    SettingEntry(
         id = "keyboard_theme.software.key_rounding",
         titleRes = R.string.setting_link_theme_software_key_rounding,
         route = SettingRoute(

@@ -288,10 +288,10 @@ class StatusBarButtonHost(
         if (view is ImageView && (icon == null || icon.intrinsicWidth <= 0 || icon.intrinsicHeight <= 0)) return false
         val contour = view.background as? CurvedCornerButtonDrawable ?: return false
         var ancestor = view.parent
-        while (ancestor != null && ancestor !is it.palsoftware.pastiera.inputmethod.StatusBarController.ImeChromeLayout) {
+        while (ancestor != null && ancestor !is it.palsoftware.pastiera.inputmethod.ImeChromeLayout) {
             ancestor = ancestor.parent
         }
-        val chrome = ancestor as? it.palsoftware.pastiera.inputmethod.StatusBarController.ImeChromeLayout ?: return false
+        val chrome = ancestor as? it.palsoftware.pastiera.inputmethod.ImeChromeLayout ?: return false
         val radii = chrome.bottomCornerRadiiPx ?: return false
         val location = IntArray(2)
         val chromeLocation = IntArray(2)

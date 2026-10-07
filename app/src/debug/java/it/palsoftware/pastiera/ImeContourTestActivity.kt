@@ -62,6 +62,23 @@ class ImeContourTestActivity : Activity() {
                 marginEnd = dp(24)
             }
         )
+        val bottomProbe = TextView(this).apply {
+            text = "App touch test"
+            setTextColor(Color.WHITE)
+            setBackgroundColor(Color.rgb(100, 20, 40))
+            gravity = Gravity.CENTER
+            setOnClickListener {
+                text = "Touch reached app"
+                setBackgroundColor(Color.rgb(20, 110, 60))
+            }
+        }
+        root.addView(bottomProbe, FrameLayout.LayoutParams(dp(240), dp(32)).apply {
+            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            bottomMargin = dp(12)
+        })
+        root.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, _ ->
+            if (bottomProbe.text != "Touch reached app") bottomProbe.text = "App height: $bottom — tap"
+        }
         setContentView(root)
         input.requestFocus()
         input.post {

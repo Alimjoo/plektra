@@ -62,7 +62,7 @@ fun ModifierSettingsScreen(
     var altLatchStaysOnSpace by remember { mutableStateOf(SettingsManager.getAltLatchStaysOnSpace(context)) }
     var ctrlTapLatches by remember { mutableStateOf(SettingsManager.getCtrlTapLatches(context)) }
     var ctrlLatchStaysOnSpace by remember { mutableStateOf(SettingsManager.getCtrlLatchStaysOnSpace(context)) }
-    var modifierIndicators by remember { mutableStateOf(SettingsManager.getModifierIndicators(context)) }
+
     var showSymShortcutCompatibilityInfo by remember { mutableStateOf(false) }
     var longPressExpanded by remember { mutableStateOf(false) }
     var altBindingExpanded by remember { mutableStateOf(false) }
@@ -141,31 +141,19 @@ fun ModifierSettingsScreen(
                 }
             )
 
-            SettingsSectionDivider(stringResource(R.string.modifiers_section_indicators))
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .settingRow(SettingLinkIds.MODIFIERS_INDICATORS)
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.modifier_indicators_description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    ModifierIndicatorMultiSelect(
-                        modifier = Modifier.fillMaxWidth(),
-                        selectedIndicators = modifierIndicators,
-                        onIndicatorsSelected = { indicators ->
-                            modifierIndicators = indicators
-                            SettingsManager.setModifierIndicators(context, indicators)
-                        }
-                    )
+            ModifierNavigationRow(
+                iconRes = R.drawable.modifier_keys_24,
+                title = stringResource(R.string.status_bar_buttons_title),
+                description = stringResource(R.string.keyboard_bar_indicator_settings),
+                linkId = SettingLinkIds.MODIFIERS_INDICATORS,
+                onClick = {
+                    context.startActivity(android.content.Intent(context, SettingsActivity::class.java).apply {
+                        putExtra(SettingsActivity.EXTRA_DESTINATION, SettingsActivity.DESTINATION_CUSTOMIZATION)
+                        putExtra(SettingsActivity.EXTRA_CUSTOMIZATION_DESTINATION,
+                            SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS)
+                    })
                 }
-            }
+            )
 
             SettingsSectionDivider(stringResource(R.string.modifiers_section_sym))
             ModifierNavigationRow(

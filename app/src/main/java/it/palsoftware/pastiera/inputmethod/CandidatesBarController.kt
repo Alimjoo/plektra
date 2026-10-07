@@ -268,6 +268,9 @@ class CandidatesBarController(
             .firstOrNull { it.isActuallyRendered() } ?: return null
         val bounds = Rect()
         if (!view.getLocalVisibleRect(bounds)) return null
+        (view as? ImeChromeLayout)?.ledOnlyReservedHeightPx?.let { stripHeight ->
+            bounds.top = maxOf(bounds.top, bounds.bottom - stripHeight)
+        }
         val location = IntArray(2)
         view.getLocationInWindow(location)
         bounds.offset(location[0], location[1])
@@ -278,6 +281,9 @@ class CandidatesBarController(
         inputStatusBar.setPastierinaModeActive(active)
         candidatesStatusBar.setPastierinaModeActive(active)
     }
+
+    fun hasTransientContent(): Boolean = inputStatusBar.hasTransientContent ||
+        (candidatesSurfaceActive && candidatesStatusBar.hasTransientContent)
 
     fun handleBackPressed(): Boolean {
         return inputStatusBar.handleBackPressed() || candidatesStatusBar.handleBackPressed()

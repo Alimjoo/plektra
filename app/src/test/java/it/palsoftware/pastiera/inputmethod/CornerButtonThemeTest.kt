@@ -37,7 +37,7 @@ class CornerButtonThemeTest {
     fun outerIconMovesWithoutLedSurfaceAndRemainsStableAcrossRedrawAndDisable() {
         val activity = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup().get()
         SettingsManager.setTitan2EliteRoundedCornerInsetsEnabled(activity, true)
-        val chrome = StatusBarController.ImeChromeLayout(activity).apply {
+        val chrome = ImeChromeLayout(activity).apply {
             orientation = android.widget.LinearLayout.HORIZONTAL
             bottomCornerRadiiPx = 100 to 100
         }
@@ -103,7 +103,7 @@ class CornerButtonThemeTest {
         val activity = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup().get()
         SettingsManager.setTitan2EliteRoundedCornerInsetsEnabled(activity, true)
         SettingsManager.setTitan2EliteTopCornerMultiplier(activity, 2)
-        val chrome = StatusBarController.ImeChromeLayout(activity).apply { bottomCornerRadiiPx = 100 to 100 }
+        val chrome = ImeChromeLayout(activity).apply { bottomCornerRadiiPx = 100 to 100 }
         activity.setContentView(chrome)
         val button = android.widget.ImageView(activity)
         chrome.addView(button, android.widget.LinearLayout.LayoutParams(94, 80))
@@ -139,16 +139,24 @@ class CornerButtonThemeTest {
         val beforePadding = pixels()
         chrome.setPadding(0, 0, 0, 20)
         org.junit.Assert.assertArrayEquals(beforePadding, pixels())
-        SettingsManager.setTitan2EliteTopCornerMultiplier(activity, 6)
-        val strongerCorners = pixels()
-        org.junit.Assert.assertFalse(beforePadding.contentEquals(strongerCorners))
-        // The upper corner facing the middle must retain exactly its theme shape.
-        for (y in 0 until 12) for (x in 82 until 94) {
-            val before = beforePadding[y * 94 + x]
-            val after = strongerCorners[y * 94 + x]
-            // Compare coverage: unpremultiplying low-alpha edge pixels amplifies RGB rounding.
-            org.junit.Assert.assertTrue("Inner corner changed at $x,$y",
-                kotlin.math.abs(Color.alpha(before) - Color.alpha(after)) <= 1)
+        for (multiplier in listOf(1, 4, 6)) {
+            SettingsManager.setTitan2EliteTopCornerMultiplier(activity, multiplier)
+            val strongerCorners = pixels()
+            org.junit.Assert.assertFalse(beforePadding.contentEquals(strongerCorners))
+            // Outer rounding must not change the corner facing the middle.
+            for (y in 0 until 12) for (x in 82 until 94) {
+                val before = beforePadding[y * 94 + x]
+                val after = strongerCorners[y * 94 + x]
+                org.junit.Assert.assertTrue("Inner corner changed at $x,$y ($multiplier)",
+                    kotlin.math.abs(Color.alpha(before) - Color.alpha(after)) <= 1)
+            }
+            for (y in 0 until 80) {
+                val filled = (0 until 94).filter { Color.alpha(strongerCorners[y * 94 + it]) > 0 }
+                if (filled.isNotEmpty()) {
+                    assertEquals("No holes in the rounded edge ($multiplier, row $y)",
+                        filled.last() - filled.first() + 1, filled.size)
+                }
+            }
         }
         SettingsManager.setTitan2EliteTopCornerMultiplier(activity, 2)
         org.junit.Assert.assertArrayEquals(beforePadding, pixels())
@@ -158,7 +166,7 @@ class CornerButtonThemeTest {
     fun languagePaddingAndSizeStayStableAndRestoreWhenMovedInward() {
         val activity = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup().get()
         SettingsManager.setTitan2EliteRoundedCornerInsetsEnabled(activity, true)
-        val chrome = StatusBarController.ImeChromeLayout(activity).apply {
+        val chrome = ImeChromeLayout(activity).apply {
             orientation = android.widget.LinearLayout.HORIZONTAL
             bottomCornerRadiiPx = 100 to 100
         }

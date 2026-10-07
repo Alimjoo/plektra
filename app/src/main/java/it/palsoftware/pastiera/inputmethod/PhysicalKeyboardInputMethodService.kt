@@ -440,8 +440,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         }
 
         val iconResId = if (
-            SettingsManager.getModifierIndicatorShowsMenuBar(this) &&
-            effectiveSoftwareKeyboardMode != SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL
+            SettingsManager.getModifierIndicatorShowsMenuBar(this)
         ) {
             systemStatusModifierIconResId(snapshot)
         } else {
@@ -2314,9 +2313,12 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                 Handler(Looper.getMainLooper()).post {
                     updateStatusBarText()
                 }
-            } else if (SettingsManager.isModifierIndicatorPreferenceKey(key)) {
+            } else if (SettingsManager.isModifierIndicatorPreferenceKey(key) ||
+                key == "suggestions_enabled" || key == "status_bar_variations_visible") {
                 Handler(Looper.getMainLooper()).post {
+                    invalidateRenderedStatusSnapshot()
                     updateStatusBarText()
+                    keyboardVisibilityController.onKeyboardBarConfigurationChanged()
                 }
             } else if (
                 key == SettingsManager.KEY_TYPING_SOUND_MODE ||
@@ -3032,7 +3034,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         val pastierinaModeActive = candidatesBarController.isPastierinaModeActive()
         val effectiveSoftwareKeyboardMode = SettingsManager.resolveEffectiveSoftwareKeyboardMode(this)
         val variationStart = ImePerfLogger.mark()
-        val variationSnapshot = if (pastierinaModeActive) {
+        val variationSnapshot = if (!it.palsoftware.pastiera.KeyboardBarConfiguration.read(this).presentation(pastierinaModeActive).actions) {
             VariationStateController.Snapshot(isActive = false, lastInsertedChar = null, variations = emptyList())
         } else {
             variationStateController.refreshFromCursor(

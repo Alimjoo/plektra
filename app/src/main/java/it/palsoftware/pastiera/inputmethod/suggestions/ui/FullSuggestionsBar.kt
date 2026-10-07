@@ -69,6 +69,8 @@ class FullSuggestionsBar(
     private var assets: AssetManager? = null
     private var imeServiceClass: Class<*>? = null
     private var showMinimalUiButtons: Boolean = false
+    private var contentEnabled = true
+    private var actionsEnabled = true
     private var showModifierMenuIndicators: Boolean = false
     private val buttonHost = buttonRegistry?.let { StatusBarButtonHost(context, it) }
     private val suggestionButtons: MutableList<TextView> = mutableListOf()
@@ -301,9 +303,20 @@ class FullSuggestionsBar(
 
     fun setMinimalUiActive(isActive: Boolean) {
         lastMinimalUiActive = isActive
-        showMinimalUiButtons = isActive
+        showMinimalUiButtons = actionsEnabled && contentEnabled
         renderMinimalUiButtons()
         hamburgerMenuView?.setMinimalUiActive(isActive)
+    }
+
+    fun setContentEnabled(suggestions: Boolean, actions: Boolean) {
+        contentEnabled = suggestions
+        actionsEnabled = actions
+        showMinimalUiButtons = suggestions && actions
+        renderMinimalUiButtons()
+        if (!suggestions) {
+            hamburgerMenuView?.hide()
+            frameContainer?.visibility = View.GONE
+        }
     }
 
     fun setModifierMenuIndicatorsEnabled(enabled: Boolean) {
@@ -370,7 +383,7 @@ class FullSuggestionsBar(
         // Hide suggestions when unavailable, but keep Pastierina buttons visible.
         val hasDictionary = !requireDictionaryForSuggestions || hasDictionaryForCurrentSubtype()
         val canShowSuggestions = shouldShow && hasDictionary
-        if (!canShowSuggestions && !showMinimalUiButtons) {
+        if (!contentEnabled || (!canShowSuggestions && !showMinimalUiButtons)) {
             cancelPendingSuggestionsAccessibilityEnable()
             suggestionButtons.clear()
             frame.visibility = View.GONE

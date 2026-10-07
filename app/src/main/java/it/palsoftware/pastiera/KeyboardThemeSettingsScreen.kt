@@ -2014,7 +2014,7 @@ private fun KeyboardThemeDraftKeysEditor(
         KeyboardThemeDraftSliderRow(DRAFT_ROW_SPACING, stringResource(R.string.keyboard_theme_row_spacing), theme.rowGapScale, 0f..2f, populatedFields, linkId = "keyboard_theme.software.row_spacing") { onFieldChanged(DRAFT_ROW_SPACING, theme.copy(rowGapScale = it)) }
         KeyboardThemeDraftSliderRow(DRAFT_SUGGESTIONS_HEIGHT, stringResource(R.string.keyboard_theme_suggestions_height), theme.suggestionsHeightScale, 0.65f..1.6f, populatedFields, linkId = "keyboard_theme.software.suggestions_height") { onFieldChanged(DRAFT_SUGGESTIONS_HEIGHT, theme.copy(suggestionsHeightScale = it)) }
         KeyboardThemeDraftSliderRow(DRAFT_VARIATIONS_HEIGHT, stringResource(R.string.keyboard_theme_variations_height), theme.variationsHeightScale, 0.65f..1.6f, populatedFields, linkId = "keyboard_theme.software.variations_height") { onFieldChanged(DRAFT_VARIATIONS_HEIGHT, theme.copy(variationsHeightScale = it)) }
-        KeyboardThemeDraftSwitchRow(DRAFT_SHOW_LEDS, stringResource(R.string.keyboard_theme_show_leds), theme.showLeds, populatedFields, linkId = SettingLinkIds.KEYBOARD_THEME_TOGGLE_SHOW_LEDS) { onFieldChanged(DRAFT_SHOW_LEDS, theme.copy(showLeds = it)) }
+
         KeyboardThemeDraftSwitchRow(DRAFT_DISTRIBUTE_SPACING, stringResource(R.string.keyboard_theme_distribute_spacing), theme.distributeHorizontalSpacing, populatedFields, linkId = SettingLinkIds.KEYBOARD_THEME_TOGGLE_DISTRIBUTE_SPACING) { onFieldChanged(DRAFT_DISTRIBUTE_SPACING, theme.copy(distributeHorizontalSpacing = it)) }
         KeyboardThemeDraftSwitchRow(DRAFT_ORTHOLINEAR, stringResource(R.string.keyboard_theme_ortholinear), theme.ortholinear, populatedFields, linkId = SettingLinkIds.KEYBOARD_THEME_TOGGLE_ORTHOLINEAR) { onFieldChanged(DRAFT_ORTHOLINEAR, theme.copy(ortholinear = it)) }
         KeyboardThemeDraftSwitchRow(DRAFT_ATTACH_POPUP, stringResource(R.string.keyboard_theme_attach_popup), theme.keyPopupAttached, populatedFields, linkId = SettingLinkIds.KEYBOARD_THEME_TOGGLE_ATTACH_POPUP) { onFieldChanged(DRAFT_ATTACH_POPUP, theme.copy(keyPopupAttached = it)) }
@@ -2337,13 +2337,7 @@ private fun KeyboardThemeKeysEditor(
             onValueChanged = { onThemeChanged(theme.copy(variationsHeightScale = it)) }
         )
         if (isSoftware) {
-            KeyboardThemeSwitchRow(
-                label = "Show LEDs",
-                checked = theme.showLeds,
-                presetChecked = preset.showLeds,
-                onCheckedChanged = { onThemeChanged(theme.copy(showLeds = it)) },
-                linkId = SettingLinkIds.KEYBOARD_THEME_TOGGLE_SHOW_LEDS
-            )
+
             KeyboardThemeSliderRow(
                 label = stringResource(R.string.keyboard_theme_key_height),
                 linkId = "keyboard_theme.software.key_height",
