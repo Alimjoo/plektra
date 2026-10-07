@@ -400,15 +400,30 @@ class AutoReplaceController(
             }
         }
 
-        val suggestions = suggestionEngine.suggest(
+        val orthographicEntry = if (settings.accentMatching) {
+            repository.topByNormalized(
+                WordNormalization.normalizeForDictionary(lookupWord, Locale.ROOT), limit = 8
+            ).firstOrNull { entry ->
+                entry.word.length == lookupWord.length && isAccentOnlyVariant(lookupWord, entry.word)
+            }
+        } else null
+        val topRaw = orthographicEntry?.let { entry ->
+            SuggestionResult(entry.word, 0, Double.MAX_VALUE, entry.source, SuggestionKind.CURRENT_WORD)
+        } ?: suggestionEngine.suggest(
             lookupWord,
             limit = 1,
             includeAccentMatching = settings.accentMatching,
             useKeyboardProximity = settings.useKeyboardProximity,
             useEditTypeRanking = settings.useEditTypeRanking
-        )
-        val topRaw = suggestions.firstOrNull()
-        val top = topRaw?.let {
+        ).firstOrNull()
+        // Suggestion ranking can assign zero distance to completions. Replacement safety
+        // uses the actual distance of the dictionary root before restoring its prefix.
+        val replacementCandidate = topRaw?.let {
+            if (it.distance == 0) it.copy(distance = suggestionEngine.editDistance(
+                lookupWord, it.candidate, settings.maxAutoReplaceDistance
+            ).takeIf { distance -> distance >= 0 } ?: (settings.maxAutoReplaceDistance + 1)) else it
+        }
+        val top = replacementCandidate?.let {
             if (apostropheSplit != null) {
                 val recomposed = recomposeApostropheCandidate(apostropheSplit, it.candidate) ?: return@let null
                 it.copy(candidate = recomposed)

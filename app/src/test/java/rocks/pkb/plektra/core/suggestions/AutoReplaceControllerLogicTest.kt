@@ -484,6 +484,65 @@ class AutoReplaceControllerLogicTest {
     }
 
     @Test
+    fun apostropheAccentVariantsWinOverHigherRankedCompletions() {
+        val context = RuntimeEnvironment.getApplication()
+        for ((input, target, completion) in listOf(
+            Triple("l'etat", "l'état", "états"),
+            Triple("j'ecris", "j'écris", "écrits"),
+            Triple("l’état", "l’état", "états")
+        )) {
+            val root = target.substringAfterLast('\'').substringAfterLast('’')
+            val repository = FakeDictionaryRepository().apply {
+                isReady = true
+                addTestEntry(root, 200)
+                addTestEntry(completion, 255)
+            }
+            val controller = AutoReplaceController(repository,
+                SuggestionEngine(repository, locale = Locale.FRENCH),
+                settingsProvider = { SuggestionSettings(autoReplaceOnSpaceEnter = true,
+                    accentMatching = true, maxAutoReplaceDistance = 1) })
+            val tracker = CurrentWordTracker(onWordChanged = {}, onWordReset = {})
+            tracker.setWord(input)
+            val connection = FakeInputConnection(context, input)
+            controller.handleBoundary(KeyEvent.KEYCODE_SPACE,
+                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SPACE), tracker, connection)
+            assertEquals("$target ", connection.text)
+        }
+    }
+
+    @Test
+    fun actualDistanceDoesNotTreatPrefixCompletionAsZeroEdits() {
+        val repository = FakeDictionaryRepository()
+        val engine = SuggestionEngine(repository, locale = Locale.FRENCH)
+        assertEquals(0, engine.editDistance("etat", "état", 1))
+        assertEquals(1, engine.editDistance("etat", "états", 1))
+        assertEquals(-1, engine.editDistance("etat", "états", 0))
+    }
+
+    @Test
+    fun replacementUsesActualDistanceForZeroRankedCandidates() {
+        val context = RuntimeEnvironment.getApplication()
+        for (maxDistance in listOf(0, 1)) {
+            val repository = FakeDictionaryRepository().apply {
+                isReady = true
+                addTestEntry("call", 255)
+            }
+            val engine = SuggestionEngine(repository, locale = Locale.ENGLISH)
+            assertEquals(0, engine.suggest("cal", limit = 1).first().distance)
+            val controller = AutoReplaceController(repository, engine, settingsProvider = {
+                SuggestionSettings(autoReplaceOnSpaceEnter = true, maxAutoReplaceDistance = maxDistance)
+            })
+            val tracker = CurrentWordTracker(onWordChanged = {}, onWordReset = {})
+            tracker.setWord("cal")
+            val connection = FakeInputConnection(context, "cal")
+            val result = controller.handleBoundary(KeyEvent.KEYCODE_SPACE,
+                KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SPACE), tracker, connection)
+            assertEquals(maxDistance == 1, result.replaced)
+            assertEquals(if (maxDistance == 1) "call " else "cal ", connection.text)
+        }
+    }
+
+    @Test
     fun boundaryCharOverrideAutoReplacesBeforeEveryRequestedPunctuation() {
         val context = RuntimeEnvironment.getApplication()
         val punctuation = listOf('?', '!', ':', ',', '.', ';')
