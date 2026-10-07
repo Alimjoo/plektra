@@ -47,6 +47,7 @@ object SettingLinkIds {
     const val TEXT_INPUT_SMART_QUOTES = "text_input.smart_quotes"
     const val TEXT_INPUT_CLEAR_ALT_ON_SPACE = "text_input.clear_alt_on_space"
     const val TEXT_INPUT_AUTO_SHOW_KEYBOARD = "text_input.auto_show_keyboard"
+    const val TEXT_INPUT_EXPERIMENTAL_SMOOTH_CARET = "text_input.experimental_smooth_caret"
     const val TEXT_INPUT_ALT_CTRL_SPEECH_SHORTCUT = "text_input.alt_ctrl_speech_shortcut"
     const val TEXT_INPUT_SHIFT_BACKSPACE_DELETE = "text_input.shift_backspace_delete"
     const val TEXT_INPUT_ALT_BACKSPACE_DELETE = "text_input.alt_backspace_delete"
@@ -426,6 +427,12 @@ object SettingLinkRegistry {
             SettingLinkIds.TEXT_INPUT_AUTO_SHOW_KEYBOARD,
             R.string.auto_show_keyboard_title,
             R.string.auto_show_keyboard_description,
+            destination = SettingsDestination.TextInput
+        ),
+        entry(
+            SettingLinkIds.TEXT_INPUT_EXPERIMENTAL_SMOOTH_CARET,
+            R.string.experimental_smooth_caret_title,
+            R.string.experimental_smooth_caret_description,
             destination = SettingsDestination.TextInput
         ),
         entry(
@@ -945,6 +952,7 @@ object SettingLinkRegistry {
         SettingLinkIds.TEXT_INPUT_AUTO_SPACE_PUNCTUATION to R.string.kw_text_input_auto_space_punctuation,
         SettingLinkIds.TEXT_INPUT_SPACED_HYPHEN_TO_EN_DASH to R.string.kw_text_input_spaced_hyphen,
         SettingLinkIds.TEXT_INPUT_SMART_QUOTES to R.string.kw_text_input_smart_quotes,
+        SettingLinkIds.TEXT_INPUT_EXPERIMENTAL_SMOOTH_CARET to R.string.kw_text_input_smooth_caret,
         SettingLinkIds.TEXT_INPUT_SHIFT_BACKSPACE_DELETE to R.string.kw_text_input_shift_backspace,
         SettingLinkIds.TEXT_INPUT_ALT_BACKSPACE_DELETE to R.string.kw_text_input_alt_backspace,
         SettingLinkIds.TEXT_INPUT_BACKSPACE_AT_START_DELETE to R.string.kw_text_input_backspace_start,

@@ -143,6 +143,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     private var userDictionaryReceiver: BroadcastReceiver? = null
     // Broadcast receiver for additional IME subtypes updates
     private var additionalSubtypesReceiver: BroadcastReceiver? = null
+    private lateinit var smoothCaretOverlayController: SmoothCaretOverlayController
+    private var smoothCaretEditorHidden = false
     private lateinit var candidatesBarController: CandidatesBarController
     private lateinit var textExpansionController: TextExpansionController
     private lateinit var emojiShortcodeSource: EmojiShortcodeSource
@@ -1659,6 +1661,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
 
     override fun onCreate() {
         super.onCreate()
+        smoothCaretOverlayController = SmoothCaretOverlayController(this)
         ClicksAccessibilityKeyBridge.register(this)
         lastSystemLocalesSignature = resources.configuration.locales.toLanguageTags()
         prefs = getSharedPreferences("plektra_prefs", Context.MODE_PRIVATE)
@@ -2162,6 +2165,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                 Handler(Looper.getMainLooper()).post { updateStatusBarText() }
             } else if (key == "clear_alt_on_space") {
                 clearAltOnSpaceEnabled = SettingsManager.getClearAltOnSpace(this)
+            } else if (key == SettingsManager.KEY_EXPERIMENTAL_SMOOTH_CARET) {
+                refreshSmoothCaretExperiment()
             } else if (key == "emoji_shortcodes_enabled" || key == "symbol_shortcodes_enabled") {
                 prepareEnabledExpansionAssets()
             } else if (key == "shift_tap_latches" || key == "alt_tap_latches" || key == "ctrl_tap_latches") {
@@ -2749,6 +2754,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
     
     override fun onDestroy() {
+        disableSmoothCaretExperiment()
+        if (::smoothCaretOverlayController.isInitialized) smoothCaretOverlayController.release()
         ClicksAccessibilityKeyBridge.unregister(this)
         clicksPowerShiftTapFilter.reset()
         accidentalKeyPressFilter.reset()
@@ -2932,6 +2939,9 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
 
     override fun onUpdateCursorAnchorInfo(cursorAnchorInfo: CursorAnchorInfo?) {
         super.onUpdateCursorAnchorInfo(cursorAnchorInfo)
+        if (smoothCaretEditorHidden && ::smoothCaretOverlayController.isInitialized) {
+            smoothCaretOverlayController.update(cursorAnchorInfo)
+        }
         if (
             symPage != 4 ||
             !::candidatesBarController.isInitialized ||
@@ -2944,6 +2954,39 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             return
         }
         disableEmojiSearchInputCapture()
+    }
+
+    private fun refreshSmoothCaretExperiment() {
+        val shouldEnable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            SettingsManager.getExperimentalSmoothCaret(this) &&
+            ::smoothCaretOverlayController.isInitialized &&
+            smoothCaretOverlayController.canShow() &&
+            inputContextState.isEditable &&
+            currentPackageName != packageName
+        if (!shouldEnable) {
+            disableSmoothCaretExperiment()
+            return
+        }
+        val connection = currentInputConnection ?: return
+        smoothCaretEditorHidden = connection.setImeConsumesInput(true)
+        if (!smoothCaretEditorHidden) {
+            smoothCaretOverlayController.hide()
+            return
+        }
+        connection.requestCursorUpdates(
+            InputConnection.CURSOR_UPDATE_IMMEDIATE or InputConnection.CURSOR_UPDATE_MONITOR
+        )
+    }
+
+    private fun disableSmoothCaretExperiment() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && smoothCaretEditorHidden) {
+            currentInputConnection?.setImeConsumesInput(false)
+        }
+        smoothCaretEditorHidden = false
+        if (::smoothCaretOverlayController.isInitialized) smoothCaretOverlayController.hide()
+        if (!emojiSearchCursorAnchorMonitoringRequested) {
+            currentInputConnection?.requestCursorUpdates(0)
+        }
     }
 
     /**
@@ -3341,6 +3384,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     
 
     override fun onUnbindInput() {
+        disableSmoothCaretExperiment()
         pendingKeyboardSurfaceTransition?.let(uiHandler::removeCallbacks)
         pendingKeyboardSurfaceTransition = null
         isInputViewActive = false
@@ -3381,6 +3425,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         // Reset clipboard overlay when starting new input
 
         updateInputContextState(info)
+        uiHandler.post { refreshSmoothCaretExperiment() }
         val state = inputContextState
         val isEditable = state.isEditable
         val isReallyEditable = state.isReallyEditable
@@ -3524,6 +3569,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
 
     override fun onFinishInput() {
+        disableSmoothCaretExperiment()
         pendingKeyboardSurfaceTransition?.let(uiHandler::removeCallbacks)
         pendingKeyboardSurfaceTransition = null
         super.onFinishInput()

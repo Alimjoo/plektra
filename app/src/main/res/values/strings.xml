@@ -31,6 +31,8 @@
     <string name="text_input_section_spacing_punctuation">Spacing &amp; punctuation</string>
     <string name="text_input_section_typography">Typography</string>
     <string name="text_input_section_keyboard_behavior">Keyboard behaviour</string>
+    <string name="experimental_smooth_caret_title">Smooth caret overlay</string>
+    <string name="experimental_smooth_caret_description">Experimentally replaces the app cursor with an animated Plektra cursor. Requires permission to display over other apps; editor support varies.</string>
     <string name="text_input_section_delete">Delete</string>
 
     <!-- Auto Capitalize Section -->
@@ -1746,6 +1748,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="kw_text_input_auto_space_punctuation">spacing, space, punctuation</string>
     <string name="kw_text_input_spaced_hyphen">hyphen, dash, en dash, punctuation</string>
     <string name="kw_text_input_smart_quotes">quotation marks, apostrophe, curly quotes, typography</string>
+    <string name="kw_text_input_smooth_caret">cursor, caret, smooth, animation, overlay, experimental</string>
     <string name="kw_text_input_shift_backspace">shift, backspace, delete word</string>
     <string name="kw_text_input_alt_backspace">alt, backspace, delete word</string>
     <string name="kw_text_input_backspace_start">backspace, delete line, start of text</string>

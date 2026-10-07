@@ -66,6 +66,7 @@ object SettingsManager {
     private const val KEY_SWIPE_TO_DELETE = "swipe_to_delete"
     private const val KEY_SWIPE_TO_DELETE_PROVIDER = "swipe_to_delete_provider"
     private const val KEY_AUTO_SHOW_KEYBOARD = "auto_show_keyboard"
+    const val KEY_EXPERIMENTAL_SMOOTH_CARET = "experimental_smooth_caret"
     private const val KEY_CLEAR_ALT_ON_SPACE = "clear_alt_on_space"
     private const val KEY_ALT_CTRL_SPEECH_SHORTCUT = "alt_ctrl_speech_shortcut"
     private const val KEY_LAYOUT_AWARE_CTRL_SHORTCUTS = "layout_aware_ctrl_shortcuts"
@@ -2180,6 +2181,16 @@ object SettingsManager {
     fun setAutoShowKeyboard(context: Context, enabled: Boolean) {
         getPreferences(context).edit()
             .putBoolean(KEY_AUTO_SHOW_KEYBOARD, enabled)
+            .apply()
+    }
+
+    fun getExperimentalSmoothCaret(context: Context): Boolean {
+        return getPreferences(context).getBoolean(KEY_EXPERIMENTAL_SMOOTH_CARET, false)
+    }
+
+    fun setExperimentalSmoothCaret(context: Context, enabled: Boolean) {
+        getPreferences(context).edit()
+            .putBoolean(KEY_EXPERIMENTAL_SMOOTH_CARET, enabled)
             .apply()
     }
 

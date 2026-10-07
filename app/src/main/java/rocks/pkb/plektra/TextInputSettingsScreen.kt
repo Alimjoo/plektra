@@ -125,6 +125,17 @@ fun TextInputSettingsScreen(
         mutableStateOf(SettingsManager.getAutoShowKeyboard(context))
     }
 
+    var experimentalSmoothCaret by remember {
+        mutableStateOf(SettingsManager.getExperimentalSmoothCaret(context))
+    }
+    val overlayPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        val granted = Settings.canDrawOverlays(context)
+        experimentalSmoothCaret = granted
+        SettingsManager.setExperimentalSmoothCaret(context, granted)
+    }
+
     var altCtrlSpeechShortcut by remember {
         mutableStateOf(SettingsManager.getAltCtrlSpeechShortcutEnabled(context))
     }
@@ -504,6 +515,31 @@ fun TextInputSettingsScreen(
                     SettingsManager.setAutoShowKeyboard(context, enabled)
                 }
             )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                SettingsSwitchRow(
+                    title = stringResource(R.string.experimental_smooth_caret_title),
+                    description = stringResource(R.string.experimental_smooth_caret_description),
+                    checked = experimentalSmoothCaret,
+                    status = FeatureStatus.Experimental,
+                    linkId = SettingLinkIds.TEXT_INPUT_EXPERIMENTAL_SMOOTH_CARET,
+                    onCheckedChange = { enabled ->
+                        if (!enabled) {
+                            experimentalSmoothCaret = false
+                            SettingsManager.setExperimentalSmoothCaret(context, false)
+                        } else if (Settings.canDrawOverlays(context)) {
+                            experimentalSmoothCaret = true
+                            SettingsManager.setExperimentalSmoothCaret(context, true)
+                        } else {
+                            overlayPermissionLauncher.launch(
+                                Intent(
+                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    Uri.parse("package:${context.packageName}")
+                                )
+                            )
+                        }
+                    }
+                )
+            }
             SettingsSwitchRow(
                 title = stringResource(R.string.alt_ctrl_speech_shortcut_title),
                 description = stringResource(R.string.alt_ctrl_speech_shortcut_description),
