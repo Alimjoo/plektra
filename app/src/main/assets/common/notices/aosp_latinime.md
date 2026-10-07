@@ -1,6 +1,6 @@
 # Android Open Source Project LatinIME
 
-Pastiera's full virtual keyboard mode uses AOSP LatinIME as a reference for keyboard geometry and includes AOSP-derived keyboard visual assets.
+Plektra's full virtual keyboard mode uses AOSP LatinIME as a reference for keyboard geometry and includes AOSP-derived keyboard visual assets.
 
 - Project: Android Open Source Project, LatinIME (`platform/packages/inputmethods/LatinIME`)
 - Source repository: https://android.googlesource.com/platform/packages/inputmethods/LatinIME
@@ -9,4 +9,4 @@ Pastiera's full virtual keyboard mode uses AOSP LatinIME as a reference for keyb
 
 The Apache License, Version 2.0 text is included in `assets/common/licenses/Apache-2.0.txt` and in the repository under `third_party/licenses/Apache-2.0.txt`.
 
-Pastiera does not import AOSP dictionaries.
+Plektra does not import AOSP dictionaries.

@@ -14,7 +14,7 @@ Pastiera is licensed under the GNU General Public License version 3. Some compon
 
 Pastiera's full virtual keyboard mode uses AOSP LatinIME as a reference for keyboard geometry and visual assets:
 
-- `app/src/main/java/it/palsoftware/pastiera/inputmethod/aospkeyboard/AospKeyboardView.kt`
+- `app/src/main/java/rocks/pkb/plektra/inputmethod/aospkeyboard/AospKeyboardView.kt`
 - AOSP-derived keyboard background, key, spacebar, preview, popup and selected-popup `.9.png` resources under:
   - `app/src/main/res/drawable-mdpi/`
   - `app/src/main/res/drawable-hdpi/`
@@ -71,7 +71,7 @@ for compact local lookup.
 
 - Project: Leipzig Corpora Collection / Wortschatz Leipzig
 - Project pages: https://corpora.uni-leipzig.de/ and https://wortschatz.uni-leipzig.de/
-- Companion asset repository: https://github.com/palsoftware/pastiera-dict
+- Companion asset repository: https://github.com/pkb-rocks/plektra-dict
 - License: Creative Commons attribution terms for the downloaded corpus/frequency-list data;
   the Leipzig frequency dictionary word lists are documented as CC-BY 3.0, while current
   downloadable corpus data may carry corpus-specific terms.

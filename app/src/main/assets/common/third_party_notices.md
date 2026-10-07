@@ -2,7 +2,7 @@
 
 ## Android Open Source Project LatinIME
 
-Pastiera's full virtual keyboard mode uses AOSP LatinIME as a reference for keyboard geometry and includes AOSP-derived keyboard visual assets.
+Plektra's full virtual keyboard mode uses AOSP LatinIME as a reference for keyboard geometry and includes AOSP-derived keyboard visual assets.
 
 - Project: Android Open Source Project, LatinIME (`platform/packages/inputmethods/LatinIME`)
 - Source repository: https://android.googlesource.com/platform/packages/inputmethods/LatinIME
@@ -11,11 +11,11 @@ Pastiera's full virtual keyboard mode uses AOSP LatinIME as a reference for keyb
 
 The Apache License, Version 2.0 text is included in `assets/common/licenses/Apache-2.0.txt` and in the repository under `third_party/licenses/Apache-2.0.txt`.
 
-Pastiera does not import AOSP dictionaries.
+Plektra does not import AOSP dictionaries.
 
 ## Google Material Symbols / Material Icons
 
-Pastiera uses icon artwork from Google Material Symbols / Material Icons for parts of the app UI and keyboard chrome.
+Plektra uses icon artwork from Google Material Symbols / Material Icons for parts of the app UI and keyboard chrome.
 
 - Project: Material Symbols / Material Icons
 - Project page: https://fonts.google.com/icons
@@ -26,7 +26,7 @@ The Apache License, Version 2.0 text is included in `assets/common/licenses/Apac
 
 ## OpenGameArt Typing Sounds
 
-Pastiera includes short typing sound samples derived from CC0 sound effects.
+Plektra includes short typing sound samples derived from CC0 sound effects.
 
 - Project: Keyboard Soundpack #1 [Typing and Single Keystrokes]
 - Author: unicaegames
@@ -57,25 +57,25 @@ Typing sound derivatives are included under `res/raw/typing_*.ogg`.
 - Source path used by generator: `cldr-json/cldr-annotations-full/annotations`
 - License: Unicode Data Files and Software License / Unicode License
 
-Pastiera's local emoji search assets under `assets/common/emoji_search/*.tsv`
+Plektra's local emoji search assets under `assets/common/emoji_search/*.tsv`
 are generated from Unicode CLDR annotation data by `scripts/generate_emoji_search_assets.py`.
-The generated TSV files are filtered to the emoji set bundled with Pastiera and normalized
+The generated TSV files are filtered to the emoji set bundled with Plektra and normalized
 for compact local lookup.
 
 ## Leipzig Corpora Collection / Wortschatz Leipzig
 
 - Project: Leipzig Corpora Collection / Wortschatz Leipzig
 - Project pages: https://corpora.uni-leipzig.de/ and https://wortschatz.uni-leipzig.de/
-- Companion asset repository: https://github.com/palsoftware/pastiera-dict
+- Companion asset repository: https://github.com/pkb-rocks/plektra-dict
 - License: Creative Commons attribution terms for the downloaded corpus/frequency-list data;
   the Leipzig frequency dictionary word lists are documented as CC-BY 3.0, while current
   downloadable corpus data may carry corpus-specific terms.
 
-Pastiera's bundled base dictionaries under `assets/common/dictionaries/*_base.json`
+Plektra's bundled base dictionaries under `assets/common/dictionaries/*_base.json`
 and the generated serialized dictionaries under `assets/common/dictionaries_serialized/*_base.dict`
 are frequency-list derivatives built mainly from Leipzig Corpora Collection / Wortschatz Leipzig
 word-frequency data, with project-maintained filtering, truncation, normalization, and additional
-entries. The companion `pastiera-dict` repository distributes larger downloadable `.dict` assets
+entries. The companion `plektra-dict` repository distributes larger downloadable `.dict` assets
 and their manifests.
 
 Provenance note: the maintained dictionary pipeline and current maintainer-provided sources point
@@ -89,6 +89,6 @@ documentation trail, so their exact upstream corpus IDs are not fully reconstruc
 - Source data used for `el_base.dict`: `data/spell_dict_with_freq.dic`
 - License: GPLv3 for source code; CC BY-SA 3.0 for the produced morphological database
 
-The downloadable Greek base dictionary distributed through the companion `pastiera-dict`
+The downloadable Greek base dictionary distributed through the companion `plektra-dict`
 repository is derived from the top frequency-ranked, letter-only entries in the eellak
-Greek spelling dictionary with Pastiera-specific filtering, truncation, and normalization.
+Greek spelling dictionary with Plektra-specific filtering, truncation, and normalization.

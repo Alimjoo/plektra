@@ -1,1 +1,1 @@
-Physical-keyboard Android IME with shortcuts, gestures, layouts, and backup.
+Open-source Android keyboard for devices with physical keys.

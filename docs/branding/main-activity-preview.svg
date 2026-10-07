@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420">
+  <defs><clipPath id="header"><rect width="720" height="170" rx="34"/></clipPath></defs>
+  <rect width="720" height="420" rx="34" fill="#f7f4ef"/>
+  <rect width="720" height="170" rx="34" fill="#332515"/>
+  <path clip-path="url(#header)" d="M-30 135L145-40M90 210L315-15M285 205L500-10M480 210L700-10M630 145L790-15" stroke="#FC7A0F" stroke-width="10" opacity=".38"/>
+  <path d="M290 54C277 62 278 84 287 112C299 146 329 143 366 113C389 94 398 76 389 62C380 45 347 24 320 19C305 16 298 31 290 54Z" fill="#FC7A0F" opacity=".9"/>
+  <text x="360" y="111" text-anchor="middle" font-family="sans-serif" font-size="42" font-weight="700" fill="white">Plektra</text>
+  <rect x="50" y="215" width="620" height="74" rx="18" fill="white" stroke="#ded7cf"/>
+  <rect x="50" y="310" width="190" height="58" rx="16" fill="white" stroke="#ded7cf"/>
+  <rect x="265" y="310" width="190" height="58" rx="16" fill="white" stroke="#ded7cf"/>
+  <rect x="480" y="310" width="190" height="58" rx="16" fill="white" stroke="#ded7cf"/>
+</svg>
