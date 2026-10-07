@@ -282,6 +282,7 @@ class KeyboardVisibilityController(
         candidatesBarController.setSlimModeActive(minimal)
         SettingsManager.setSlimModeActive(context, minimal)
         refreshStatusBar()
+        onKeyboardBarConfigurationChanged()
     }
 
     private fun detachFromParent(view: View) { (view.parent as? ViewGroup)?.removeView(view) }

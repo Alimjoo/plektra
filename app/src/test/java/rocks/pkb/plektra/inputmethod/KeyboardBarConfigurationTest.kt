@@ -37,6 +37,146 @@ class KeyboardBarConfigurationTest {
         assertFalse(config.copy(suggestions = false).presentation(false).inlineIndicators)
     }
 
+    @Test fun slimProfileCanDisableEverythingWithoutChangingNormalProfile() {
+        SettingsManager.setSuggestionsEnabled(context, true)
+        SettingsManager.setStatusBarVariationsEnabled(context, true)
+        rocks.pkb.plektra.KeyboardBarConfiguration.setSlimProfile(context,
+            rocks.pkb.plektra.KeyboardBarProfile(false, false, false, true, false))
+        val configuration = KeyboardBarConfiguration.read(context)
+        assertFalse(configuration.presentation(true).hasPersistentContent)
+        assertTrue(configuration.presentation(true).androidIndicators)
+        assertTrue(configuration.presentation(false).actions)
+        val controller = StatusBarController(context, StatusBarController.Mode.CANDIDATES_ONLY)
+        controller.setSlimModeActive(true)
+        controller.update(snapshot())
+        assertEquals(View.GONE, controller.getLayout()!!.visibility)
+    }
+
+    @Test fun migratedSlimProfileIsIndependentOfSubsequentNormalEdits() {
+        SettingsManager.setSuggestionsEnabled(context, true)
+        val before = KeyboardBarConfiguration.read(context).slimProfile
+        SettingsManager.setSuggestionsEnabled(context, false)
+        assertEquals(before, KeyboardBarConfiguration.read(context).slimProfile)
+    }
+
+    @Test fun emptySuggestionsReserveNoHeight() {
+        SettingsManager.setSuggestionsEnabled(context, true)
+        SettingsManager.setStatusBarVariationsEnabled(context, false)
+        SettingsManager.setModifierIndicators(context, emptySet())
+        val controller = StatusBarController(context, StatusBarController.Mode.CANDIDATES_ONLY)
+        controller.update(snapshot())
+        assertEquals(View.GONE, controller.getLayout()!!.visibility)
+        assertEquals(0, controller.getLayout()!!.layoutParams.height)
+    }
+
+    @Test fun actionsFirstMovesSnippetRowBelowActionsAndKeepsIndicatorsLast() {
+        SettingsManager.setStatusBarVariationsEnabled(context, true)
+        KeyboardBarConfiguration.setArrangement(context, rocks.pkb.plektra.KeyboardBarArrangement.ACTIONS_FIRST)
+        val controller = StatusBarController(context, StatusBarController.Mode.CANDIDATES_ONLY)
+        controller.showExpansionSuggestions(listOf("Snippet choice")) {}
+        controller.update(snapshot())
+        val root = controller.getLayout()!!
+        assertTrue(root.getChildAt(1) is rocks.pkb.plektra.inputmethod.ui.CursorSwipeLayout)
+        assertTrue(root.getChildAt(root.childCount - 1) is android.widget.FrameLayout)
+        assertEquals(View.VISIBLE, root.getChildAt(1).visibility)
+    }
+
+    @Test fun sharedRowCommitsSnippetAndSuppressesSeparateActionsRow() {
+        SettingsManager.setStatusBarVariationsEnabled(context, true)
+        KeyboardBarConfiguration.setArrangement(context, rocks.pkb.plektra.KeyboardBarArrangement.SHARED)
+        val controller = StatusBarController(context, StatusBarController.Mode.CANDIDATES_ONLY)
+        var selected: String? = null
+        controller.showExpansionSuggestions(listOf("Snippet choice")) { selected = it }
+        controller.update(snapshot())
+        val root = controller.getLayout()!!
+        assertEquals(View.VISIBLE, root.getChildAt(0).visibility)
+        assertEquals(View.GONE, root.getChildAt(1).visibility)
+        assertEquals(View.GONE, root.getChildAt(2).visibility)
+        fun findLabel(view: View): android.widget.TextView? {
+            if (view is android.widget.TextView && view.text.toString() == "Snippet choice") return view
+            if (view is android.view.ViewGroup) for (i in 0 until view.childCount) {
+                findLabel(view.getChildAt(i))?.let { return it }
+            }
+            return null
+        }
+        findLabel(root)!!.performClick()
+        assertEquals("Snippet choice", selected)
+    }
+
+    @Test fun sharedRowPrefersDynamicVariationsOverWordSuggestions() {
+        SettingsManager.setSuggestionsEnabled(context, true)
+        SettingsManager.setExperimentalSuggestionsEnabled(context, true)
+        SettingsManager.setStatusBarVariationsEnabled(context, true)
+        KeyboardBarConfiguration.setArrangement(context, rocks.pkb.plektra.KeyboardBarArrangement.SHARED)
+        val controller = StatusBarController(context, StatusBarController.Mode.CANDIDATES_ONLY)
+        controller.update(snapshot().copy(variations = listOf("à", "â"), suggestions = listOf("alphabet")))
+        val labels = mutableListOf<String>()
+        fun collect(view: View) {
+            if (view.visibility != View.VISIBLE) return
+            if (view is android.widget.TextView) labels.add(view.text.toString())
+            if (view is android.view.ViewGroup) for (index in 0 until view.childCount) collect(view.getChildAt(index))
+        }
+        collect(controller.getLayout()!!)
+        assertTrue(labels.contains("à"))
+        assertTrue(labels.contains("â"))
+        assertFalse(labels.contains("alphabet"))
+    }
+
+    @Test fun modifiersShareOneGrowingMenuButtonAndHandBackTheOuterEdge() {
+        SettingsManager.setSuggestionsEnabled(context, true)
+        SettingsManager.setTitan2EliteRoundedCornerInsetsEnabled(context, true)
+        SettingsManager.setStatusBarVariationsEnabled(context, true)
+        SettingsManager.setStatusBarSlotsLeft(context, listOf(SettingsManager.STATUS_BAR_BUTTON_HAMBURGER))
+        SettingsManager.setStatusBarSlotsRight(context, emptyList())
+        SettingsManager.setModifierIndicators(context, setOf(SettingsManager.MODIFIER_INDICATOR_STATUS_BAR))
+        KeyboardBarConfiguration.setArrangement(context, rocks.pkb.plektra.KeyboardBarArrangement.SHARED)
+        val controller = StatusBarController(context, StatusBarController.Mode.CANDIDATES_ONLY)
+        controller.showExpansionSuggestions(listOf("Sample")) {}
+        controller.update(snapshot().copy(shiftOneShot = true))
+        val root = controller.getLayout()!!
+        fun layout() {
+            root.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+            root.layout(0, 0, root.measuredWidth, root.measuredHeight)
+            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.updateRows(root)
+        }
+        fun image(description: String, view: View = root): android.widget.ImageView? {
+            if (view is android.widget.ImageView && view.contentDescription == description) return view
+            if (view is android.view.ViewGroup) for (index in 0 until view.childCount) {
+                image(description, view.getChildAt(index))?.let { return it }
+            }
+            return null
+        }
+        controller.update(snapshot().copy(shiftOneShot = true))
+        layout()
+        val modifier = image("Shift")!!
+        val singleWidth = modifier.layoutParams.width
+        val buttons = modifier.parent as android.widget.LinearLayout
+        assertEquals(2, buttons.childCount)
+        assertSame(modifier, buttons.getChildAt(0))
+        assertTrue(modifier.background is rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable)
+        assertFalse(buttons.getChildAt(1).background is rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable)
+
+        controller.update(snapshot().copy(shiftOneShot = true, ctrlLatchActive = true, altOneShot = true))
+        layout()
+        assertSame(modifier, image("Shift, Ctrl, Alt"))
+        assertEquals(2, buttons.childCount)
+        assertTrue(modifier.layoutParams.width > singleWidth)
+        val tripleWidth = modifier.layoutParams.width
+        controller.update(snapshot().copy(shiftOneShot = true, ctrlLatchActive = true, altOneShot = true,
+            symPhysicallyPressed = true))
+        layout()
+        assertSame(modifier, image("Shift, Ctrl, Alt, SYM"))
+        assertEquals(2, buttons.childCount)
+        assertTrue(modifier.layoutParams.width > tripleWidth)
+
+        controller.update(snapshot())
+        layout()
+        assertNull(image("Shift, Ctrl, Alt"))
+        assertEquals(1, buttons.childCount)
+        assertTrue(buttons.getChildAt(0).background is rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable)
+    }
+
     @Test fun onlyAndroidIndicatorCollapsesAndRestoresHeight() {
         SettingsManager.setSuggestionsEnabled(context, false)
         SettingsManager.setStatusBarVariationsEnabled(context, false)
@@ -87,6 +227,33 @@ class KeyboardBarConfigurationTest {
         assertEquals(View.GONE, controller.getLayout()!!.visibility)
     }
 
+    @Test fun snippetSuggestionsAppearAndCollapseWithPersistentContentOff() {
+        SettingsManager.setSuggestionsEnabled(context, false)
+        SettingsManager.setStatusBarVariationsEnabled(context, false)
+        SettingsManager.setModifierIndicators(context, emptySet())
+        val controller = StatusBarController(context, StatusBarController.Mode.CANDIDATES_ONLY)
+        controller.update(snapshot())
+        assertEquals(View.GONE, controller.getLayout()!!.visibility)
+        controller.showExpansionSuggestions(listOf("Snippet choice")) {}
+        assertTrue(controller.hasTransientContent)
+        controller.update(snapshot())
+        val root = controller.getLayout()!!
+        assertEquals(View.VISIBLE, root.visibility)
+        fun containsVisibleLabel(view: View): Boolean {
+            if (view.visibility != View.VISIBLE) return false
+            if (view is android.widget.TextView && view.text.toString() == "Snippet choice") return true
+            return view is android.view.ViewGroup && (0 until view.childCount).any {
+                containsVisibleLabel(view.getChildAt(it))
+            }
+        }
+        assertTrue("Snippet row must actually be visible", containsVisibleLabel(root))
+        controller.clearExpansionSuggestions()
+        assertFalse(controller.hasTransientContent)
+        controller.update(snapshot())
+        assertEquals(View.GONE, root.visibility)
+        assertEquals(0, root.layoutParams.height)
+    }
+
     @Test fun ledStripStaysAtBottomWhenAndroidEnlargesTheWindowAfterMeasurement() {
         SettingsManager.setSuggestionsEnabled(context, false)
         SettingsManager.setStatusBarVariationsEnabled(context, false)
@@ -123,4 +290,61 @@ class KeyboardBarConfigurationTest {
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
         assertTrue(view.measuredHeight >= 100)
     }
+    @Test fun variationsTakeOverEmptyMenuEdgesAndReleaseThemWhenAMenuButtonReturns() {
+        SettingsManager.setTitan2EliteRoundedCornerInsetsEnabled(context, true)
+        SettingsManager.setStatusBarSlotsLeft(context, listOf(SettingsManager.STATUS_BAR_BUTTON_NONE))
+        SettingsManager.setStatusBarSlotsRight(context, listOf(SettingsManager.STATUS_BAR_BUTTON_NONE))
+        SettingsManager.setStaticVariationBarModeEnabled(context, true)
+        val bar = rocks.pkb.plektra.inputmethod.ui.VariationBarView(context, context.assets,
+            buttonRegistry = rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonRegistry())
+        bar.themeOverride = SettingsManager.getEffectiveKeyboardTheme(context,
+            SettingsManager.KeyboardThemeTarget.HARDWARE).toKeyboardThemeColors()
+        val view = bar.ensureView()
+        val state = snapshot().copy(shouldDisableVariations = true)
+        fun edges(): List<android.view.View> {
+            view.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(300, View.MeasureSpec.AT_MOST))
+            view.layout(0, 0, view.measuredWidth, view.measuredHeight)
+            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.updateRows(view)
+            val result = mutableListOf<android.view.View>()
+            fun visit(v: android.view.View) {
+                if (v.background is rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable) result += v
+                if (v is android.view.ViewGroup) for (i in 0 until v.childCount) visit(v.getChildAt(i))
+            }
+            visit(view)
+            return result
+        }
+        bar.showVariations(state, null)
+        val emptyMenus = edges()
+        assertEquals(2, emptyMenus.size)
+        assertTrue(emptyMenus.all { it is android.widget.TextView })
+        assertTrue((emptyMenus.first().background as rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable).leftEdge)
+        assertTrue((emptyMenus.last().background as rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable).rightEdge)
+
+        SettingsManager.setStatusBarSlotsLeft(context, listOf(SettingsManager.STATUS_BAR_BUTTON_HAMBURGER))
+        bar.showVariations(state, null)
+        val menuReturns = edges()
+        assertEquals(2, menuReturns.size)
+        assertTrue(menuReturns.first() is android.widget.ImageView)
+        assertTrue(menuReturns.last() is android.widget.TextView)
+
+        SettingsManager.setStatusBarSlotsLeft(context, listOf(SettingsManager.STATUS_BAR_BUTTON_NONE))
+        bar.showVariations(state.copy(suggestions = listOf("word"), addWordCandidate = "word"), null)
+        val single = edges().single().background as rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable
+        assertTrue(single.leftEdge)
+        assertTrue(single.rightEdge)
+    }
+
+    @Test fun roundedLedClearanceIsEnabledBeforeWindowInsetsArrive() {
+        SettingsManager.setPhysicalKeyboardProfileOverride(context, "titan2elite_qwerty")
+        SettingsManager.setTitan2EliteRoundedCornerInsetsEnabled(context, true)
+        SettingsManager.setModifierIndicators(context, setOf(SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP))
+        val controller = StatusBarController(context, StatusBarController.Mode.CANDIDATES_ONLY)
+        controller.showExpansionSuggestions(listOf("Sample")) {}
+        controller.update(snapshot())
+        val chrome = controller.getLayout()!! as ImeChromeLayout
+        assertNull(chrome.bottomCornerRadiiPx)
+        assertTrue("LED clearance must not depend on the timing of window insets", chrome.contourIntegratedIndicators)
+    }
+
 }

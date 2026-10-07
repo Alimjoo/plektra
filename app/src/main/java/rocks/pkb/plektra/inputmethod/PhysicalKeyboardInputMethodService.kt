@@ -442,7 +442,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         }
 
         val iconResId = if (
-            SettingsManager.getModifierIndicatorShowsMenuBar(this)
+            rocks.pkb.plektra.KeyboardBarConfiguration.read(this)
+                .presentation(SettingsManager.getSlimModeActive(this)).androidIndicators
         ) {
             systemStatusModifierIconResId(snapshot)
         } else {
@@ -779,7 +780,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
 
     private fun getSuggestionSettings(): SuggestionSettings {
-        val suggestionsEnabled = SettingsManager.getSuggestionsEnabled(this)
+        val suggestionsEnabled = rocks.pkb.plektra.KeyboardBarConfiguration.read(this)
+            .presentation(SettingsManager.getSlimModeActive(this)).suggestions
         return SuggestionSettings(
             textReplacementsEnabled = SettingsManager.getAutoCorrectEnabled(this),
             suggestionsEnabled = suggestionsEnabled,
@@ -2328,7 +2330,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                 }
             } else if (SettingsManager.isModifierIndicatorPreferenceKey(key) ||
                 key == "suggestions_enabled" || key == "status_bar_variations_visible" ||
-                key == "keyboard_bar_show_on_launcher") {
+                key?.startsWith("keyboard_bar_") == true) {
                 Handler(Looper.getMainLooper()).post {
                     invalidateRenderedStatusSnapshot()
                     updateStatusBarText()
@@ -3102,7 +3104,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         val modifierSnapshot = modifierStateController.snapshot()
         val state = inputContextState
         val addWordCandidate = suggestionController.pendingAddWord()
-        val suggestionsEnabled = SettingsManager.isExperimentalSuggestionsEnabled(this) && SettingsManager.getSuggestionsEnabled(this)
+        val suggestionsEnabled = SettingsManager.isExperimentalSuggestionsEnabled(this) && rocks.pkb.plektra.KeyboardBarConfiguration.read(this)
+            .presentation(SettingsManager.getSlimModeActive(this)).suggestions
         val suggestionsStart = ImePerfLogger.mark()
         val baseSuggestions = if (suggestionsEnabled) visibleSuggestionStrings() else emptyList()
         suggestionsMs = ImePerfLogger.elapsedMs(suggestionsStart)
@@ -5797,7 +5800,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         val allowGesture =
             symPage == 0 &&
             (visibleSuggestions.isNotEmpty() || canAddWordByGesture) &&
-            SettingsManager.getSuggestionsEnabled(this) &&
+            rocks.pkb.plektra.KeyboardBarConfiguration.read(this)
+            .presentation(SettingsManager.getSlimModeActive(this)).suggestions &&
             !shouldDisableSmartFeatures
         if (!allowGesture) {
             Log.d(

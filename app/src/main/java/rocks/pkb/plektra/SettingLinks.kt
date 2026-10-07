@@ -726,8 +726,7 @@ object SettingLinkRegistry {
             SettingLinkIds.MODIFIERS_INDICATORS,
             R.string.modifier_indicators_title,
             R.string.modifier_indicators_description,
-            destination = SettingsDestination.Customization,
-            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
+            destination = SettingsDestination.ModifierIndicators
         ),
         entry(
             SettingLinkIds.MODIFIERS_SYM_LAYERS,
@@ -915,22 +914,19 @@ object SettingLinkRegistry {
             SettingLinkIds.MODIFIERS_INDICATOR_BOTTOM_STRIP,
             R.string.modifier_indicators_bottom_strip,
             R.string.modifier_indicators_bottom_strip_description,
-            destination = SettingsDestination.Customization,
-            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
+            destination = SettingsDestination.ModifierIndicators
         ),
         entry(
             SettingLinkIds.MODIFIERS_INDICATOR_MENU_BAR,
             R.string.modifier_indicators_menu_bar,
             R.string.modifier_indicators_menu_bar_description,
-            destination = SettingsDestination.Customization,
-            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
+            destination = SettingsDestination.ModifierIndicators
         ),
         entry(
             SettingLinkIds.MODIFIERS_INDICATOR_STATUS_BAR,
             R.string.modifier_indicators_status_bar,
             R.string.modifier_indicators_status_bar_description,
-            destination = SettingsDestination.Customization,
-            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
+            destination = SettingsDestination.ModifierIndicators
         )
     ) + customizationSettingEntries() + inputDeviceSettingEntries() + systemSettingEntries()
 
@@ -1055,7 +1051,8 @@ object SettingLinkRegistry {
         SettingsDestination.About to R.string.about_title,
         SettingsDestination.CustomInputStyles to R.string.custom_input_styles_title,
         SettingsDestination.AppLanguage to R.string.app_language_title,
-        SettingsDestination.Modifiers to R.string.modifiers_title
+        SettingsDestination.Modifiers to R.string.modifiers_title,
+        SettingsDestination.ModifierIndicators to R.string.modifiers_section_indicators
     )
 
     val keyboardsDevicesSubtitles: Map<KeyboardsDevicesDestination, Int> = mapOf(

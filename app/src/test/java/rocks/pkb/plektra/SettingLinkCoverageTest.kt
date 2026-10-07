@@ -134,4 +134,29 @@ class SettingLinkCoverageTest {
         return sourceDirectory.walkTopDown().filter { it.isFile && it.extension == "kt" }.toList()
     }
 
+    @Test
+    fun keyboardBarLinksOpenTheActualEditorsEvenWhenSlimIsActive() {
+        SettingsManager.setStatusBarPresentationMode(context, SettingsManager.StatusBarPresentationMode.SLIM)
+        SettingsManager.setStatusBarVariationsEnabled(context, false)
+        val targets = mapOf(
+            "status_bar.extended_left" to "keyboard_bar_buttons",
+            "status_bar.extended_right" to "keyboard_bar_buttons",
+            "status_bar.variation_slots" to "keyboard_bar_variations",
+            "status_bar.resize_variations" to "keyboard_bar_variations",
+            "status_bar.rounded_corners" to "display_geometry",
+            "keyboard_bar.geometry" to "display_geometry"
+        )
+        targets.forEach { (id, destination) ->
+            val entry = requireNotNull(SettingLinkRegistry.byId(id))
+            assertTrue("Editor should remain accessible: $id", entry.isAvailable(context))
+            val route = SettingLinkRegistry.visibleTarget(context, entry).route
+            assertEquals(destination, route.toSettingsPage().customizationDestination)
+        }
+        listOf(SettingLinkIds.MODIFIERS_INDICATORS, SettingLinkIds.MODIFIERS_INDICATOR_BOTTOM_STRIP,
+            SettingLinkIds.MODIFIERS_INDICATOR_MENU_BAR, SettingLinkIds.MODIFIERS_INDICATOR_STATUS_BAR).forEach { id ->
+            assertEquals(SettingsDestination.ModifierIndicators,
+                requireNotNull(SettingLinkRegistry.byId(id)).route.toSettingsPage().destination)
+        }
+    }
+
 }

@@ -6077,6 +6077,14 @@ object SettingsManager {
             .apply()
     }
 
+    fun getDefaultKeyboardBarProfile(slim: Boolean): KeyboardBarProfile = KeyboardBarProfile(
+        suggestions = DEFAULT_SUGGESTIONS_ENABLED,
+        actions = !slim && DEFAULT_STATUS_BAR_VARIATIONS_VISIBLE,
+        bottomIndicators = MODIFIER_INDICATOR_BOTTOM_STRIP in DEFAULT_MODIFIER_INDICATORS,
+        androidIndicators = MODIFIER_INDICATOR_MENU_BAR in DEFAULT_MODIFIER_INDICATORS,
+        inlineIndicators = MODIFIER_INDICATOR_STATUS_BAR in DEFAULT_MODIFIER_INDICATORS
+    )
+
     fun getModifierIndicators(context: Context): Set<String> {
         return normalizeModifierIndicators(
             getPreferences(context).getString(

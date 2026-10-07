@@ -14,6 +14,7 @@ import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonId
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonRegistry
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarCallbacks
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonStyles
+import rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry
 
 /**
  * Overlay menu that replaces the status bar row with fixed buttons.
@@ -23,10 +24,6 @@ class HamburgerMenuView(
     private val buttonRegistry: StatusBarButtonRegistry
 ) {
 
-    companion object {
-        private const val MAX_VERTICAL_PADDING_DP = 8f
-        private const val MIN_BUTTON_HEIGHT_DP = 28f
-    }
 
     private val menuButtonIds = listOf(
         StatusBarButtonId.Symbols,
@@ -121,14 +118,12 @@ class HamburgerMenuView(
         if (root != null) {
             return root!!
         }
-        val verticalPadding = dpToPx(MAX_VERTICAL_PADDING_DP)
         val rowView = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            setPadding(0, verticalPadding, 0, verticalPadding)
             addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
                 updateButtonSizes(this)
             }
@@ -195,7 +190,6 @@ class HamburgerMenuView(
             onHapticFeedback = callbacks.onHapticFeedback
         )
 
-        applyDynamicPadding(rowView)
         val buttonHeight = resolveButtonHeight(rowView)
         val closeButtonView = createCloseButton(onClose, buttonHeight)
         closeButton = closeButtonView
@@ -215,6 +209,8 @@ class HamburgerMenuView(
         }
         currentButtons = hostedButtons
 
+        KeyboardBarRowGeometry.bind(rowView, listOf(closeButtonView) + hostedButtons.map { it.button })
+
         updateButtonSizes(rowView)
         applyStoredStates()
     }
@@ -231,7 +227,6 @@ class HamburgerMenuView(
         if (totalButtons != expectedButtons) {
             return
         }
-        applyDynamicPadding(rowView)
         val spacing = dpToPx(3f)
         val availableWidth = rowView.width - rowView.paddingLeft - rowView.paddingRight
         if (availableWidth <= 0) {
@@ -243,14 +238,23 @@ class HamburgerMenuView(
             val child = rowView.getChildAt(index)
             val params = (child.layoutParams as? LinearLayout.LayoutParams)
                 ?: LinearLayout.LayoutParams(buttonWidth, buttonHeight)
-            params.width = buttonWidth
-            params.height = buttonHeight
-            params.marginEnd = if (index == totalButtons - 1) 0 else spacing
-            child.layoutParams = params
+            val end = if (index == totalButtons - 1) 0 else spacing
+            if (params.width != 0 || params.weight != 1f || params.height != buttonHeight || params.marginEnd != end) {
+                params.width = 0
+                params.weight = 1f
+                params.height = buttonHeight
+                params.marginEnd = end
+                child.layoutParams = params
+            }
         }
         currentButtons.forEach { hosted ->
             buttonHost.updateButtonLayout(hosted.id, buttonWidth, buttonHeight)
+            (hosted.container.layoutParams as? LinearLayout.LayoutParams)?.apply {
+                width = 0
+                weight = 1f
+            }
         }
+        closeButton?.let { applyCloseButtonTheme(it, buttonHeight) }
     }
 
     private fun resolveButtonHeight(rowView: LinearLayout): Int {
@@ -258,19 +262,6 @@ class HamburgerMenuView(
         return if (height > 0) height else dpToPx(39f)
     }
 
-    private fun applyDynamicPadding(rowView: LinearLayout) {
-        val rowHeight = rowView.height
-        val maxPadding = dpToPx(MAX_VERTICAL_PADDING_DP)
-        if (rowHeight <= 0) {
-            return
-        }
-        val minButtonHeight = dpToPx(MIN_BUTTON_HEIGHT_DP)
-        val desiredPadding = ((rowHeight - minButtonHeight) / 2f).toInt().coerceAtLeast(0)
-        val padding = minOf(maxPadding, desiredPadding)
-        if (rowView.paddingTop != padding || rowView.paddingBottom != padding) {
-            rowView.setPadding(rowView.paddingLeft, padding, rowView.paddingRight, padding)
-        }
-    }
 
     private fun applyStoredStates() {
         lastClipboardCount?.let { buttonHost.updateClipboardCount(it) }
@@ -305,7 +296,7 @@ class HamburgerMenuView(
             ?: button.height.takeIf { it > 0 }
             ?: dpToPx(39f)
         button.setColorFilter(theme?.textAndIcons ?: Color.WHITE)
-        button.background = StatusBarButtonStyles.createButtonDrawable(
+        val flat = StatusBarButtonStyles.createButtonDrawable(
             heightPx = height,
             normalColor = theme?.statusBarButton ?: StatusBarButtonStyles.NORMAL_COLOR,
             pressedColor = theme?.accent ?: StatusBarButtonStyles.PRESSED_BLUE,
@@ -313,6 +304,12 @@ class HamburgerMenuView(
             borderColor = theme?.divider,
             borderWidthPx = if (theme != null) dpToPx(1f) else 0
         )
+        KeyboardBarRowGeometry.setStyle(button, KeyboardBarRowGeometry.Style(
+            theme?.statusBarButton ?: StatusBarButtonStyles.NORMAL_COLOR,
+            theme?.accent ?: StatusBarButtonStyles.PRESSED_BLUE,
+            height * (theme?.chromeCornerRadiusRatio ?: StatusBarButtonStyles.BUTTON_CORNER_RADIUS_RATIO),
+            theme?.divider, if (theme != null) dpToPx(1f) else 0, flat
+        ))
     }
 
     private fun dpToPx(dp: Float): Int {

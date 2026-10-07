@@ -12,4 +12,7 @@
     <item name="tag_microphone_state" type="id" />
     <item name="tag_minimal_ui_state" type="id" />
     <item name="tag_previous_count" type="id" />
+    <item name="keyboard_bar_surface_geometry" type="id" />
+    <item name="keyboard_bar_row_geometry" type="id" />
+    <item name="keyboard_bar_canvas_geometry" type="id" />
 </resources>

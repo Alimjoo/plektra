@@ -51,6 +51,7 @@ import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonId
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonPosition
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarCallbacks
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonStyles
+import rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry
 
 /**
  * Handles the variations row (suggestions + microphone/language) rendered above the LED strip.
@@ -388,6 +389,43 @@ class VariationBarView(
         }
     }
 
+    fun resolveStaticVariations(snapshot: StatusBarController.StatusSnapshot): List<String> {
+        return if (snapshot.isEmailField) {
+                    if (emailVariations.isEmpty()) {
+                        emailVariations = VariationRepository.loadEmailVariations(context.assets, context)
+                    }
+                    emailVariations
+                } else if (snapshot.shiftPhysicallyPressed || snapshot.shiftOneShot || snapshot.capsLockEnabled || snapshot.shiftLayerLatched) {
+                    if (staticVariationsShift.isEmpty()) {
+                        val loaded = VariationRepository.loadStaticVariationsShift(context.assets, context)
+                        staticVariationsShift = if (loaded.isNotEmpty()) {
+                            loaded
+                        } else {
+                            SettingsManager.getDefaultStaticVariationShiftPreset()
+                        }
+                    }
+                    staticVariationsShift
+                } else if (snapshot.altPhysicallyPressed || snapshot.altOneShot || snapshot.altLatchActive || snapshot.altModifierLayerLatched) {
+                    if (staticVariationsAlt.isEmpty()) {
+                        val loaded = VariationRepository.loadStaticVariationsAlt(context.assets, context)
+                        staticVariationsAlt = if (loaded.isNotEmpty()) {
+                            loaded
+                        } else {
+                            SettingsManager.getDefaultStaticVariationAltPreset()
+                        }
+                    }
+                    staticVariationsAlt
+                } else {
+                    if (staticVariations.isEmpty()) {
+                        val loaded = VariationRepository.loadStaticVariations(context.assets, context)
+                        staticVariations = loaded.ifEmpty {
+                            SettingsManager.getStaticVariationBasePreset(context)
+                        }
+                    }
+                    staticVariations
+                }
+    }
+
     fun showVariations(snapshot: StatusBarController.StatusSnapshot, inputConnection: android.view.inputmethod.InputConnection?) {
         lastSnapshot = snapshot
         applyHeight()
@@ -424,41 +462,7 @@ class VariationBarView(
                 isStaticContent = false
             }
             allowStaticFallback -> {
-                val variations = if (snapshot.isEmailField) {
-                    if (emailVariations.isEmpty()) {
-                        emailVariations = VariationRepository.loadEmailVariations(context.assets, context)
-                    }
-                    emailVariations
-                } else if (snapshot.shiftPhysicallyPressed || snapshot.shiftOneShot || snapshot.capsLockEnabled || snapshot.shiftLayerLatched) {
-                    if (staticVariationsShift.isEmpty()) {
-                        val loaded = VariationRepository.loadStaticVariationsShift(context.assets, context)
-                        staticVariationsShift = if (loaded.isNotEmpty()) {
-                            loaded
-                        } else {
-                            SettingsManager.getDefaultStaticVariationShiftPreset()
-                        }
-                    }
-                    staticVariationsShift
-                } else if (snapshot.altPhysicallyPressed || snapshot.altOneShot || snapshot.altLatchActive || snapshot.altModifierLayerLatched) {
-                    if (staticVariationsAlt.isEmpty()) {
-                        val loaded = VariationRepository.loadStaticVariationsAlt(context.assets, context)
-                        staticVariationsAlt = if (loaded.isNotEmpty()) {
-                            loaded
-                        } else {
-                            SettingsManager.getDefaultStaticVariationAltPreset()
-                        }
-                    }
-                    staticVariationsAlt
-                } else {
-                    if (staticVariations.isEmpty()) {
-                        val loaded = VariationRepository.loadStaticVariations(context.assets, context)
-                        staticVariations = loaded.ifEmpty {
-                            SettingsManager.getStaticVariationBasePreset(context)
-                        }
-                    }
-                    staticVariations
-                }
-                effectiveVariations = variations
+                effectiveVariations = resolveStaticVariations(snapshot)
                 isStaticContent = true
             }
             else -> {
@@ -492,7 +496,8 @@ class VariationBarView(
         val geometrySignature = listOf(
             availableWidth, verticalPaddingPx(), roundedCorners,
             SettingsManager.getDynamicVariationBarSlotCount(context),
-            SettingsManager.getDynamicVariationBarResizeToContent(context)
+            SettingsManager.getDynamicVariationBarResizeToContent(context),
+            SettingsManager.getStatusBarSlotsLeft(context), SettingsManager.getStatusBarSlotsRight(context)
         )
         val hasExistingRow = currentVariationsRow != null &&
             currentVariationsRow?.parent == containerView &&
@@ -713,6 +718,9 @@ class VariationBarView(
                 isLast,
                 spacingBetweenButtons
             )
+            if (addOnly || isStaticContent || resizeDynamicVariationsToContent || displayedVariations.size == variationSlotsForSizing) {
+                (button.layoutParams as LinearLayout.LayoutParams).apply { width = 0; weight = 1f }
+            }
             button.alpha = 1f
             button.visibility = View.VISIBLE
             variationButtons.add(button)
@@ -728,6 +736,10 @@ class VariationBarView(
             val isLast = index == rightButtons.lastIndex
             createAndAddButton(config.id, buttonsContainerView, isLast, if (isLast) StatusBarButtonPosition.RIGHT else null)
         }
+
+        KeyboardBarRowGeometry.bind(containerView,
+            KeyboardBarRowGeometry.surfaces(leftButtonsContainer) + variationButtons +
+                KeyboardBarRowGeometry.surfaces(buttonsContainer))
 
         if (variationAreaVisible) {
             variationsRow.alpha = 1f
@@ -1161,7 +1173,11 @@ class VariationBarView(
                 setCompoundDrawablesWithIntrinsicBounds(null, null, addDrawable, null)
                 compoundDrawablePadding = dp4
             }
-            background = stateListDrawable
+            KeyboardBarRowGeometry.setStyle(this, KeyboardBarRowGeometry.Style(
+                themeOverride?.normalKey ?: VariationButtonStyles.NORMAL_COLOR,
+                themeOverride?.accent ?: VariationButtonStyles.PRESSED_BLUE,
+                buttonHeight * (themeOverride?.chromeCornerRadiusRatio ?: VariationButtonStyles.BUTTON_CORNER_RADIUS_RATIO),
+                themeOverride?.divider, dpToPx(1f), stateListDrawable))
             layoutParams = LinearLayout.LayoutParams(calculatedWidth, buttonHeight).apply {
                 marginEnd = if (isLast) 0 else spacingBetweenButtons
             }

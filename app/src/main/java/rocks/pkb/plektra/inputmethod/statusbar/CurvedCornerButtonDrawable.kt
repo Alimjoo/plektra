@@ -10,9 +10,8 @@ import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.view.View
 import rocks.pkb.plektra.inputmethod.ImeChromeLayout
-import kotlin.math.PI
 
-/** Draws the button and its border inside the display contour without shrinking its touch target. */
+/** Draws the button and its border inside the display and LED contours. */
 internal class CurvedCornerButtonDrawable(
     private val view: View,
     private val normalColor: Int,
@@ -20,19 +19,17 @@ internal class CurvedCornerButtonDrawable(
     private val cornerRadius: Float,
     private val borderColor: Int?,
     private val borderWidth: Int,
-    private val leftEdge: Boolean
+    val leftEdge: Boolean,
+    val rightEdge: Boolean = !leftEdge
 ) : Drawable() {
-    private var lastTopMultiplier = -1
     private var drawableAlpha = 255
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val buttonPath = Path()
-    private val displayPath = Path()
     private val location = IntArray(2)
     private val chromeLocation = IntArray(2)
     private var lastPlacementKey: List<Any>? = null
     private var lastPlacement = ContentPlacement(0f, 0f, 1f)
     data class ContentPlacement(val x: Float, val y: Float, val scale: Float)
-    data class OuterContour(val points: List<PointF>, val borderHalfWidthPx: Float)
 
 
     override fun isStateful() = true
@@ -43,165 +40,22 @@ internal class CurvedCornerButtonDrawable(
 
     private fun updatePath() {
         val halfStroke = borderWidth / 2f
-        buttonPath.reset()
         val rect = RectF(bounds).apply { inset(halfStroke, halfStroke) }
-        val bottomRadius = cornerRadius.coerceAtMost(minOf(rect.width(), rect.height()) / 2f)
-        val multiplier = rocks.pkb.plektra.SettingsManager.getTitan2EliteTopCornerMultiplier(view.context)
-        if (multiplier != lastTopMultiplier) {
-            lastTopMultiplier = multiplier
-            invalidateSelf()
-        }
-        val topRadius = (cornerRadius * multiplier).coerceAtMost(minOf(rect.width() - bottomRadius, rect.height() - bottomRadius))
-        buttonPath.addRoundRect(
-            rect,
-            floatArrayOf(if (leftEdge) 0f else bottomRadius, if (leftEdge) 0f else bottomRadius,
-                if (leftEdge) bottomRadius else 0f, if (leftEdge) bottomRadius else 0f,
-                bottomRadius, bottomRadius, bottomRadius, bottomRadius), Path.Direction.CW
-        )
         var ancestor = view.parent
         while (ancestor != null && ancestor !is ImeChromeLayout) ancestor = ancestor.parent
         val chrome = ancestor as? ImeChromeLayout
-        val radii = chrome?.bottomCornerRadiiPx
-        if (chrome != null && radii != null) {
-            view.getLocationInWindow(location)
-            chrome.getLocationInWindow(chromeLocation)
-            val x = (location[0] - chromeLocation[0]).toFloat()
-            val y = (location[1] - chromeLocation[1]).toFloat()
-            val calibration = rocks.pkb.plektra.T2eCornerCalibration.read(view.context)
-            val ledInset = if (chrome.contourIntegratedIndicators) {
-                rocks.pkb.plektra.inputmethod.ui.LedStatusView.CONTOUR_BUTTON_INSET_DP *
-                    view.resources.displayMetrics.density
-            } else {
-                0f
-            }
-            // Calibration already includes the intended visible gap. Offset only the
-            // stroke centerline so its outside edge follows that exact contour.
-            val contourInset = halfStroke + ledInset
-            displayPath.set(rocks.pkb.plektra.T2eCornerGeometry.path(
-                chrome.width.toFloat(), chrome.height.toFloat(),
-                radii.first.toFloat(), radii.second.toFloat(), calibration, contourInset
-            ))
-            displayPath.offset(-x, -y)
-            buttonPath.op(displayPath, Path.Op.INTERSECT)
-            // The upper button rounding joins the same calibrated contour used by the preview.
-            val radius = (if (leftEdge) radii.first else radii.second).toFloat()
-            val outerX = (if (leftEdge) -x else chrome.width - x) + calibration.shiftXPx
-            fun boundary(atY: Float): Float =
-                rocks.pkb.plektra.T2eCornerGeometry.atY(
-                    radius, chrome.height.toFloat(), atY + y - calibration.shiftYPx, calibration, contourInset
-                ).x
-            val joinY = (rect.top + topRadius).coerceAtMost(rect.bottom - bottomRadius)
-            val joinX = boundary(joinY)
-            val dx = (boundary(joinY + 0.05f) - boundary(joinY - 0.05f)).coerceAtLeast(0f)
-            val tangentLength = kotlin.math.sqrt(dx * dx + 0.1f * 0.1f)
-            val tangentX = dx / tangentLength
-            val tangentY = 0.1f / tangentLength
-            val available = if (leftEdge) rect.right - outerX else outerX - rect.left
-            val startX = (boundary(rect.top) + topRadius).coerceAtMost(available - bottomRadius)
-            val handle = minOf((joinY - rect.top) * 0.55228475f,
-                (startX - joinX).coerceAtLeast(0f) + topRadius * 0.25f)
-            fun screenX(localX: Float) = outerX + if (leftEdge) localX else -localX
-            val blend = Path().apply {
-                moveTo(screenX(startX), rect.top)
-                cubicTo(screenX(startX - handle), rect.top,
-                    screenX(joinX - tangentX * handle), joinY - tangentY * handle,
-                    screenX(joinX), joinY)
-                // Continue outside the display contour; its circle supplies the rest.
-                lineTo(screenX(-chrome.width.toFloat()), joinY + tangentY * chrome.width)
-                lineTo(screenX(-chrome.width.toFloat()), rect.bottom + chrome.height)
-                lineTo(screenX(chrome.width.toFloat() * 2), rect.bottom + chrome.height)
-                lineTo(screenX(chrome.width.toFloat() * 2), rect.top)
-                close()
-            }
-            buttonPath.op(blend, Path.Op.INTERSECT)
-        }
-    }
-
-    /** The visible outer button edge, including its rounded transition from the top edge. */
-    fun outerContourCenterline(): OuterContour? {
-        if (view.width <= 0 || view.height <= 0) return null
-        setBounds(0, 0, view.width, view.height)
-        val halfStroke = borderWidth / 2f
-        val rect = RectF(bounds).apply { inset(halfStroke, halfStroke) }
-        val bottomRadius = cornerRadius.coerceAtMost(minOf(rect.width(), rect.height()) / 2f)
-        val multiplier = rocks.pkb.plektra.SettingsManager
-            .getTitan2EliteTopCornerMultiplier(view.context)
-        val topRadius = (cornerRadius * multiplier)
-            .coerceAtMost(minOf(rect.width() - bottomRadius, rect.height() - bottomRadius))
-        var ancestor = view.parent
-        while (ancestor != null && ancestor !is ImeChromeLayout) ancestor = ancestor.parent
-        val chrome = ancestor as? ImeChromeLayout ?: return null
-        val radii = chrome.bottomCornerRadiiPx ?: return null
+        val geometry = chrome?.geometry ?: rocks.pkb.plektra.inputmethod.KeyboardBarGeometry(view.context)
         view.getLocationInWindow(location)
-        chrome.getLocationInWindow(chromeLocation)
-        val x = (location[0] - chromeLocation[0]).toFloat()
-        val y = (location[1] - chromeLocation[1]).toFloat()
-        val calibration = rocks.pkb.plektra.T2eCornerCalibration.read(view.context)
-        val ledInset = if (chrome.contourIntegratedIndicators) {
-            rocks.pkb.plektra.inputmethod.ui.LedStatusView.CONTOUR_BUTTON_INSET_DP *
-                view.resources.displayMetrics.density
-        } else 0f
-        val contourInset = halfStroke + ledInset
-        val radius = (if (leftEdge) radii.first else radii.second).toFloat()
-        val outerX = (if (leftEdge) -x else chrome.width - x) + calibration.shiftXPx
-        fun boundary(atY: Float): Float =
-            rocks.pkb.plektra.T2eCornerGeometry.atY(
-                radius, chrome.height.toFloat(), atY + y - calibration.shiftYPx,
-                calibration, contourInset
-            ).x
-        val joinY = (rect.top + topRadius).coerceAtMost(rect.bottom - bottomRadius)
-        val joinX = boundary(joinY)
-        val dx = (boundary(joinY + 0.05f) - boundary(joinY - 0.05f)).coerceAtLeast(0f)
-        val tangentLength = kotlin.math.sqrt(dx * dx + 0.1f * 0.1f)
-        val tangentX = dx / tangentLength
-        val tangentY = 0.1f / tangentLength
-        val available = if (leftEdge) rect.right - outerX else outerX - rect.left
-        val startX = (boundary(rect.top) + topRadius).coerceAtMost(available - bottomRadius)
-        val handle = minOf((joinY - rect.top) * 0.55228475f,
-            (startX - joinX).coerceAtLeast(0f) + topRadius * 0.25f)
-        fun screenX(localX: Float) = outerX + if (leftEdge) localX else -localX
-        val p0 = PointF(screenX(startX), rect.top)
-        val p1 = PointF(screenX(startX - handle), rect.top)
-        val p2 = PointF(screenX(joinX - tangentX * handle), joinY - tangentY * handle)
-        val p3 = PointF(screenX(joinX), joinY)
-        val points = ArrayList<PointF>(130)
-        for (index in 0..32) {
-            val t = index / 32f
-            val u = 1f - t
-            points += PointF(
-                x + u * u * u * p0.x + 3f * u * u * t * p1.x +
-                    3f * u * t * t * p2.x + t * t * t * p3.x,
-                y + u * u * u * p0.y + 3f * u * u * t * p1.y +
-                    3f * u * t * t * p2.y + t * t * t * p3.y
-            )
-        }
-        fun contourPoint(fraction: Float): PointF {
-            val point = rocks.pkb.plektra.T2eCornerGeometry.point(
-                radius, chrome.height.toFloat(), PI / 2.0 * fraction,
-                calibration, contourInset
-            )
-            return PointF(
-                if (leftEdge) point.x + calibration.shiftXPx
-                else chrome.width - point.x + calibration.shiftXPx,
-                point.y + calibration.shiftYPx
-            )
-        }
-        val joinGlobalY = y + joinY
-        var low = 0.0
-        var high = 1.0
-        repeat(28) {
-            val mid = (low + high) / 2.0
-            if (contourPoint(mid.toFloat()).y < joinGlobalY) low = mid else high = mid
-        }
-        val startFraction = ((low + high) / 2.0).toFloat()
-        for (index in 1..96) {
-            val fraction = startFraction + (1f - startFraction) * index / 96f
-            points += contourPoint(fraction)
-        }
-        return OuterContour(points, halfStroke)
+        chrome?.getLocationInWindow(chromeLocation) ?: chromeLocation.fill(0)
+        val x = if (chrome != null) (location[0] - chromeLocation[0]).toFloat() else 0f
+        val y = if (chrome != null) (location[1] - chromeLocation[1]).toFloat() else 0f
+        rect.offset(x, y)
+        buttonPath.set(geometry.surfacePath(chrome?.width?.toFloat() ?: view.width.toFloat(),
+            chrome?.height?.toFloat() ?: view.height.toFloat(), rect, cornerRadius, leftEdge, rightEdge, halfStroke))
+        buttonPath.offset(-x, -y)
     }
 
-    /** Keep the complete icon/text box 2 dp inside the drawn shape, moving only inward/up. */
+    /** Center the visible content in the remaining shape, then fit its complete ink box. */
     fun contentCenter(contentWidth: Float, contentHeight: Float, preferredX: Float,
                       preferredY: Float, leftEdge: Boolean): ContentPlacement {
         setBounds(0, 0, view.width, view.height)
@@ -215,6 +69,7 @@ internal class CurvedCornerButtonDrawable(
         val region = android.graphics.Region().apply {
             setPath(buttonPath, android.graphics.Region(this@CurvedCornerButtonDrawable.bounds))
         }
+        val center = rocks.pkb.plektra.inputmethod.KeyboardBarGeometry.centroid(region, PointF(preferredX, preferredY))
         val gap = 2f * view.resources.displayMetrics.density + borderWidth / 2f
         fun findPlacement(scale: Float): ContentPlacement? {
             val halfWidth = contentWidth * scale / 2f + gap
@@ -224,18 +79,15 @@ internal class CurvedCornerButtonDrawable(
                 region.contains(kotlin.math.ceil(x + halfWidth).toInt(), kotlin.math.floor(y - halfHeight).toInt()) &&
                 region.contains(kotlin.math.floor(x - halfWidth).toInt(), kotlin.math.ceil(y + halfHeight).toInt()) &&
                 region.contains(kotlin.math.ceil(x + halfWidth).toInt(), kotlin.math.ceil(y + halfHeight).toInt())
-            if (fits(preferredX, preferredY)) return ContentPlacement(preferredX, preferredY, scale)
+            if (fits(center.x, center.y)) return ContentPlacement(center.x, center.y, scale)
             var best: ContentPlacement? = null
             var bestDistance = Float.POSITIVE_INFINITY
-            val maxUp = (preferredY - halfHeight).toInt().coerceAtLeast(0)
-            val maxInward = (if (leftEdge) view.width - halfWidth - preferredX else preferredX - halfWidth)
-                .toInt().coerceAtLeast(0)
-            for (up in 0..maxUp) {
-                for (inward in 0..maxInward) {
-                    val distance = (up * up + inward * inward).toFloat()
+            for (yPixel in halfHeight.toInt()..(view.height - halfHeight).toInt()) {
+                for (xPixel in halfWidth.toInt()..(view.width - halfWidth).toInt()) {
+                    val x = xPixel.toFloat()
+                    val y = yPixel.toFloat()
+                    val distance = (x - center.x) * (x - center.x) + (y - center.y) * (y - center.y)
                     if (distance >= bestDistance) continue
-                    val x = preferredX + if (leftEdge) inward else -inward
-                    val y = preferredY - up
                     if (fits(x, y)) {
                         bestDistance = distance
                         best = ContentPlacement(x, y, scale)
@@ -276,6 +128,16 @@ internal class CurvedCornerButtonDrawable(
             paint.alpha = android.graphics.Color.alpha(paint.color) * drawableAlpha / 255
             canvas.drawPath(buttonPath, paint)
         }
+    }
+
+    fun visibleCenter(): PointF {
+        setBounds(0, 0, view.width, view.height)
+        updatePath()
+        val region = android.graphics.Region().apply {
+            setPath(buttonPath, android.graphics.Region(this@CurvedCornerButtonDrawable.bounds))
+        }
+        return rocks.pkb.plektra.inputmethod.KeyboardBarGeometry.centroid(region,
+            PointF(view.width / 2f, view.height / 2f))
     }
 
     override fun setAlpha(alpha: Int) { drawableAlpha = alpha; invalidateSelf() }

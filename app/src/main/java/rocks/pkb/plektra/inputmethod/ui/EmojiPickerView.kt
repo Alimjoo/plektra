@@ -2,7 +2,6 @@ package rocks.pkb.plektra.inputmethod.ui
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Matrix
 import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.ColorDrawable
@@ -70,8 +69,7 @@ class EmojiPickerView(
     private val searchPanel: FrameLayout
     private val searchToggleButton: ImageView
     private val closeButton: ImageView
-    private var roundedControls = false
-    private var roundedIconSize = 0f
+    private var controlsHeight = 0
     val edgeControls: Pair<View, View> get() = searchToggleButton to closeButton
 
     private var coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -205,7 +203,7 @@ class EmojiPickerView(
             overScrollMode = View.OVER_SCROLL_ALWAYS
             setHasFixedSize(false)
             clipToPadding = false
-            setPadding(smallPadding, smallPadding, smallPadding, smallPadding + dpToPx(44f))
+            setPadding(smallPadding, smallPadding, smallPadding, smallPadding)
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -228,7 +226,8 @@ class EmojiPickerView(
                 if (pos == RecyclerView.NO_POSITION) return
                 when (parent.adapter?.getItemViewType(pos) ?: return) {
                     VIEW_TYPE_HEADER -> {
-                        outRect.set(0, spacing, 0, spacing)
+                        val followsEmoji = pos > 0 && parent.adapter?.getItemViewType(pos - 1) == VIEW_TYPE_EMOJI
+                        outRect.set(0, if (followsEmoji) spacing else 0, 0, if (followsEmoji) spacing else 0)
                     }
                     VIEW_TYPE_EMOJI -> {
                         val layoutParams = view.layoutParams as? GridLayoutManager.LayoutParams
@@ -379,12 +378,10 @@ class EmojiPickerView(
         currentInputConnection = connection
     }
 
-    fun configureRoundedControls(enabled: Boolean, rowHeight: Int, iconSize: Float) {
-        roundedControls = enabled
-        roundedIconSize = iconSize
-        // Reserve the slot; rounded mode uses the chrome's shared SYM close control.
-        closeButton.visibility = if (enabled) View.INVISIBLE else View.VISIBLE
-        val height = if (enabled) rowHeight else dpToPx(32f)
+    fun configureControls(rowHeight: Int) {
+        controlsHeight = rowHeight
+        closeButton.visibility = View.VISIBLE
+        val height = rowHeight
         val bar = closeButton.parent as LinearLayout
         bar.layoutParams = bar.layoutParams.apply { this.height = height }
         tabScrollView.layoutParams = tabScrollView.layoutParams.apply { this.height = height }
@@ -393,16 +390,14 @@ class EmojiPickerView(
         for (index in 0 until tabRow.childCount) {
             val category = tabRow.getChildAt(index)
             category.layoutParams = category.layoutParams.apply {
-                this.height = if (enabled) ViewGroup.LayoutParams.MATCH_PARENT else dpToPx(32f)
+                this.height = ViewGroup.LayoutParams.MATCH_PARENT
             }
             (category as? ImageView)?.scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
         fun sizeControls(width: Int) {
             listOf(searchToggleButton, closeButton).forEach { button ->
                 button.layoutParams = (button.layoutParams as LinearLayout.LayoutParams).apply {
-                    this.width = if (enabled) {
-                        if (button === closeButton) width - (width / 10) * 9 else width / 10
-                    } else dpToPx(if (button === closeButton) 36f else 32f)
+                    this.width = width / 10
                     this.height = height
                     marginEnd = if (button === searchToggleButton) spacing else 0
                 }
@@ -415,42 +410,18 @@ class EmojiPickerView(
 
     private fun applyEdgeControlAppearance() {
         listOf(searchToggleButton, closeButton).forEach { button ->
-            if (roundedControls) {
-                button.background = if (button === closeButton) createCloseButtonBackground() else createTabBackground(isSearchPanelVisible)
-                if (roundedControls) button.background = android.graphics.drawable.InsetDrawable(
-                    button.background,
-                    if (button === searchToggleButton) dpToPx(3f) else 0,
-                    0,
-                    if (button === closeButton) dpToPx(3f) else 0,
-                    dpToPx(3f)
-                )
-                button.setPadding(0, 0, 0, 0)
-                button.scaleType = ImageView.ScaleType.MATRIX
-                button.drawable?.let { icon ->
-                    val scale = roundedIconSize / icon.intrinsicHeight.coerceAtLeast(1)
-                    button.imageMatrix = Matrix().apply {
-                        setScale(scale, scale)
-                        postTranslate(
-                            (button.layoutParams.width - icon.intrinsicWidth * scale) / 2f +
-                                dpToPx(8f) * if (button === searchToggleButton) 1 else -1,
-                            (button.layoutParams.height - icon.intrinsicHeight * scale) / 2f - dpToPx(2f)
-                        )
-                    }
-                }
-            } else {
-                val pad = dpToPx(4f)
-                button.setPadding(pad, pad, pad, pad)
-                button.scaleType = ImageView.ScaleType.CENTER_INSIDE
-                button.background = if (button === closeButton) createCloseButtonBackground() else createTabBackground(isSearchPanelVisible)
-                if (roundedControls) button.background = android.graphics.drawable.InsetDrawable(
-                    button.background,
-                    if (button === searchToggleButton) dpToPx(3f) else 0,
-                    0,
-                    if (button === closeButton) dpToPx(3f) else 0,
-                    dpToPx(3f)
-                )
-            }
+            val theme = themeOverride
+            val selected = button === searchToggleButton && isSearchPanelVisible
+            val flat = if (button === closeButton) createCloseButtonBackground() else createTabBackground(selected)
+            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.setStyle(button,
+                rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.Style(
+                    if (selected) theme?.accent ?: Color.DKGRAY else theme?.statusBarButton ?: Color.DKGRAY,
+                    theme?.accent ?: Color.BLUE,
+                    (controlsHeight.takeIf { it > 0 } ?: dpToPx(32f)) * (theme?.chromeCornerRadiusRatio ?: 0.15f),
+                    theme?.divider, dpToPx(1f), flat))
         }
+        val bar = closeButton.parent as? LinearLayout ?: return
+        rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bind(bar, listOf(searchToggleButton, closeButton))
     }
 
     fun configureSoftwareKeyboardMode(heightPx: Int?, onKeyboardLayoutRequested: (() -> Unit)?) {
@@ -884,7 +855,9 @@ class EmojiPickerView(
     private fun setSearchPanelVisible(visible: Boolean) {
         isSearchPanelVisible = visible
         searchPanel.visibility = if (visible) View.VISIBLE else View.GONE
-        searchToggleButton.background = createTabBackground(visible)
+        recyclerView.setPadding(smallPadding, smallPadding, smallPadding,
+            smallPadding + if (visible) dpToPx(44f) else 0)
+        searchToggleButton.background = createSearchToggleBackground(visible)
         applyEdgeControlAppearance()
         setSearchInputCaptureEnabled(visible)
         if (visible) {
@@ -999,7 +972,7 @@ class EmojiPickerView(
                 isFocusable = true
                 layoutParams = LinearLayout.LayoutParams(
                     0, // Use weight
-                    if (roundedControls) ViewGroup.LayoutParams.MATCH_PARENT else tabHeight,
+                    if (controlsHeight > 0) ViewGroup.LayoutParams.MATCH_PARENT else tabHeight,
                     1f // Equal weight for all tabs
                 )
                 setOnClickListener {
@@ -1177,6 +1150,10 @@ class EmojiPickerView(
         }
     }
 
+    private fun createSearchToggleBackground(selected: Boolean): android.graphics.drawable.Drawable {
+        return createTabBackground(selected)
+    }
+
     private fun createTabBackground(isSelected: Boolean): GradientDrawable {
         val theme = themeOverride
         return GradientDrawable().apply {
@@ -1235,7 +1212,7 @@ class EmojiPickerView(
         closeButton.setColorFilter(theme?.textAndIcons ?: Color.WHITE)
         closeButton.background = createCloseButtonBackground()
         searchToggleButton.setColorFilter(theme?.textAndIcons ?: Color.WHITE)
-        searchToggleButton.background = createTabBackground(isSearchPanelVisible)
+        searchToggleButton.background = createSearchToggleBackground(isSearchPanelVisible)
         keyboardSwitcherButton.setColorFilter(theme?.textAndIcons ?: Color.WHITE)
         keyboardSwitcherButton.background = createTabBackground(false)
         applyEdgeControlAppearance()
@@ -1364,8 +1341,9 @@ class EmojiPickerView(
         }
         // Quiet: no onSearchPanelVisibilityChanged notification, the view is off-screen.
         isSearchPanelVisible = false
+        recyclerView.setPadding(smallPadding, smallPadding, smallPadding, smallPadding)
         searchPanel.visibility = View.GONE
-        searchToggleButton.background = createTabBackground(false)
+        searchToggleButton.background = createSearchToggleBackground(false)
         setSearchInputCaptureEnabled(false)
         searchQuery = ""
         lastSearchResults = emptyList()

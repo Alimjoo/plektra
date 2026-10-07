@@ -139,9 +139,8 @@ class ClipboardHistoryView(
             clipToPadding = false  // Important: allows scrolling into padding area
             overScrollMode = View.OVER_SCROLL_ALWAYS
             setHasFixedSize(false)
-            // Add minimal horizontal/top padding and bottom padding (double entry height)
-            // This ensures we can always scroll to the last entry, even when new rows are added
-            setPadding(smallPadding, smallPadding, smallPadding, entryHeightPx * 2)
+            // Keep only the clearance needed by the overlaid close control.
+            setPadding(smallPadding, smallPadding, smallPadding, dpToPx(32f) + smallPadding)
             isNestedScrollingEnabled = true
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -209,9 +208,8 @@ class ClipboardHistoryView(
         super.onDetachedFromWindow()
     }
 
-    /** The chrome owns the shared, screen-contoured close button in rounded mode. */
-    fun configureRoundedLayout(enabled: Boolean) {
-        closeButton?.visibility = if (enabled) View.GONE else View.VISIBLE
+    fun useHostCloseControl() {
+        closeButton?.visibility = View.GONE
     }
 
     fun configureSoftwareKeyboardMode(heightPx: Int?) {

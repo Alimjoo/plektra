@@ -18,6 +18,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import rocks.pkb.plektra.R
@@ -27,7 +28,9 @@ import rocks.pkb.plektra.inputmethod.suggestions.SuggestionButtonHandler
 import rocks.pkb.plektra.inputmethod.VariationButtonHandler
 import rocks.pkb.plektra.inputmethod.ui.HamburgerMenuView
 import rocks.pkb.plektra.inputmethod.ui.KeyboardThemeColors
-import rocks.pkb.plektra.inputmethod.ui.ModifierIndicatorView
+import rocks.pkb.plektra.inputmethod.statusbar.button.ModifierButtonFactory
+import rocks.pkb.plektra.inputmethod.statusbar.ButtonState
+import rocks.pkb.plektra.inputmethod.statusbar.ModifierIndicator
 import rocks.pkb.plektra.inputmethod.StatusBarController
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonHost
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonId
@@ -61,9 +64,7 @@ class FullSuggestionsBar(
     private var frameContainer: FrameLayout? = null
     private var minimalLeftButtonsContainer: LinearLayout? = null
     private var minimalRightButtonsContainer: LinearLayout? = null
-    private var modifierIndicatorsContainer: LinearLayout? = null
     private var hamburgerMenuView: HamburgerMenuView? = null
-    private var modifierIndicatorView: ModifierIndicatorView? = null
     private var lastMinimalUiActive: Boolean? = null
     private var lastSlots: List<String?> = emptyList()
     private var assets: AssetManager? = null
@@ -72,7 +73,13 @@ class FullSuggestionsBar(
     private var contentEnabled = true
     private var actionsEnabled = true
     private var showModifierMenuIndicators: Boolean = false
-    private val buttonHost = buttonRegistry?.let { StatusBarButtonHost(context, it) }
+    private val renderingRegistry = buttonRegistry ?: StatusBarButtonRegistry()
+    private val buttonHost = StatusBarButtonHost(context, renderingRegistry)
+    private var activeModifiers: List<ModifierIndicator> = emptyList()
+
+    init {
+        renderingRegistry.register(ModifierButtonFactory.id, ModifierButtonFactory())
+    }
     private val suggestionButtons: MutableList<TextView> = mutableListOf()
     private val mainHandler = Handler(Looper.getMainLooper())
     private var reenableSuggestionsAccessibilityRunnable: Runnable? = null
@@ -81,6 +88,8 @@ class FullSuggestionsBar(
     private var lastAnnouncedSlots: List<String?> = emptyList()
     private var actionCandidate: String? = null
     private var actionSlots: List<String?> = emptyList()
+    private var currentInputConnection: android.view.inputmethod.InputConnection? = null
+    var onCursorMovedListener: (() -> Unit)? = null
     var requireDictionaryForSuggestions: Boolean = true
     var themeOverride: KeyboardThemeColors? = null
         set(value) {
@@ -89,14 +98,15 @@ class FullSuggestionsBar(
             }
             field = value
             hamburgerMenuView?.themeOverride = value
-            modifierIndicatorView?.themeOverride = value
-            buttonHost?.themeOverride = value?.let {
+            buttonHost.themeOverride = value?.let {
                 StatusBarButtonStyles.ThemeOverride(
                     normalColor = it.statusBarButton,
                     pressedColor = it.accent,
                     iconColor = it.textAndIcons,
                     cornerRadiusRatio = it.keyCornerRadiusRatio,
                     borderColor = it.statusButtonBorder,
+                    activeIndicatorColor = it.ledActive,
+                    lockedIndicatorColor = it.ledLocked,
                     borderWidthPx = dpToPx(1f)
                 )
             }
@@ -132,7 +142,9 @@ class FullSuggestionsBar(
     fun ensureView(): FrameLayout {
         if (frameContainer == null) {
             // Create frame container to allow overlaying the language button
-            frameContainer = FrameLayout(context).apply {
+            frameContainer = rocks.pkb.plektra.inputmethod.ui.CursorSwipeLayout(context).apply {
+                connection = { currentInputConnection }
+                onCursorMoved = { onCursorMovedListener?.invoke() }
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     targetHeightPx
@@ -180,20 +192,7 @@ class FullSuggestionsBar(
                 }
             }
 
-            modifierIndicatorView = ModifierIndicatorView(context).apply {
-                themeOverride = this@FullSuggestionsBar.themeOverride
-            }
-            modifierIndicatorsContainer = modifierIndicatorView?.ensureView()?.apply {
-                layoutParams = FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    targetHeightPx
-                ).apply {
-                    gravity = Gravity.START or Gravity.CENTER_VERTICAL
-                }
-            }
-            
             frameContainer?.addView(container)
-            modifierIndicatorsContainer?.let { frameContainer?.addView(it) }
             minimalLeftButtonsContainer?.let { frameContainer?.addView(it) }
             minimalRightButtonsContainer?.let { frameContainer?.addView(it) }
             
@@ -246,14 +245,7 @@ class FullSuggestionsBar(
                 buttons.layoutParams = params
             }
         }
-        modifierIndicatorsContainer?.let { indicators ->
-            val params = (indicators.layoutParams as? FrameLayout.LayoutParams)
-                ?: FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, height)
-            if (params.height != height) {
-                params.height = height
-                indicators.layoutParams = params
-            }
-        }
+
     }
     
     private fun toggleHamburgerMenu() {
@@ -274,7 +266,7 @@ class FullSuggestionsBar(
      */
     fun setMicrophoneButtonActive(isActive: Boolean) {
         hamburgerMenuView?.setMicrophoneActive(isActive)
-        buttonHost?.setMicrophoneActive(isActive)
+        buttonHost.setMicrophoneActive(isActive)
     }
     
     /**
@@ -282,7 +274,7 @@ class FullSuggestionsBar(
      */
     fun updateMicrophoneAudioLevel(rmsdB: Float) {
         hamburgerMenuView?.updateMicrophoneAudioLevel(rmsdB)
-        buttonHost?.updateMicrophoneAudioLevel(rmsdB)
+        buttonHost.updateMicrophoneAudioLevel(rmsdB)
     }
     
     /**
@@ -290,7 +282,7 @@ class FullSuggestionsBar(
      */
     fun updateClipboardCount(count: Int) {
         hamburgerMenuView?.updateClipboardCount(count)
-        buttonHost?.updateClipboardCount(count)
+        buttonHost.updateClipboardCount(count)
     }
     
     /**
@@ -298,12 +290,12 @@ class FullSuggestionsBar(
      */
     fun refreshLanguageText() {
         hamburgerMenuView?.refreshLanguageText()
-        buttonHost?.refreshLanguageText()
+        buttonHost.refreshLanguageText()
     }
 
     fun setMinimalUiActive(isActive: Boolean) {
         lastMinimalUiActive = isActive
-        showMinimalUiButtons = actionsEnabled && contentEnabled
+        showMinimalUiButtons = actionsEnabled
         renderMinimalUiButtons()
         hamburgerMenuView?.setMinimalUiActive(isActive)
     }
@@ -311,27 +303,25 @@ class FullSuggestionsBar(
     fun setContentEnabled(suggestions: Boolean, actions: Boolean) {
         contentEnabled = suggestions
         actionsEnabled = actions
-        showMinimalUiButtons = suggestions && actions
+        showMinimalUiButtons = actions
         renderMinimalUiButtons()
-        if (!suggestions) {
+        if (!suggestions && !actions) {
             hamburgerMenuView?.hide()
             frameContainer?.visibility = View.GONE
         }
     }
 
     fun setModifierMenuIndicatorsEnabled(enabled: Boolean) {
+        if (showModifierMenuIndicators == enabled) return
         showModifierMenuIndicators = enabled
-        if (!enabled) {
-            modifierIndicatorsContainer?.visibility = View.GONE
-        }
-        applyContainerInsetsForMinimalButtons()
-        frameContainer?.requestLayout()
+        renderMinimalUiButtons()
     }
 
     fun updateModifierIndicators(snapshot: StatusBarController.StatusSnapshot) {
-        val visible = showModifierMenuIndicators && modifierIndicatorView?.update(snapshot) == true
-        modifierIndicatorsContainer?.visibility = if (visible) View.VISIBLE else View.GONE
-        applyContainerInsetsForMinimalButtons()
+        val next = ModifierButtonFactory.active(snapshot)
+        if (activeModifiers == next) return
+        activeModifiers = next
+        renderMinimalUiButtons()
         frameContainer?.requestLayout()
     }
 
@@ -377,13 +367,15 @@ class FullSuggestionsBar(
         canDeleteUserSuggestion: ((String) -> Boolean)?,
         onSuggestionSelectedOverride: ((Int, String) -> Unit)? = null
     ) {
+        currentInputConnection = inputConnection
         val bar = container ?: return
         val frame = frameContainer ?: return
         
         // Hide suggestions when unavailable, but keep Slim buttons visible.
         val hasDictionary = !requireDictionaryForSuggestions || hasDictionaryForCurrentSubtype()
-        val canShowSuggestions = shouldShow && hasDictionary
-        if (!contentEnabled || (!canShowSuggestions && !showMinimalUiButtons)) {
+        val canShowSuggestions = shouldShow && hasDictionary &&
+            (suggestions.isNotEmpty() || !addWordCandidate.isNullOrBlank())
+        if ((!contentEnabled && !actionsEnabled) || (!canShowSuggestions && !showMinimalUiButtons)) {
             cancelPendingSuggestionsAccessibilityEnable()
             suggestionButtons.clear()
             frame.visibility = View.GONE
@@ -502,12 +494,12 @@ class FullSuggestionsBar(
     private fun renderMinimalUiButtons() {
         val leftContainer = minimalLeftButtonsContainer ?: return
         val rightContainer = minimalRightButtonsContainer ?: return
-        val registry = buttonRegistry ?: return
-        val host = buttonHost ?: return
+        val registry = renderingRegistry
+        val host = buttonHost
 
         leftContainer.removeAllViews()
         rightContainer.removeAllViews()
-        if (!showMinimalUiButtons) {
+        if (!showMinimalUiButtons && (!showModifierMenuIndicators || activeModifiers.isEmpty())) {
             leftContainer.visibility = View.GONE
             rightContainer.visibility = View.GONE
             applyContainerInsetsForMinimalButtons()
@@ -523,8 +515,8 @@ class FullSuggestionsBar(
         val callbacks = (callbacksProvider?.invoke() ?: StatusBarCallbacks())
             .copy(onHamburgerMenuRequested = { toggleHamburgerMenu() })
 
-        fun addButton(buttonId: StatusBarButtonId, target: LinearLayout, isLast: Boolean, outerEdge: StatusBarButtonPosition?) {
-            val actualButtonWidth = buttonWidth + if (outerEdge != null) outerButtonExtraPx() else 0
+        fun addButton(buttonId: StatusBarButtonId, target: LinearLayout, isLast: Boolean, outerEdge: StatusBarButtonPosition?, contentWidth: Int? = null) {
+            val actualButtonWidth = contentWidth ?: (buttonWidth + if (outerEdge != null) outerButtonExtraPx() else 0)
             val hosted = host.getOrCreateButton(
                 id = buttonId,
                 size = buttonSize,
@@ -539,7 +531,7 @@ class FullSuggestionsBar(
             target.addView(hosted.container)
         }
 
-        val enabledButtons = registry.getEnabledSlimButtons(context)
+        val enabledButtons = if (showMinimalUiButtons) registry.getEnabledButtons(context) else emptyList()
         val leftButtons = enabledButtons
             .filter { it.position == StatusBarButtonPosition.LEFT }
             .sortedBy { it.order }
@@ -547,14 +539,19 @@ class FullSuggestionsBar(
             .filter { it.position == StatusBarButtonPosition.RIGHT }
             .sortedBy { it.order }
 
-        leftButtons.forEachIndexed { index, config ->
-            addButton(config.id, leftContainer, index == leftButtons.lastIndex, if (index == 0) StatusBarButtonPosition.LEFT else null)
+        val dynamicModifiers = if (showModifierMenuIndicators) activeModifiers else emptyList()
+        val allLeftIds = (if (dynamicModifiers.isNotEmpty()) listOf(ModifierButtonFactory.id) else emptyList()) + leftButtons.map { it.id }
+        allLeftIds.forEachIndexed { index, id ->
+            addButton(id, leftContainer, index == allLeftIds.lastIndex,
+                if (index == 0) StatusBarButtonPosition.LEFT else null,
+                if (id == ModifierButtonFactory.id) buttonWidth + dpToPx(ModifierButtonFactory.ICON_STEP_DP) * (dynamicModifiers.size - 1) else null)
+            if (id == ModifierButtonFactory.id) host.updateButton(id, ButtonState.ModifierState(dynamicModifiers))
         }
         rightButtons.forEachIndexed { index, config ->
             addButton(config.id, rightContainer, index == rightButtons.lastIndex, if (index == rightButtons.lastIndex) StatusBarButtonPosition.RIGHT else null)
         }
 
-        leftContainer.visibility = if (leftButtons.isEmpty()) View.GONE else View.VISIBLE
+        leftContainer.visibility = if (allLeftIds.isEmpty()) View.GONE else View.VISIBLE
         rightContainer.visibility = if (rightButtons.isEmpty()) View.GONE else View.VISIBLE
         applyContainerInsetsForMinimalButtons()
     }
@@ -562,40 +559,14 @@ class FullSuggestionsBar(
     private fun applyContainerInsetsForMinimalButtons() {
         val bar = container ?: return
         val spacing = chromeSpacingPx()
-        val indicatorInset = modifierIndicatorsContainer?.takeIf {
-            showModifierMenuIndicators && it.visibility == View.VISIBLE
-        }?.let {
-            modifierIndicatorsWidthPx(it) + spacing
+        fun buttonsInset(buttons: LinearLayout?): Int = buttons?.takeIf { it.visibility == View.VISIBLE }?.let {
+            (0 until it.childCount).sumOf { index ->
+                val params = it.getChildAt(index).layoutParams as LinearLayout.LayoutParams
+                params.width + params.marginStart + params.marginEnd
+            } + spacing
         } ?: 0
-        val minimalLeftInset = if (showMinimalUiButtons) {
-            minimalLeftButtonsContainer?.takeIf { it.visibility == View.VISIBLE }?.let {
-                it.childCount * minimalButtonWidthPx() + (if (it.childCount > 0) outerButtonExtraPx() else 0) +
-                    (it.childCount - 1).coerceAtLeast(0) * spacing +
-                    spacing
-            } ?: 0
-        } else {
-            0
-        }
-        minimalLeftButtonsContainer?.let { buttons ->
-            val params = (buttons.layoutParams as? FrameLayout.LayoutParams)
-                ?: FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, targetHeightPx).apply {
-                    gravity = Gravity.START or Gravity.CENTER_VERTICAL
-                }
-            if (params.marginStart != indicatorInset) {
-                params.marginStart = indicatorInset
-                buttons.layoutParams = params
-            }
-        }
-        val leftInset = indicatorInset + minimalLeftInset
-        val rightInset = if (showMinimalUiButtons) {
-            minimalRightButtonsContainer?.takeIf { it.visibility == View.VISIBLE }?.let {
-                it.childCount * minimalButtonWidthPx() + (if (it.childCount > 0) outerButtonExtraPx() else 0) +
-                    (it.childCount - 1).coerceAtLeast(0) * spacing +
-                    spacing
-            } ?: 0
-        } else {
-            0
-        }
+        val leftInset = buttonsInset(minimalLeftButtonsContainer)
+        val rightInset = buttonsInset(minimalRightButtonsContainer)
         val params = (bar.layoutParams as? FrameLayout.LayoutParams)
             ?: FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -619,19 +590,21 @@ class FullSuggestionsBar(
         if (changed || bar.layoutParams !is FrameLayout.LayoutParams) {
             bar.layoutParams = params
         }
+        bindRowGeometry()
     }
 
-    private fun modifierIndicatorsWidthPx(indicators: LinearLayout): Int {
-        val childCount = indicators.childCount
-        if (childCount <= 0) {
-            return 0
+    private fun bindRowGeometry() {
+        frameContainer?.let { row ->
+            KeyboardBarRowGeometry.bind(row, KeyboardBarRowGeometry.surfaces(minimalLeftButtonsContainer) +
+                KeyboardBarRowGeometry.surfaces(container) + KeyboardBarRowGeometry.surfaces(minimalRightButtonsContainer))
         }
-        val chipWidth = dpToPx(26f)
-        val chipGap = dpToPx(2f)
-        return indicators.paddingLeft +
-            indicators.paddingRight +
-            childCount * chipWidth +
-            (childCount - 1).coerceAtLeast(0) * chipGap
+    }
+
+    private fun styleSuggestionSurface(view: View) {
+        KeyboardBarRowGeometry.setStyle(view, KeyboardBarRowGeometry.Style(
+            themeOverride?.suggestion ?: DEFAULT_SUGGESTION_COLOR, themeOverride?.accent ?: PRESSED_BLUE,
+            targetHeightPx * (themeOverride?.chromeCornerRadiusRatio ?: 0f),
+            themeOverride?.divider, dpToPx(1f), buildSuggestionBackground()))
     }
 
     private fun renderSlots(
@@ -721,7 +694,7 @@ class FullSuggestionsBar(
                 maxLines = 1
                 ellipsize = TextUtils.TruncateAt.END
                 setPadding(padH, padV, padH, padV)
-                background = buildSuggestionBackground()
+                styleSuggestionSurface(this)
                 layoutParams = weightLayoutParams
                 isClickable = suggestion != null
                 isFocusable = suggestion != null
@@ -798,6 +771,7 @@ class FullSuggestionsBar(
             bar.addView(button)
             suggestionButtons.add(button)
         }
+        bindRowGeometry()
     }
 
     private fun buildSuggestionActionSlot(
@@ -823,7 +797,7 @@ class FullSuggestionsBar(
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
             layoutParams = weightLayoutParams
-            background = buildSuggestionBackground()
+            styleSuggestionSurface(this)
             val padding = dpToPx(4f)
             setPadding(padding, padding, padding, padding)
 

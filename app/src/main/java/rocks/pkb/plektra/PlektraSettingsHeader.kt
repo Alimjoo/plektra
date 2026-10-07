@@ -1,6 +1,7 @@
 package rocks.pkb.plektra
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,7 +25,8 @@ import androidx.compose.ui.unit.dp
 internal fun PlektraSettingsHeader(
     title: String,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     Surface(
         modifier = modifier
@@ -48,8 +50,9 @@ internal fun PlektraSettingsHeader(
                 text = title,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp).weight(1f)
             )
+            actions()
         }
     }
 }

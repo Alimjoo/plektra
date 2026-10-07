@@ -3,7 +3,6 @@ package rocks.pkb.plektra.inputmethod.ui
 import android.graphics.Color
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.PointF
 import android.view.View
 import rocks.pkb.plektra.R
 import rocks.pkb.plektra.inputmethod.StatusBarController
@@ -20,7 +19,8 @@ import org.robolectric.annotation.GraphicsMode
 @Config(sdk = [33])
 class LedStatusViewTest {
     @Test
-    fun roundedOverlayPassesCenterTouchesThroughButRetainsBottomStripGestures() {
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun roundedOverlayPassesCenterTouchesThroughButRetainsArcGestures() {
         val leds = LedStatusView(RuntimeEnvironment.getApplication()).apply {
             bottomCornerRadiiPx = 100 to 100
         }
@@ -34,16 +34,20 @@ class LedStatusViewTest {
             val event = android.view.MotionEvent.obtain(0, 0, android.view.MotionEvent.ACTION_DOWN, x, y, 0)
             return try { view.dispatchTouchEvent(event) } finally { event.recycle() }
         }
+        val railPoint = FloatArray(2)
+        android.graphics.PathMeasure(leds.barGeometry.ledRailPath(1000f, 110f,
+            leds.layout.segments.first()), false).let { it.getPosTan(it.length / 3f, railPoint, null) }
+        assertTrue(touch(railPoint[0], railPoint[1]))
         org.junit.Assert.assertFalse(touch(50f, 50f))
         org.junit.Assert.assertFalse(touch(500f, 50f))
-        assertTrue(touch(500f, 109f))
+        org.junit.Assert.assertFalse(touch(500f, 109f))
         leds.bottomCornerRadiiPx = null
         assertTrue(touch(500f, 50f))
     }
 
     @Test
     @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun roundedIndicatorsStayInTwoHorizontalRowsInsideTheContour() {
+    fun roundedIndicatorsFollowTheDisplayContourAndFinishAlongTheBottom() {
         val leds = LedStatusView(RuntimeEnvironment.getApplication()).apply {
             layout = ModifierLedLayouts.TITAN_2_ELITE
             bottomCornerRadiiPx = 100 to 100
@@ -67,7 +71,7 @@ class LedStatusViewTest {
         val bottom = bitmap.height
         assertTrue("Left indicators must stay near the lower edge", hasPaint(50, 220, bottom - 20, bottom))
         assertTrue("Right indicators must stay near the lower edge", hasPaint(780, 950, bottom - 20, bottom))
-        assertTrue("Indicators must not climb the side contour", !hasPaint(0, 1_000, 0, bottom - 30))
+        assertTrue("Indicators must follow the side contour", hasPaint(0, 220, 0, bottom - 30))
         assertTrue("The glass corner must stay clear", !hasPaint(0, 10, bottom - 10, bottom))
 
         leds.bottomCornerRadiiPx = null
@@ -78,30 +82,11 @@ class LedStatusViewTest {
 
     @Test
     @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun contourIntegratedIndicatorsUseOnlyTheLowerCornerRails() {
+    fun integratedIndicatorsFollowTheFixedDisplayContour() {
         val leds = LedStatusView(RuntimeEnvironment.getApplication()).apply {
             layout = ModifierLedLayouts.TITAN_2_ELITE
             bottomCornerRadiiPx = 100 to 100
             contourIntegrated = true
-            contourGeometry = LedStatusView.ContourGeometry(
-                buttonTopPx = 20f,
-                leftButtonEndPx = 120f,
-                rightButtonStartPx = 880f,
-                leftButtonContour = LedStatusView.ButtonContour(
-                    listOf(
-                        PointF(30f, 25f), PointF(20f, 25f), PointF(10f, 35f),
-                        PointF(10f, 60f), PointF(30f, 90f), PointF(120f, 100f)
-                    ),
-                    borderHalfWidthPx = 1f
-                ),
-                rightButtonContour = LedStatusView.ButtonContour(
-                    listOf(
-                        PointF(970f, 25f), PointF(980f, 25f), PointF(990f, 35f),
-                        PointF(990f, 60f), PointF(970f, 90f), PointF(880f, 100f)
-                    ),
-                    borderHalfWidthPx = 1f
-                )
-            )
         }
         val view = leds.ensureView()
         view.measure(
@@ -117,11 +102,30 @@ class LedStatusViewTest {
                 (top until bottom).any { y -> Color.alpha(bitmap.getPixel(x, y)) > 0 }
             }
 
-        assertTrue("Left contour rails must be visible", hasPaint(0, 150, 0, 110))
-        assertTrue("Right contour rails must be visible", hasPaint(850, 1_000, 0, 110))
-        assertTrue("The rails must start at the rounded top corners", hasPaint(0, 1_000, 20, 30))
-        assertTrue("No rail stroke may cross the button top edge", !hasPaint(0, 1_000, 0, 20))
-        assertTrue("The LEDs must stay inside the outer button regions", !hasPaint(125, 875, 0, 110))
+        assertTrue("Left contour rails must be visible", hasPaint(0, 180, 0, 110))
+        assertTrue("Right contour rails must be visible", hasPaint(820, 1_000, 0, 110))
+        assertTrue("The display center must remain clear above the lower rails", !hasPaint(300, 700, 0, 80))
+
+        val integrated = IntArray(bitmap.width * bitmap.height).also {
+            bitmap.getPixels(it, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        }
+        leds.contourIntegrated = false
+        view.measure(
+            View.MeasureSpec.makeMeasureSpec(1_000, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(110, View.MeasureSpec.EXACTLY)
+        )
+        view.layout(0, 0, view.measuredWidth, view.measuredHeight)
+        val standaloneBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        view.draw(Canvas(standaloneBitmap))
+        val standalone = IntArray(standaloneBitmap.width * standaloneBitmap.height).also {
+            standaloneBitmap.getPixels(it, 0, standaloneBitmap.width, 0, 0,
+                standaloneBitmap.width, standaloneBitmap.height)
+        }
+        org.junit.Assert.assertArrayEquals(
+            "LED geometry must not depend on the keyboard-bar contents",
+            standalone,
+            integrated
+        )
     }
 
     @Test

@@ -109,7 +109,11 @@ data class StatusBarCallbacks(
  * State passed to buttons for updates.
  * Each button type can define its own state requirements.
  */
+data class ModifierIndicator(val iconResId: Int, val locked: Boolean, val description: String, val label: String? = null)
+
 sealed class ButtonState {
+    data class ModifierState(val indicators: List<ModifierIndicator>) : ButtonState()
+
     /**
      * State for clipboard button - badge count.
      */

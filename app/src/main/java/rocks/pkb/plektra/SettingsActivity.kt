@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
@@ -51,13 +53,19 @@ class SettingsActivity : LocalizedComponentActivity() {
         setContent {
             PlektraTheme {
                 val linkRequest by settingLinkRequest
-                SettingsScreen(
+                Surface(
                     modifier = Modifier.fillMaxSize(),
-                    initialDestination = intent.getStringExtra(EXTRA_DESTINATION),
-                    initialCustomizationDestination = intent.getStringExtra(EXTRA_CUSTOMIZATION_DESTINATION),
-                    initialKeyboardThemeTarget = intent.getStringExtra(EXTRA_KEYBOARD_THEME_TARGET),
-                    settingLinkRequest = linkRequest
-                )
+                    color = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.onBackground
+                ) {
+                    SettingsScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        initialDestination = intent.getStringExtra(EXTRA_DESTINATION),
+                        initialCustomizationDestination = intent.getStringExtra(EXTRA_CUSTOMIZATION_DESTINATION),
+                        initialKeyboardThemeTarget = intent.getStringExtra(EXTRA_KEYBOARD_THEME_TARGET),
+                        settingLinkRequest = linkRequest
+                    )
+                }
             }
         }
     }

@@ -15,7 +15,9 @@ object StatusBarButtonStyles {
         val iconColor: Int,
         val cornerRadiusRatio: Float = BUTTON_CORNER_RADIUS_RATIO,
         val borderColor: Int? = null,
-        val borderWidthPx: Int = 0
+        val borderWidthPx: Int = 0,
+        val activeIndicatorColor: Int = iconColor,
+        val lockedIndicatorColor: Int = iconColor
     )
 
     fun createButtonDrawable(

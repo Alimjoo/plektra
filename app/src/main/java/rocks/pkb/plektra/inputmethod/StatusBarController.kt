@@ -9,10 +9,6 @@ import android.inputmethodservice.InputMethodService
 import android.graphics.Color
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Outline
-import android.graphics.Matrix
-import android.graphics.Path
-import android.graphics.RectF
 import androidx.core.content.ContextCompat
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
@@ -22,7 +18,6 @@ import android.view.MotionEvent
 import android.view.RoundedCorner
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewOutlineProvider
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.FrameLayout
@@ -321,8 +316,6 @@ class StatusBarController(
     private var symSurfaceStack: LinearLayout? = null
     private var symSurfaceCloseButton: View? = null
     private var emojiKeyboardContainer: LinearLayout? = null
-    private var emojiKeyboardHorizontalPaddingPx: Int = 0
-    private var emojiKeyboardBottomPaddingPx: Int = 0
     private var clipboardHistoryView: ClipboardHistoryView? = null
     private var lastClipboardCountRendered: Int = -1
     private var lastClipboardAccessibleRendered: Boolean? = null
@@ -356,8 +349,9 @@ class StatusBarController(
     private var variationsWrapper: View? = null
     private var hamburgerMenuView: HamburgerMenuView? = null
     private var slimModeActive: Boolean = false
-    var hasTransientContent: Boolean = false
-        private set
+    private var hasTransientSurface: Boolean = false
+    val hasTransientContent: Boolean
+        get() = hasTransientSurface || expansionSuggestions.isNotEmpty()
     private var fullSuggestionsBar: FullSuggestionsBar? = null
     private var expansionSuggestions: List<String> = emptyList()
     private var onExpansionSuggestionSelected: ((String) -> Unit)? = null
@@ -464,8 +458,6 @@ class StatusBarController(
             chrome.regularCornerColors = activeColors.background to activeColors.background
             chrome.compactCornerColors = activeColors.background to activeColors.background
             chrome.bottomFillColors = activeColors.background to activeColors.background
-            chrome.expandedCloseColor = activeColors.background
-            chrome.expandedKeyHeightPx = hardwareSymKeyHeightPx(activeColors)
             chrome.invalidate()
         }
         emojiKeyboardContainer?.setBackgroundColor(activeColors.background)
@@ -521,7 +513,10 @@ class StatusBarController(
         val modifiers = modifiersContainer
         val variations = variationsWrapper
         val surface = symSurfaceContainer
-        val children = listOf(suggestions, modifiers, variations, surface).filterNotNull()
+        val arrangement = rocks.pkb.plektra.KeyboardBarConfiguration.read(context).arrangement
+        val rows = if (arrangement == rocks.pkb.plektra.KeyboardBarArrangement.ACTIONS_FIRST)
+            listOf(variations, suggestions) else listOf(suggestions, variations)
+        val children = (rows + listOf(modifiers, surface)).filterNotNull()
         val alreadyOrdered = children.withIndex().all { (index, child) ->
             child.parent === layout && layout.indexOfChild(child) == index
         }
@@ -729,24 +724,9 @@ class StatusBarController(
                 visibility = View.GONE
             }
 
-            // Container for emoji grid (when SYM is active) - placed at the bottom
-            val emojiKeyboardHorizontalPadding = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                8f,
-                context.resources.displayMetrics
-            ).toInt()
-            val emojiKeyboardBottomPadding = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                12f, // Padding in basso per evitare i controlli IME
-                context.resources.displayMetrics
-            ).toInt()
-            emojiKeyboardHorizontalPaddingPx = emojiKeyboardHorizontalPadding
-            emojiKeyboardBottomPaddingPx = emojiKeyboardBottomPadding
-            
-            emojiKeyboardContainer = LinearLayout(context).apply {
+            emojiKeyboardContainer = ImeContentLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                // No top padding, only horizontal and bottom
-                setPadding(emojiKeyboardHorizontalPadding, 0, emojiKeyboardHorizontalPadding, emojiKeyboardBottomPadding)
+                setPadding(0, 0, 0, 0)
                 layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
@@ -811,10 +791,8 @@ class StatusBarController(
                 indicatorView = ledStrip
                 expandedSurfaceView = emojiKeyboardContainer
                 compactStatusRow = fullSuggestionsBar?.ensureView()
-                expandedCloseButton = symSurfaceCloseButton
-                onContourGeometryChanged = { geometry ->
-                    ledStatusView.contourGeometry = geometry
-                }
+                ledStatusView.barGeometry = geometry
+                onLedGeometryChanged = { ledStatusView.invalidateGeometry() }
             }
             applyChromeZOrder()
             applyAccessibilitySecondRowReadPreference()
@@ -1182,9 +1160,7 @@ class StatusBarController(
             }
         }
         view.configureSoftwareKeyboardMode(softwareKeyboardHeight)
-        view.configureRoundedLayout(
-            SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)
-        )
+        view.useHostCloseControl()
         view.setInputConnection(inputConnection)
 
         // Refresh only when needed (data changed), otherwise keep the list stable.
@@ -1265,13 +1241,8 @@ class StatusBarController(
                 onKeyboardLayoutRequested = null
             )
         }
-        val roundedControls = SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context) && !pickerShownAboveSoftwareKeyboard
         val colors = activeThemeColors()
-        val iconSize = if (slimModeActive) {
-            (dpToPx(36f * colors.suggestionsHeightScale.coerceIn(0.65f, 1.6f)) - dpToPx(4f)) * 0.64f
-        } else minOf(dpToPx(24f).toFloat(), hardwareSymKeyHeightPx(colors) * 0.48f)
-        view.configureRoundedControls(roundedControls, hardwareSymKeyHeightPx(colors), iconSize)
-        (statusBarLayout as? ImeChromeLayout)?.expandedPickerButtons = if (roundedControls) view.edgeControls else null
+        view.configureControls(if (pickerShownAboveSoftwareKeyboard) dpToPx(32f) else hardwareSymKeyHeightPx(colors))
         view.setInputConnection(inputConnection)
 
         // Only scroll to top when view is just added (first open or switching pages)
@@ -1372,9 +1343,7 @@ class StatusBarController(
         val container = emojiKeyboardContainer ?: return
         // Restore default padding for emoji/symbols pages.
         val roundedCorners = SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)
-        val sidePadding = emojiKeyboardHorizontalPaddingPx
-        val bottomPadding = if (roundedCorners) dpToPx(3f) else 0
-        container.setPadding(sidePadding, 0, sidePadding, bottomPadding)
+        container.setPadding(0, 0, 0, 0)
         val inputConnectionChanged = lastInputConnectionUsed != inputConnection
         val inputConnectionBecameAvailable = lastInputConnectionUsed == null && inputConnection != null
         if (lastSymPageRendered == page && lastSymMappingsRendered == symMappings && !inputConnectionChanged && !inputConnectionBecameAvailable) {
@@ -1422,7 +1391,7 @@ class StatusBarController(
         val screenWidth = context.resources.displayMetrics.widthPixels
         val horizontalPadding = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
-            8f * 2, // padding sinistro + destro
+            0f,
             context.resources.displayMetrics
         ).toInt()
         val availableWidth = screenWidth - horizontalPadding
@@ -1564,7 +1533,7 @@ class StatusBarController(
         symMappings: Map<Int, String>? = null
     ) {
         val container = emojiKeyboardContainer ?: return
-        container.setPadding(0, 0, 0, emojiKeyboardBottomPaddingPx)
+        container.setPadding(0, 0, 0, 0)
         val keyboardView = obtainSoftwareKeyboardView(container)
         configureSoftwareKeyboard(keyboardView, snapshot, inputConnection, symMappings)
         (keyboardView.layoutParams as? LinearLayout.LayoutParams)?.let { params ->
@@ -1928,7 +1897,7 @@ class StatusBarController(
     ) {
         val page = snapshot.symPage
         val container = emojiKeyboardContainer ?: return
-        container.setPadding(0, 0, 0, emojiKeyboardBottomPaddingPx)
+        container.setPadding(0, 0, 0, 0)
         val inputConnectionChanged = lastInputConnectionUsed != inputConnection
         val layoutName = resolveSoftwareKeyboardLayoutName(snapshot)
         val layoutStyle = softwareKeyboardLayoutStyle()
@@ -1954,7 +1923,7 @@ class StatusBarController(
             layoutName = layoutName
         )
         val keySpacing = dpToPx(2f)
-        val keyHeight = ((lastSoftwareKeyboardHeight.takeIf { it > 0 } ?: dpToPx(200f)) - emojiKeyboardBottomPaddingPx) / 4
+        val keyHeight = (lastSoftwareKeyboardHeight.takeIf { it > 0 } ?: dpToPx(200f)) / 4
         val screenWidth = context.resources.displayMetrics.widthPixels
         val columns = maxOf(10, rows.maxOf { it.length }, rows.getOrNull(2)?.length?.plus(2) ?: 0)
         val fixedKeyWidth = ((screenWidth - keySpacing * (columns - 1)) / columns).coerceAtLeast(1)
@@ -2376,7 +2345,6 @@ class StatusBarController(
             setCornerRadius(cornerRadius)
             setStroke(dpToPx(1f), theme.divider)
         }
-        keyLayout.background = drawable
         
         // Emoji/carattere deve occupare tutto il tasto, centrata
         // Calcola textSize in base all'altezza disponibile (convertendo da pixel a sp)
@@ -2434,6 +2402,10 @@ class StatusBarController(
         // Aggiungi prima il contenuto (dietro) poi il testo (davanti)
         keyLayout.addView(contentText)
         keyLayout.addView(labelText)
+        rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.setStyle(keyLayout,
+            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.Style(
+                theme.normalKey, theme.accent, cornerRadius, theme.divider, dpToPx(1f), drawable),
+            content = contentText)
         
         return keyLayout
     }
@@ -2569,66 +2541,10 @@ class StatusBarController(
     private fun applySurfaceCloseButtonTheme(theme: KeyboardThemeColors) {
         (symSurfaceCloseButton as? ImageView)?.apply {
             setColorFilter(theme.textAndIcons)
-            background = createCloseButtonBackground(theme)
-            val rounded = SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)
-            (layoutParams as? FrameLayout.LayoutParams)?.let { params ->
-                val screenWidth = statusBarLayout?.width?.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels
-                val rightInset = if (rounded) dpToPx(3.1f) else 0
-                val targetWidth = if (rounded) screenWidth - (screenWidth / 10) * 9 - rightInset else dpToPx(36f)
-                val targetHeight = if (rounded) hardwareSymKeyHeightPx(theme) else dpToPx(32f)
-                if (params.width != targetWidth || params.height != targetHeight || params.rightMargin != rightInset) {
-                    params.width = targetWidth
-                    params.height = targetHeight
-                    params.rightMargin = rightInset
-                    layoutParams = params
-                }
-            }
-            setPadding(dpToPx(4f), dpToPx(4f), dpToPx(if (rounded) 12f else 4f), dpToPx(if (rounded) 12f else 4f))
-            if (rounded) {
-                background = android.graphics.drawable.InsetDrawable(background, 0, 0, dpToPx(3f), dpToPx(3f))
-                drawable?.let { icon ->
-                    val clipboardSize = if (slimModeActive) {
-                        (dpToPx(36f * theme.suggestionsHeightScale.coerceIn(0.65f, 1.6f)) - dpToPx(4f)) * 0.64f
-                    } else {
-                        minOf(dpToPx(24f).toFloat(), dpToPx(55f * theme.variationsHeightScale.coerceIn(0.65f, 1.6f)) * 0.48f)
-                    }
-                    val scale = clipboardSize / icon.intrinsicHeight.coerceAtLeast(1)
-                    scaleType = ImageView.ScaleType.MATRIX
-                    imageMatrix = Matrix().apply {
-                        setScale(scale, scale)
-                        postTranslate(
-                            (layoutParams.width - icon.intrinsicWidth * scale) / 2f - paddingLeft - dpToPx(8f),
-                            (layoutParams.height - icon.intrinsicHeight * scale) / 2f - paddingTop - dpToPx(2f)
-                        )
-                    }
-                }
-                outlineProvider = object : ViewOutlineProvider() {
-                    override fun getOutline(view: View, outline: Outline) {
-                        val displayRadius = (statusBarLayout as? ImeChromeLayout)?.bottomCornerRadiiPx?.second
-                            ?: dpToPx(TITAN_2_ELITE_CORNER_FALLBACK_RADIUS_DP)
-                        val radius = (displayRadius - reservedExpandedLedHeight()).coerceAtLeast(0).toFloat()
-                        val horizontalRadius = (displayRadius - dpToPx(3.1f)).coerceAtLeast(0).toFloat()
-                        val path = Path().apply {
-                            addRoundRect(
-                                RectF(0f, -2f * radius, view.width.toFloat(), view.height.toFloat()),
-                                floatArrayOf(0f, 0f, 0f, 0f, horizontalRadius, radius, 0f, 0f),
-                                Path.Direction.CW
-                            )
-                        }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) outline.setPath(path)
-                        else {
-                            @Suppress("DEPRECATION")
-                            outline.setConvexPath(path)
-                        }
-                    }
-                }
-                clipToOutline = true
-                invalidateOutline()
-            } else {
-                scaleType = ImageView.ScaleType.CENTER_INSIDE
-                clipToOutline = false
-                outlineProvider = ViewOutlineProvider.BACKGROUND
-            }
+            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.placeTrailingControl(this, hardwareSymKeyHeightPx(theme))
+            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.style(this,
+                theme.statusBarButton, theme.accent, hardwareSymKeyHeightPx(theme) * theme.chromeCornerRadiusRatio,
+                theme.divider, dpToPx(1f), right = true)
         }
     }
 
@@ -3052,7 +2968,7 @@ class StatusBarController(
         val isSoftwareKeyboardSymbolPage = isFullSoftwareKeyboardMode && snapshot.symPage in listOf(1, 2, 5)
         val isSoftwareKeyboardOverlayPage =
             isSoftwareKeyboardSymbolPage || isSoftwareKeyboardClipboardPage || isSoftwareKeyboardEmojiPage
-        hasTransientContent = isFullSoftwareKeyboardMode || snapshot.symPage > 0 || snapshot.clipboardOverlay
+        hasTransientSurface = isFullSoftwareKeyboardMode || snapshot.symPage > 0 || snapshot.clipboardOverlay
         if (!isSoftwareKeyboardEmojiPage) {
             dismissEmojiPickerPopup()
         }
@@ -3063,7 +2979,15 @@ class StatusBarController(
         variationBarView?.onCursorMovedListener = onCursorMovedListener
         variationBarView?.updateInputConnection(inputConnection)
         val barPresentation = rocks.pkb.plektra.KeyboardBarConfiguration.read(context).presentation(slimModeActive)
-        variationBarView?.forceVariationAreaVisible = isFullSoftwareKeyboardMode && barPresentation.actions
+        val sharedRow = barPresentation.arrangement == rocks.pkb.plektra.KeyboardBarArrangement.SHARED &&
+            !isFullSoftwareKeyboardMode && snapshot.symPage == 0 && !snapshot.clipboardOverlay
+        val expansionActive = expansionSuggestions.isNotEmpty()
+        val suggestionsAvailable = barPresentation.suggestions && !snapshot.shouldDisableSuggestions &&
+            (SettingsManager.isExperimentalSuggestionsEnabled(context) || isFullSoftwareKeyboardMode) &&
+            (snapshot.suggestions.isNotEmpty() || !snapshot.addWordCandidate.isNullOrBlank())
+        val hasSuggestionRow = expansionActive || suggestionsAvailable
+        fullSuggestionsBar?.onCursorMovedListener = onCursorMovedListener
+        variationBarView?.forceVariationAreaVisible = barPresentation.actions
         variationBarView?.setSymModeActive((snapshot.symPage > 0 && !isSoftwareKeyboardOverlayPage) || snapshot.clipboardOverlay)
         variationBarView?.updateLanguageButtonText()
         updateClipboardCount(snapshot.clipboardCount)
@@ -3074,13 +2998,13 @@ class StatusBarController(
             hideHamburgerMenu()
             lastHamburgerInputConnection = inputConnection
         }
-        if ((snapshot.symPage > 0 && !isFullSoftwareKeyboardMode) || snapshot.clipboardOverlay || (slimModeActive && !isFullSoftwareKeyboardMode)) {
+        if ((snapshot.symPage > 0 && !isFullSoftwareKeyboardMode) || snapshot.clipboardOverlay) {
             hideHamburgerMenu()
         }
         
         val layout = ensureLayoutCreated(emojiMapText) ?: return
-        if ((!barPresentation.hasPersistentContent && !isFullSoftwareKeyboardMode &&
-                snapshot.symPage == 0 && !snapshot.clipboardOverlay) || snapshot.navModeActive) {
+        if ((!hasSuggestionRow && !barPresentation.actions && !barPresentation.bottomIndicators && !isFullSoftwareKeyboardMode &&
+                snapshot.symPage == 0 && !snapshot.clipboardOverlay && expansionSuggestions.isEmpty()) || snapshot.navModeActive) {
             collapseLayout()
             return
         }
@@ -3126,30 +3050,12 @@ class StatusBarController(
         val activeLedLayout = modifierLedLayout()
         ledStatusView.layout = activeLedLayout
         val ledStripEnabled = showHardwareBottomIndicators
-        val showLedStrip = ledStripEnabled && snapshot.symPage == 0 && !snapshot.clipboardOverlay
-        ledStatusView.compactOnly = !barPresentation.suggestions && !barPresentation.actions && !isFullSoftwareKeyboardMode
-        val ledOnly = ledStatusView.compactOnly && showLedStrip
-        (statusBarLayout as? ImeChromeLayout)?.ledOnlyReservedHeightPx =
-            if (ledOnly) ledStatusView.reservedStripHeightPx() else null
-        if (ledOnly) {
-            layout.setBackgroundColor(Color.TRANSPARENT)
-            (context as? InputMethodService)?.window?.window?.navigationBarColor = Color.TRANSPARENT
-        }
-        val contourIntegratedIndicators =
-            showLedStrip &&
-                !ledStatusView.compactOnly &&
-                !slimModeActive &&
-                !isFullSoftwareKeyboardMode &&
-                activeLedLayout == ModifierLedLayouts.TITAN_2_ELITE &&
-                (statusBarLayout as? ImeChromeLayout)?.bottomCornerRadiiPx != null
-        ledStatusView.contourIntegrated = contourIntegratedIndicators
-        (statusBarLayout as? ImeChromeLayout)?.contourIntegratedIndicators =
-            contourIntegratedIndicators
+        val showLedStrip = ledStripEnabled
         ledStatusView.getView()?.visibility = if (showLedStrip) View.VISIBLE else View.GONE
         if (showLedStrip) {
             ledStatusView.update(snapshot)
         }
-        val showSecondRow = barPresentation.actions
+        val showSecondRow = barPresentation.actions && !sharedRow
         val variationsBar = if (showSecondRow) variationBarView else null
         val variationsWrapperView = if (showSecondRow) variationsWrapper else null
         if (!showSecondRow) {
@@ -3157,9 +3063,22 @@ class StatusBarController(
         }
         val experimentalEnabled = SettingsManager.isExperimentalSuggestionsEnabled(context)
         val suggestionsEnabledSetting = barPresentation.suggestions
-        fullSuggestionsBar?.setContentEnabled(suggestionsEnabledSetting, false)
-        val expansionActive = expansionSuggestions.isNotEmpty()
-        val showFullBar = expansionActive || (
+        val sharedDynamicVariations = !SettingsManager.isStaticVariationBarModeEnabled(context) &&
+            !snapshot.shouldDisableVariations && snapshot.variations.isNotEmpty()
+        val sharedVariations = if (sharedRow && barPresentation.actions && !expansionActive) {
+            if (sharedDynamicVariations) snapshot.variations
+            else if (!suggestionsAvailable) variationBarView?.resolveStaticVariations(snapshot).orEmpty()
+            else emptyList()
+        } else emptyList()
+        val rowContent = when {
+            expansionActive -> expansionSuggestions
+            sharedVariations.isNotEmpty() -> sharedVariations
+            suggestionsAvailable -> snapshot.suggestions
+            else -> emptyList()
+        }
+        fullSuggestionsBar?.setContentEnabled(suggestionsEnabledSetting || expansionActive || sharedVariations.isNotEmpty(),
+            sharedRow && barPresentation.actions)
+        val showFullBar = expansionActive || (sharedRow && barPresentation.actions) || (
             suggestionsEnabledSetting &&
                 (experimentalEnabled || isFullSoftwareKeyboardMode) &&
                 (isFullSoftwareKeyboardMode || !snapshot.shouldDisableSuggestions) &&
@@ -3171,26 +3090,50 @@ class StatusBarController(
             liveAnnouncementsEnabled = isAccessibilityLiveAnnouncementsEnabled(),
             suggestionsAnnouncementDelayMs = suggestionsAnnouncementDelayMs
         )
-        fullSuggestionsBar?.requireDictionaryForSuggestions = !expansionActive && !isFullSoftwareKeyboardMode
+        fullSuggestionsBar?.requireDictionaryForSuggestions = !expansionActive && sharedVariations.isEmpty() && !isFullSoftwareKeyboardMode
         fullSuggestionsBar?.update(
-            if (expansionActive) expansionSuggestions else snapshot.suggestions,
+            rowContent,
             showFullBar,
             inputConnection,
             onVariationSelectedListener,
             if (expansionActive || isFullSoftwareKeyboardMode) false else snapshot.shouldDisableSuggestions,
-            if (expansionActive) null else snapshot.addWordCandidate,
+            if (expansionActive || sharedVariations.isNotEmpty()) null else snapshot.addWordCandidate,
             onAddUserWord,
             onAddUserWordSubstitutionRequested,
             onSuggestionCommitted,
             onHideSuggestion,
             onDeleteUserSuggestion,
             canDeleteUserSuggestion,
-            if (expansionActive) { _, suggestion -> onExpansionSuggestionSelected?.invoke(suggestion) } else null
+            when {
+                expansionActive -> { _, suggestion -> onExpansionSuggestionSelected?.invoke(suggestion) }
+                sharedVariations.isNotEmpty() -> { _, variation ->
+                    val click = if (sharedDynamicVariations)
+                        VariationButtonHandler.createVariationClickListener(variation, inputConnection, context, onVariationSelectedListener)
+                    else VariationButtonHandler.createStaticVariationClickListener(variation, inputConnection, context, onVariationSelectedListener)
+                    click.onClick(fullSuggestionsBar?.ensureView())
+                }
+                else -> null
+            }
         )
+        ledStatusView.compactOnly = fullSuggestionsBar?.ensureView()?.visibility != View.VISIBLE && !barPresentation.actions && !hasTransientSurface
+        val ledOnly = ledStatusView.compactOnly && showLedStrip
+        (statusBarLayout as? ImeChromeLayout)?.ledOnlyReservedHeightPx =
+            if (ledOnly) ledStatusView.reservedStripHeightPx() else null
+        if (ledOnly) {
+            layout.setBackgroundColor(Color.TRANSPARENT)
+            (context as? InputMethodService)?.window?.window?.navigationBarColor = Color.TRANSPARENT
+        }
+        val contourIntegratedIndicators =
+            showLedStrip &&
+                !ledStatusView.compactOnly &&
+                activeLedLayout == ModifierLedLayouts.TITAN_2_ELITE &&
+                SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)
+        ledStatusView.contourIntegrated = contourIntegratedIndicators
+        (statusBarLayout as? ImeChromeLayout)?.contourIntegratedIndicators =
+            contourIntegratedIndicators
         val shouldShowSoftwareKeyboard =
             isFullSoftwareKeyboardMode &&
                 !snapshot.clipboardOverlay
-        (layout as? ImeChromeLayout)?.expandedPickerButtons = null
         (layout as? ImeChromeLayout)?.softwareKeyboardModeActive = shouldShowSoftwareKeyboard
         if (snapshot.clipboardOverlay) {
             // Show clipboard as dedicated overlay (not part of SYM pages)
@@ -3206,7 +3149,7 @@ class StatusBarController(
             }
             (layout.background as? ColorDrawable)?.color = activeThemeColors().background
             variationsWrapperView?.apply {
-                visibility = View.INVISIBLE
+                visibility = View.GONE
                 isEnabled = false
                 isClickable = false
             }
@@ -3217,7 +3160,7 @@ class StatusBarController(
             emojiKeyboardView.setBackgroundColor(activeColors.background)
             emojiKeyboardView.visibility = View.VISIBLE
             val surfaceHeight = resolveSurfaceHeightWithOptionalLed(animationHeight, showLedStrip)
-            setSurfaceCloseVisible(SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context))
+            setSurfaceCloseVisible(true)
             applySymSurfaceLayout(
                 symSurfaceView,
                 symSurfaceStackView,
@@ -3318,7 +3261,7 @@ class StatusBarController(
                 variationsBar?.showVariations(snapshotForVariations, inputConnection)
             } else {
                 variationsWrapperView?.apply {
-                    visibility = View.INVISIBLE // keep space to avoid shrink/flash
+                    visibility = View.GONE
                     isEnabled = false
                     isClickable = false
                 }
@@ -3343,8 +3286,7 @@ class StatusBarController(
                 reserveLedSpace = showLedStrip
             )
             setSurfaceCloseVisible(snapshot.symPage in listOf(1, 2, 5) ||
-                (snapshot.symPage == 3 && SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)) ||
-                (snapshot.symPage == 4 && (layout as? ImeChromeLayout)?.expandedPickerButtons != null))
+                snapshot.symPage == 3)
             if (!symShown && !wasSymActive) {
                 emojiKeyboardView.alpha = 1f // keep black visible immediately
                 emojiKeyboardView.translationY = surfaceHeight.toFloat()
@@ -3393,6 +3335,8 @@ class StatusBarController(
             wasSymActive = false
             lastSymPageRendered = 0 // Reset when closing SYM page
         }
+        if (fullSuggestionsBar?.ensureView()?.visibility != View.VISIBLE &&
+            variationsWrapper?.visibility != View.VISIBLE && !showLedStrip) collapseLayout()
     }
 
     private fun updateAccessibilityStateDescription(view: View) {
@@ -3532,6 +3476,7 @@ class StatusBarController(
             stack.layoutParams = stackParams
         }
         updateSurfaceCloseBottomMargin(if (reserveLedSpace) reservedExpandedLedHeight() else 0)
+        if (content is ViewGroup) bindExpandedRows(content)
 
         val contentParams = content.layoutParams as? LinearLayout.LayoutParams
         val targetContentHeight = 0
@@ -3577,22 +3522,17 @@ class StatusBarController(
     }
 
     private fun reservedExpandedLedHeight(): Int =
-        if (SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)) {
-            dpToPx(LedStatusView.LED_ZONE_HEIGHT_DP)
-        }
-        else measureLedStripHeight()
+        (statusBarLayout as? ImeChromeLayout)?.geometry?.reservedLedHeight(ledStatusView.reservedStripHeightPx())
+            ?: ledStatusView.reservedStripHeightPx()
 
-    private fun measureLedStripHeight(): Int {
-        val ledStrip = ledStatusView.getView() ?: return 0
-        if (ledStrip.measuredHeight > 0) {
-            return ledStrip.measuredHeight
+    private fun bindExpandedRows(root: ViewGroup) {
+        if (root is LinearLayout && root.orientation == LinearLayout.HORIZONTAL) {
+            val surfaces = rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.surfaces(root)
+            if (surfaces.isNotEmpty()) rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bind(root, surfaces)
         }
-        val width = statusBarLayout?.width?.takeIf { it > 0 } ?: context.resources.displayMetrics.widthPixels
-        ledStrip.measure(
-            View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-        return ledStrip.measuredHeight
+        for (index in 0 until root.childCount) {
+            (root.getChildAt(index) as? ViewGroup)?.let(::bindExpandedRows)
+        }
     }
 
     private fun resetSymSurfaceToLedOnly(surface: FrameLayout) {
@@ -3616,12 +3556,7 @@ class StatusBarController(
             // All hardware SYM pages use the same three key rows. Do not let
             // measurement under the previous page's weighted layout resize them.
             val gap = dpToPx(4f)
-            val bottomPadding = if (SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)) {
-                dpToPx(3f)
-            } else {
-                0
-            }
-            return 3 * hardwareSymKeyHeightPx() + 2 * gap + bottomPadding
+            return 3 * hardwareSymKeyHeightPx() + 2 * gap
         }
         if (snapshot.symPage == 4 && measuredHeight > 0) {
             return measuredHeight
@@ -3642,8 +3577,7 @@ class StatusBarController(
 
     private fun hardwareSymKeyHeightPx(theme: KeyboardThemeColors = activeThemeColors()): Int {
         if (!SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)) return dpToPx(HARDWARE_SYM_KEY_HEIGHT_DP)
-        return if (slimModeActive) dpToPx(36f * theme.suggestionsHeightScale.coerceIn(0.65f, 1.6f))
-        else dpToPx(55f * theme.variationsHeightScale.coerceIn(0.65f, 1.6f))
+        return dpToPx(HARDWARE_SYM_KEY_HEIGHT_DP * theme.variationsHeightScale.coerceIn(0.65f, 1.6f))
     }
 
 }

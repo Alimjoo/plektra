@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardReturn
 import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.SmartButton
+import androidx.compose.material.icons.filled.RoundedCorner
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Language
@@ -73,7 +74,8 @@ enum class SettingsDestination {
     CustomInputStyles,
     AppLanguage,
     DeviceSymLayerEditor,
-    Modifiers
+    Modifiers,
+    ModifierIndicators
 }
 
 /** The destination payload of one SettingsActivity, also used by deep links. */
@@ -209,6 +211,7 @@ fun SettingsScreen(
                     onAccessibilityClick = { navigateTo(SettingsDestination.Accessibility) },
                     onAutoCorrectionClick = { navigateTo(SettingsDestination.AutoCorrection) },
                     onCustomizationClick = { openCustomization(null) },
+                    onDisplayGeometryClick = { openCustomization("display_geometry") },
                     onStatusBarButtonsClick = {
                         openCustomization(SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS)
                     },
@@ -314,6 +317,10 @@ fun SettingsScreen(
             SettingsDestination.DeviceSymLayerEditor -> {
                 DeviceSymLayerEditorStubScreen(modifier = modifier, onBack = { navigateBack() })
             }
+            SettingsDestination.ModifierIndicators -> {
+                KeyboardBarSettingsScreen(modifier = modifier, onBack = { navigateBack() },
+                    onCustomizeVariations = {}, page = KeyboardBarSettingsPage.Indicators)
+            }
             SettingsDestination.Modifiers -> {
                 ModifierSettingsScreen(
                     modifier = modifier,
@@ -354,6 +361,7 @@ private fun SettingsMainScreen(
     onAccessibilityClick: () -> Unit,
     onAutoCorrectionClick: () -> Unit,
     onCustomizationClick: () -> Unit,
+    onDisplayGeometryClick: () -> Unit,
     onStatusBarButtonsClick: () -> Unit,
     onKeyboardThemeClick: () -> Unit,
     onQuickLauncherClick: () -> Unit,
@@ -502,6 +510,12 @@ private fun SettingsMainScreen(
                 description = stringResource(R.string.status_bar_buttons_description),
                 linkId = SettingLinkIds.MAIN_STATUS_BAR_BUTTONS,
                 onClick = onStatusBarButtonsClick
+            )
+            SettingsCategoryRow(
+                icon = Icons.Filled.RoundedCorner,
+                title = stringResource(R.string.keyboard_bar_geometry),
+                linkId = "keyboard_bar.geometry",
+                onClick = onDisplayGeometryClick
             )
             SettingsCategoryRow(
                 icon = Icons.Filled.Tune,

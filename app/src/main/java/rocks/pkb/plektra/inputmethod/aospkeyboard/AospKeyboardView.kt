@@ -477,6 +477,7 @@ class AospKeyboardView @JvmOverloads constructor(
     private val returnIcon = drawable(R.drawable.keyboard_return_24)
     private val ctrlIcon = drawable(R.drawable.keyboard_control_key_24)
     private val altIcon = drawable(R.drawable.keyboard_option_key_24)
+    private val shapedKeyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.rgb(238, 238, 238)
         textAlign = Paint.Align.CENTER
@@ -537,10 +538,28 @@ class AospKeyboardView @JvmOverloads constructor(
             canvas.drawColor(it.background)
         } ?: drawDrawable(canvas, keyboardBackground, RectF(0f, 0f, width.toFloat(), height.toFloat()))
         keys.forEach { key ->
-            drawDrawable(canvas, backgroundFor(key), key.visualRect)
+            val surface = rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.canvasSurface(this,
+                key.visualRect, themeOverride?.let(::keyCornerRadius) ?: dp(6f).toFloat(),
+                key.spec.xPercent <= 0f, key.spec.xPercent + key.spec.widthPercent >= 100f)
+            val save = canvas.save()
+            canvas.clipPath(surface.path)
+            val theme = themeOverride
+            if (surface.ledShaped && theme != null) {
+                val base = themedKeyColor(theme, key.spec.type)
+                shapedKeyPaint.style = Paint.Style.FILL
+                shapedKeyPaint.color = if (key == pressedKey) blendColors(base, theme.accent, 0.28f) else base
+                canvas.drawPath(surface.path, shapedKeyPaint)
+                shapedKeyPaint.style = Paint.Style.STROKE
+                shapedKeyPaint.color = theme.divider
+                shapedKeyPaint.strokeWidth = 2f * dp(1f)
+                canvas.drawPath(surface.path, shapedKeyPaint)
+            } else {
+                drawDrawable(canvas, backgroundFor(key), key.visualRect)
+            }
+            canvas.restoreToCount(save)
             val previewIcon = previewIconFor(key)
             if (previewIcon != null) {
-                drawCenteredIcon(canvas, previewIcon, key.visualRect)
+                drawCenteredIcon(canvas, previewIcon, key.visualRect, surface.center)
                 return@forEach
             }
             val previewLabel = previewLabelFor(key)
@@ -559,12 +578,12 @@ class AospKeyboardView @JvmOverloads constructor(
             textPaint.typeface = if (key.spec.type == KeyType.SPACE) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
             textPaint.color = themeOverride?.textAndIcons
                 ?: if (isFunctional(key.spec.type)) Color.rgb(202, 209, 216) else Color.rgb(238, 238, 238)
-            if (layerLabel == null && drawFunctionalIcon(canvas, key)) {
+            if (layerLabel == null && drawFunctionalIcon(canvas, key, surface.center)) {
                 return@forEach
             }
-            val baselineOffset = -(textPaint.ascent() + textPaint.descent()) / 2f
-            val y = if (key.spec.type == KeyType.SPACE) key.visualRect.centerY() + dp(7f) else key.visualRect.centerY() + baselineOffset
-            canvas.drawText(label, key.visualRect.centerX(), y, textPaint)
+            val ink = android.graphics.Rect().also { textPaint.getTextBounds(label, 0, label.length, it) }
+            val opticalOffsetX = ink.exactCenterX() - textPaint.measureText(label) / 2f
+            canvas.drawText(label, surface.center.x - opticalOffsetX, surface.center.y - ink.exactCenterY(), textPaint)
             val altHint = displayAltHint(key)
             val longPressHint = displayHint(key)
             if (previewLabel == null && altHint.isNotBlank()) {
@@ -585,7 +604,7 @@ class AospKeyboardView @JvmOverloads constructor(
         }
     }
 
-    private fun drawFunctionalIcon(canvas: Canvas, key: Key): Boolean {
+    private fun drawFunctionalIcon(canvas: Canvas, key: Key, center: android.graphics.PointF): Boolean {
         val icon = when (key.spec.type) {
             KeyType.SHIFT -> when {
                 shiftLocked -> shiftLockIcon
@@ -599,11 +618,12 @@ class AospKeyboardView @JvmOverloads constructor(
             KeyType.SYMBOLS -> symbolsIconRes?.let(::drawable)
             else -> null
         } ?: return false
-        drawCenteredIcon(canvas, icon, key.visualRect)
+        drawCenteredIcon(canvas, icon, key.visualRect, center)
         return true
     }
 
-    private fun drawCenteredIcon(canvas: Canvas, source: Drawable, rect: RectF) {
+    private fun drawCenteredIcon(canvas: Canvas, source: Drawable, rect: RectF,
+                                 center: android.graphics.PointF = android.graphics.PointF(rect.centerX(), rect.centerY())) {
         val icon = source.constantState?.newDrawable()?.mutate() ?: source.mutate()
         val color = themeOverride?.textAndIcons ?: Color.rgb(202, 209, 216)
         icon.setTint(color)
@@ -613,8 +633,8 @@ class AospKeyboardView @JvmOverloads constructor(
         val scale = minOf(maxSize / intrinsicWidth, maxSize / intrinsicHeight)
         val iconWidth = intrinsicWidth * scale
         val iconHeight = intrinsicHeight * scale
-        val left = (rect.centerX() - iconWidth / 2f).toInt()
-        val top = (rect.centerY() - iconHeight / 2f).toInt()
+        val left = (center.x - iconWidth / 2f).toInt()
+        val top = (center.y - iconHeight / 2f).toInt()
         icon.setBounds(left, top, (left + iconWidth).toInt(), (top + iconHeight).toInt())
         icon.draw(canvas)
     }
@@ -874,6 +894,15 @@ class AospKeyboardView @JvmOverloads constructor(
                 keys.add(Key(spec, hit, visual))
             }
             y += rowHeight + rowGapPx
+        }
+        if (keys.isNotEmpty()) {
+            val bottomTop = keys.maxOf { it.visualRect.top }
+            val bottomKeys = keys.filter { it.visualRect.top == bottomTop }
+            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bindCanvasRow(this,
+                bottomTop, keys.maxOf { it.visualRect.bottom },
+                theme?.let(::keyCornerRadius) ?: dp(6f).toFloat(),
+                bottomKeys.minBy { it.visualRect.left }.visualRect,
+                bottomKeys.maxBy { it.visualRect.right }.visualRect)
         }
     }
 

@@ -18,7 +18,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [33])
 class ClipboardRoundedLayoutTest {
     @Test
-    fun roundedModeUsesSharedCloseButPreservesCardSpacing() {
+    fun hostCloseControlPreservesCardSpacing() {
         val context = RuntimeEnvironment.getApplication()
         val view = ClipboardHistoryView(context, ClipboardHistoryManager(context))
         fun descendants(group: ViewGroup): List<View> = (0 until group.childCount).flatMap {
@@ -30,15 +30,11 @@ class ClipboardRoundedLayoutTest {
         val close = children.filterIsInstance<ImageView>().single()
         val originalPadding = recycler.paddingBottom
         val originalSidePadding = recycler.paddingLeft
-        view.configureRoundedLayout(true)
+        view.useHostCloseControl()
         assertEquals(View.GONE, close.visibility)
         assertEquals(originalSidePadding, recycler.paddingLeft)
         assertEquals(originalSidePadding, recycler.paddingRight)
         assertEquals(originalSidePadding, recycler.paddingTop)
-        assertEquals(originalPadding, recycler.paddingBottom)
-        view.configureRoundedLayout(false)
-        assertEquals(View.VISIBLE, close.visibility)
-        assertTrue(recycler.paddingLeft > 0)
         assertEquals(originalPadding, recycler.paddingBottom)
     }
 }

@@ -117,6 +117,16 @@ fun ModifierSettingsScreen(
         Column(
             modifier = modifier.fillMaxWidth().padding(paddingValues).verticalScroll(rememberScrollState())
         ) {
+            ModifierNavigationRow(
+                iconRes = R.drawable.modifier_keys_24,
+                title = stringResource(R.string.modifiers_section_indicators),
+                description = stringResource(R.string.modifier_indicators_description),
+                linkId = SettingLinkIds.MODIFIERS_INDICATORS,
+                onClick = {
+                    openSettingsPage(context, SettingsPage(SettingsDestination.ModifierIndicators))
+                }
+            )
+
             SettingsSectionDivider(stringResource(R.string.modifiers_section_long_press))
             ModifierDropdownRow(
                 title = stringResource(R.string.long_press_modifier_title),
@@ -138,20 +148,6 @@ fun ModifierSettingsScreen(
                 onThresholdChanged = { threshold ->
                     longPressThreshold = threshold
                     SettingsManager.setLongPressThreshold(context, threshold)
-                }
-            )
-
-            ModifierNavigationRow(
-                iconRes = R.drawable.modifier_keys_24,
-                title = stringResource(R.string.status_bar_buttons_title),
-                description = stringResource(R.string.keyboard_bar_indicator_settings),
-                linkId = SettingLinkIds.MODIFIERS_INDICATORS,
-                onClick = {
-                    context.startActivity(android.content.Intent(context, SettingsActivity::class.java).apply {
-                        putExtra(SettingsActivity.EXTRA_DESTINATION, SettingsActivity.DESTINATION_CUSTOMIZATION)
-                        putExtra(SettingsActivity.EXTRA_CUSTOMIZATION_DESTINATION,
-                            SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS)
-                    })
                 }
             )
 

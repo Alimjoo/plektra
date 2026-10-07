@@ -384,6 +384,7 @@ fun CustomizationSettingsScreen(
                             }
                         }
 
+
                         // Sound Settings
                         Surface(
                             modifier = Modifier
@@ -580,13 +581,21 @@ fun CustomizationSettingsScreen(
                 )
             }
 
-            CustomizationDestination.StatusBarButtons -> {
-                StatusBarButtonsScreen(
+            CustomizationDestination.KeyboardBarButtons, CustomizationDestination.KeyboardBarVariations, CustomizationDestination.StatusBarButtons -> {
+                KeyboardBarSettingsScreen(
                     modifier = modifier,
                     onBack = { navigateBack() },
                     onCustomizeVariations = { navigateTo(CustomizationDestination.Variations) },
-                    onOpenModifiers = onOpenModifiers
+                    page = when (destination) {
+                        CustomizationDestination.KeyboardBarButtons -> KeyboardBarSettingsPage.Buttons
+                        CustomizationDestination.KeyboardBarVariations -> KeyboardBarSettingsPage.Variations
+                        else -> KeyboardBarSettingsPage.Contents
+                    }
                 )
+            }
+
+            CustomizationDestination.DisplayGeometry -> {
+                DisplayGeometryScreen(modifier, onBack = { navigateBack() })
             }
 
             CustomizationDestination.KeyboardTheme -> {
@@ -2181,6 +2190,9 @@ private enum class CustomizationDestination {
     LauncherShortcutCosmetic,
     LauncherShortcutAssignments,
     StatusBarButtons,
+    KeyboardBarButtons,
+    KeyboardBarVariations,
+    DisplayGeometry,
     KeyboardTheme,
     Sounds,
     AppIcon,
@@ -2200,6 +2212,9 @@ private fun customizationDestination(destination: String?): CustomizationDestina
     "launcher_shortcut_behavior" -> CustomizationDestination.LauncherShortcutBehavior
     "launcher_shortcut_cosmetic" -> CustomizationDestination.LauncherShortcutCosmetic
     "launcher_shortcut_assignments" -> CustomizationDestination.LauncherShortcutAssignments
+    "keyboard_bar_buttons" -> CustomizationDestination.KeyboardBarButtons
+    "keyboard_bar_variations" -> CustomizationDestination.KeyboardBarVariations
+    "display_geometry" -> CustomizationDestination.DisplayGeometry
     "sounds" -> CustomizationDestination.Sounds
     else -> CustomizationDestination.Main
 }

@@ -2,6 +2,18 @@ package rocks.pkb.plektra
 
 /** Addressable customization controls; dynamic data rows remain inside their aggregate editors. */
 internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
+    SettingEntry(id = "keyboard_bar.geometry", titleRes = R.string.keyboard_bar_geometry,
+        route = SettingRoute(destination = SettingsDestination.Customization,
+            customizationDestination = "display_geometry")),
+    SettingEntry(id = "keyboard_bar.buttons", titleRes = R.string.status_bar_buttons_section,
+        route = SettingRoute(destination = SettingsDestination.Customization,
+            customizationDestination = "keyboard_bar_buttons")),
+    SettingEntry(id = "keyboard_bar.variations", titleRes = R.string.keyboard_bar_variations_title,
+        route = SettingRoute(destination = SettingsDestination.Customization,
+            customizationDestination = "keyboard_bar_variations")),
+    SettingEntry(id = "keyboard_bar.row_layout", titleRes = R.string.keyboard_bar_arrangement,
+        route = SettingRoute(destination = SettingsDestination.Customization,
+            customizationDestination = "status_bar_buttons")),
     SettingEntry(
         id = "quick_launcher.top_match_color",
         titleRes = R.string.setting_link_quick_launcher_top_match_color,
@@ -392,7 +404,7 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         summaryRes = R.string.titan2_elite_rounded_corners_description,
         route = SettingRoute(
             destination = SettingsDestination.Customization,
-            customizationDestination = "status_bar_buttons"
+            customizationDestination = "display_geometry"
         )
     ),
     SettingEntry(
@@ -401,7 +413,7 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         summaryRes = R.string.titan2_elite_fill_bottom_corners_description,
         route = SettingRoute(
             destination = SettingsDestination.Customization,
-            customizationDestination = "status_bar_buttons"
+            customizationDestination = "display_geometry"
         ),
         availabilityCheck = { SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(it) },
         unavailableFallbackId = "status_bar.rounded_corners"
@@ -422,10 +434,8 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         titleRes = R.string.dynamic_variation_slot_count_title,
         route = SettingRoute(
             destination = SettingsDestination.Customization,
-            customizationDestination = "status_bar_buttons"
-        ),
-        availabilityCheck = { SettingsManager.getStatusBarPresentationMode(it) != SettingsManager.StatusBarPresentationMode.SLIM && SettingsManager.areStatusBarVariationsEnabled(it) },
-        unavailableFallbackId = "status_bar.variations_visible"
+            customizationDestination = "keyboard_bar_variations"
+        )
     ),
     SettingEntry(
         id = "status_bar.resize_variations",
@@ -433,10 +443,8 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         summaryRes = R.string.dynamic_variation_resize_to_content_description,
         route = SettingRoute(
             destination = SettingsDestination.Customization,
-            customizationDestination = "status_bar_buttons"
-        ),
-        availabilityCheck = { SettingsManager.getStatusBarPresentationMode(it) != SettingsManager.StatusBarPresentationMode.SLIM && SettingsManager.areStatusBarVariationsEnabled(it) },
-        unavailableFallbackId = "status_bar.variations_visible"
+            customizationDestination = "keyboard_bar_variations"
+        )
     ),
     SettingEntry(
         id = "status_bar.top_corner",
@@ -444,7 +452,7 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         summaryRes = R.string.titan2_elite_top_corner_description,
         route = SettingRoute(
             destination = SettingsDestination.Customization,
-            customizationDestination = "status_bar_buttons"
+            customizationDestination = "display_geometry"
         ),
         availabilityCheck = { SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(it) },
         unavailableFallbackId = "status_bar.rounded_corners"
@@ -454,7 +462,7 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         titleRes = R.string.setting_link_max_icon_shrink,
         route = SettingRoute(
             destination = SettingsDestination.Customization,
-            customizationDestination = "status_bar_buttons"
+            customizationDestination = "display_geometry"
         ),
         availabilityCheck = { SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(it) },
         unavailableFallbackId = "status_bar.rounded_corners"
@@ -464,20 +472,16 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         titleRes = R.string.setting_link_status_extended_left,
         route = SettingRoute(
             destination = SettingsDestination.Customization,
-            customizationDestination = "status_bar_buttons"
-        ),
-        availabilityCheck = { SettingsManager.getStatusBarPresentationMode(it) != SettingsManager.StatusBarPresentationMode.SLIM },
-        unavailableFallbackId = "status_bar.presentation"
+            customizationDestination = "keyboard_bar_buttons"
+        )
     ),
     SettingEntry(
         id = "status_bar.extended_right",
         titleRes = R.string.setting_link_status_extended_right,
         route = SettingRoute(
             destination = SettingsDestination.Customization,
-            customizationDestination = "status_bar_buttons"
-        ),
-        availabilityCheck = { SettingsManager.getStatusBarPresentationMode(it) != SettingsManager.StatusBarPresentationMode.SLIM },
-        unavailableFallbackId = "status_bar.presentation"
+            customizationDestination = "keyboard_bar_buttons"
+        )
     ),
     SettingEntry(
         id = "keyboard_theme.software.key_rounding",

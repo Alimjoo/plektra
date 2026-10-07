@@ -24,6 +24,7 @@ class StatusBarButtonHost(
         val container: View
     )
 
+    private val buttonStates = mutableMapOf<View, ButtonState>()
     private val recordingColors = mutableMapOf<View, Int>()
     private val outerEdges = mutableMapOf<View, StatusBarButtonPosition>()
 
@@ -58,31 +59,6 @@ class StatusBarButtonHost(
 
         val result = registry.createButton(context, id, size, callbacks) ?: return null
         val button = result.view
-        if (button is ImageView || button is TextView) {
-            val originalScaleType = (button as? ImageView)?.scaleType
-            val originalTextSize = (button as? TextView)?.textSize
-            val originalPadding = intArrayOf(button.paddingLeft, button.paddingTop, button.paddingRight, button.paddingBottom)
-            var corrected = false
-            val listener = android.view.ViewTreeObserver.OnPreDrawListener {
-                if (alignOuterIcon(button, originalTextSize)) {
-                    corrected = true
-                } else if (corrected) {
-                    if (button is ImageView) button.scaleType = originalScaleType
-                    if (button is TextView && originalTextSize != null) button.setTextSize(TypedValue.COMPLEX_UNIT_PX, originalTextSize)
-                    button.setPadding(originalPadding[0], originalPadding[1], originalPadding[2], originalPadding[3])
-                    corrected = false
-                }
-                true
-            }
-            button.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(v: View) {
-                    v.viewTreeObserver.addOnPreDrawListener(listener)
-                }
-                override fun onViewDetachedFromWindow(v: View) {
-                    v.viewTreeObserver.removeOnPreDrawListener(listener)
-                }
-            })
-        }
         applyTheme(button, height.takeIf { it > 0 } ?: size)
         val container = if (result.badgeView != null || result.flashOverlayView != null) {
             createWrappedView(button, result.badgeView, result.flashOverlayView, width, height)
@@ -160,10 +136,12 @@ class StatusBarButtonHost(
         hostedButtons.clear()
         outerEdges.clear()
         recordingColors.clear()
+        buttonStates.clear()
     }
 
-    private fun updateButton(id: StatusBarButtonId, state: ButtonState) {
+    fun updateButton(id: StatusBarButtonId, state: ButtonState) {
         val hosted = hostedButtons[id] ?: return
+        buttonStates[hosted.button] = state
         registry.updateButton(id, hosted.button, state)
         applyTheme(hosted.button, resolveThemeHeight(hosted), state)
     }
@@ -261,88 +239,23 @@ class StatusBarButtonHost(
                 borderColor = theme.borderColor,
                 borderWidthPx = theme.borderWidthPx
             )
-            view.background = if (
-                outerEdges[view] != null &&
-                rocks.pkb.plektra.SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)
-            ) {
-                CurvedCornerButtonDrawable(
-                    view, normalColor,
-                    theme.pressedColor, height * theme.cornerRadiusRatio,
-                    theme.borderColor, theme.borderWidthPx,
-                    leftEdge = outerEdges[view] == StatusBarButtonPosition.LEFT
-                )
-            } else background
+            KeyboardBarRowGeometry.setStyle(view, KeyboardBarRowGeometry.Style(
+                normalColor, theme.pressedColor, height * theme.cornerRadiusRatio,
+                theme.borderColor, theme.borderWidthPx, background),
+                fallbackLeft = outerEdges[view] == StatusBarButtonPosition.LEFT,
+                fallbackRight = outerEdges[view] == StatusBarButtonPosition.RIGHT)
         }
+        val effectiveState = state ?: buttonStates[view]
         when (view) {
-            is ImageView -> view.setColorFilter(theme.iconColor)
+            is ImageView -> {
+                val modifierIcons = view.drawable as? rocks.pkb.plektra.inputmethod.statusbar.button.ModifierIconsDrawable
+                if (effectiveState is ButtonState.ModifierState && modifierIcons != null) {
+                    view.clearColorFilter()
+                    modifierIcons.setIndicatorColors(theme.activeIndicatorColor, theme.lockedIndicatorColor)
+                } else view.setColorFilter(theme.iconColor)
+            }
             is TextView -> view.setTextColor(theme.iconColor)
         }
-    }
-
-    // Runs after layout, including configurations without the bottom LED surface.
-    private fun alignOuterIcon(view: View, originalTextSize: Float?): Boolean {
-        val edge = outerEdges[view] ?: return false
-        if (!rocks.pkb.plektra.SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)) return false
-        if (view.width <= 0 || view.height <= 0) return false
-        val icon = (view as? ImageView)?.drawable
-        if (view is ImageView && (icon == null || icon.intrinsicWidth <= 0 || icon.intrinsicHeight <= 0)) return false
-        val contour = view.background as? CurvedCornerButtonDrawable ?: return false
-        var ancestor = view.parent
-        while (ancestor != null && ancestor !is rocks.pkb.plektra.inputmethod.ImeChromeLayout) {
-            ancestor = ancestor.parent
-        }
-        val chrome = ancestor as? rocks.pkb.plektra.inputmethod.ImeChromeLayout ?: return false
-        val radii = chrome.bottomCornerRadiiPx ?: return false
-        val location = IntArray(2)
-        val chromeLocation = IntArray(2)
-        view.getLocationInWindow(location)
-        chrome.getLocationInWindow(chromeLocation)
-        val left = location[0] - chromeLocation[0]
-        val contentWidth: Float
-        val contentHeight: Float
-        val scale: Float
-        if (icon != null) {
-            contentWidth = icon.intrinsicWidth.toFloat().coerceAtMost(view.width.toFloat())
-            scale = contentWidth / icon.intrinsicWidth
-            contentHeight = icon.intrinsicHeight * scale
-        } else {
-            val text = view as? TextView ?: return false
-            val textPaint = android.text.TextPaint(text.paint).apply { textSize = originalTextSize ?: text.textSize }
-            contentWidth = textPaint.measureText(text.text.toString())
-            contentHeight = textPaint.fontMetrics.let { it.descent - it.ascent }
-            scale = 1f
-        }
-        val availableExclusion = (view.width - contentWidth).coerceAtLeast(0f)
-        val excluded = if (edge == StatusBarButtonPosition.LEFT) {
-            (radii.first - left).toFloat()
-        } else {
-            (left + view.width - (chrome.width - radii.second)).toFloat()
-        }.coerceIn(0f, availableExclusion)
-        val preferredX = view.width / 2f + if (edge == StatusBarButtonPosition.LEFT) excluded / 4f else -excluded / 4f
-        val center = contour.contentCenter(contentWidth, contentHeight, preferredX, view.height / 2f,
-            edge == StatusBarButtonPosition.LEFT)
-        if (view is ImageView) {
-            view.scaleType = ImageView.ScaleType.MATRIX
-            view.imageMatrix = android.graphics.Matrix().apply {
-                setScale(scale * center.scale, scale * center.scale)
-                postTranslate(center.x - contentWidth * center.scale / 2f - view.paddingLeft,
-                    center.y - contentHeight * center.scale / 2f - view.paddingTop)
-            }
-        } else if (view is TextView) {
-            val targetTextSize = (originalTextSize ?: view.textSize) * center.scale
-            if (view.textSize != targetTextSize) view.setTextSize(TypedValue.COMPLEX_UNIT_PX, targetTextSize)
-            val dx = center.x - view.width / 2f
-            val dy = center.y - view.height / 2f
-            val leftPadding = kotlin.math.round(2f * dx.coerceAtLeast(0f)).toInt()
-            val rightPadding = kotlin.math.round(-2f * dx.coerceAtMost(0f)).toInt()
-            val topPadding = kotlin.math.round(2f * dy.coerceAtLeast(0f)).toInt()
-            val bottomPadding = kotlin.math.round(-2f * dy.coerceAtMost(0f)).toInt()
-            if (view.paddingLeft != leftPadding || view.paddingRight != rightPadding ||
-                view.paddingTop != topPadding || view.paddingBottom != bottomPadding) {
-                view.setPadding(leftPadding, topPadding, rightPadding, bottomPadding)
-            }
-        }
-        return true
     }
 
     private fun dpToPx(dp: Float): Int {

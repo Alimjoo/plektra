@@ -5,28 +5,24 @@ import android.graphics.Color
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Outline
-import android.graphics.Matrix
 import android.graphics.Path
 import android.os.Build
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
-import android.widget.ImageView
 import android.widget.LinearLayout
 import rocks.pkb.plektra.R
 import rocks.pkb.plektra.inputmethod.ui.LedStatusView
 
 internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
+    val geometry = KeyboardBarGeometry(context)
     var ledOnlyReservedHeightPx: Int? = null
     private val screenAwakeController = ImeTouchScreenAwakeController(context)
+    private var ledTouchActive = false
     var regularCornerColors: Pair<Int, Int> = Color.BLACK to Color.BLACK
     var compactCornerColors: Pair<Int, Int> = Color.BLACK to Color.BLACK
     var bottomFillColors: Pair<Int, Int> = Color.BLACK to Color.BLACK
-    var expandedCloseColor: Int = Color.BLACK
-    var expandedCloseButton: View? = null
-    var expandedPickerButtons: Pair<View, View>? = null
-    var expandedKeyHeightPx: Int = (56f * resources.displayMetrics.density).toInt()
     private val cornerFillPaint = Paint()
     private val calibrationPreviewListener: () -> Unit = {
         applyBottomCornerClip()
@@ -53,20 +49,7 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
             return
         }
         val calibration = rocks.pkb.plektra.T2eCornerCalibration.read(context)
-        val path = rocks.pkb.plektra.T2eCornerGeometry.path(
-            width.toFloat(), height.toFloat(), radii.first.toFloat(), radii.second.toFloat(),
-            calibration
-        ).apply {
-            // Preserve the calibrated physical corners, but do not carry their
-            // inward bottom offset across the straight center of the display.
-            addRect(
-                radii.first.toFloat(),
-                0f,
-                width.toFloat() - radii.second,
-                height.toFloat(),
-                Path.Direction.CW
-            )
-        }
+        val path = geometry.displayPath(width.toFloat(), height.toFloat()) ?: return
         val bottomContour = rocks.pkb.plektra.T2eCornerGeometry.bottomContourPath(
             width.toFloat(), height.toFloat(), radii.first.toFloat(), radii.second.toFloat(),
             calibration
@@ -102,34 +85,6 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (bottomCornerRadiiPx != null && expandedSurfaceView?.visibility == View.VISIBLE) {
-            val surface = surfaceView
-            val content = expandedSurfaceView
-            if (surface != null && content != null) {
-                cornerFillPaint.color = bottomFillColors.first
-                canvas.drawRect(0f, (surface.top + content.bottom).toFloat(), width.toFloat(), height.toFloat(), cornerFillPaint)
-                expandedCloseButton?.takeIf { it.visibility == View.VISIBLE }?.let { button ->
-                    cornerFillPaint.color = expandedCloseColor
-                    canvas.drawRect(
-                        (surface.left + button.left).toFloat(), (surface.top + button.top).toFloat(),
-                        width.toFloat(), height.toFloat(), cornerFillPaint
-                    )
-                }
-                expandedPickerButtons?.let { (leftButton, rightButton) ->
-                    listOf(leftButton, rightButton).forEach { button ->
-                        if (button.visibility != View.VISIBLE) return@forEach
-                        val bounds = android.graphics.Rect(0, 0, button.width, button.height)
-                        offsetDescendantRectToMyCoords(button, bounds)
-                        cornerFillPaint.color = expandedCloseColor
-                        canvas.drawRect(
-                            if (button === leftButton) 0f else bounds.left.toFloat(), bounds.top.toFloat(),
-                            if (button === rightButton) width.toFloat() else bounds.right.toFloat(),
-                            height.toFloat(), cornerFillPaint
-                        )
-                    }
-                }
-            }
-        }
         val row = nestedRow ?: return
         val radii = bottomCornerRadiiPx ?: return
         val colors = if (row === compactStatusRow) compactCornerColors else regularCornerColors
@@ -147,16 +102,17 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
         set(value) {
             if (field == value) return
             field = value
+            geometry.ledsVisible = value
+            applyBottomCornerClip()
             requestLayout()
             invalidate()
         }
-    var onContourGeometryChanged: ((LedStatusView.ContourGeometry?) -> Unit)? = null
+    var onLedGeometryChanged: (() -> Unit)? = null
     private var nestedRow: View? = null
     private var originalRowMargins = intArrayOf(0, 0, 0)
     private var originalRowOutline: ViewOutlineProvider? = null
     private var originalRowClip = false
     private var originalRowMinHeight = 0
-    private val originalIconTransforms = mutableMapOf<ImageView, Pair<ImageView.ScaleType, Matrix>>()
 
     private fun updateNestedStatusRow() {
         indicatorView?.layoutParams?.height = ViewGroup.LayoutParams.WRAP_CONTENT
@@ -177,32 +133,10 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
         if (expandedSurfaceView?.visibility == View.VISIBLE && indicatorView?.visibility == View.VISIBLE) {
             val density = resources.displayMetrics.density
             val radius = maxOf(radii.first, radii.second)
-            val stripHeight = (LedStatusView.LED_ZONE_HEIGHT_DP * density).toInt()
-            val ledHeight = maxOf(radius + density.toInt(), expandedKeyHeightPx + stripHeight)
+            val ledHeight = radius + density.toInt()
             (indicatorView?.layoutParams as? LayoutParams)?.apply {
                 height = ledHeight
-                topMargin = -(ledHeight - stripHeight).coerceAtLeast(0)
-            }
-            expandedSurfaceView?.apply {
-                outlineProvider = object : ViewOutlineProvider() {
-                    override fun getOutline(view: View, outline: Outline) {
-                        val path = rocks.pkb.plektra.T2eCornerGeometry.path(
-                            view.width.toFloat(),
-                            view.height.toFloat(),
-                            radii.first.toFloat(),
-                            radii.second.toFloat(),
-                            rocks.pkb.plektra.T2eCornerCalibration.read(context),
-                            stripHeight.toFloat()
-                        )
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) outline.setPath(path)
-                        else {
-                            @Suppress("DEPRECATION")
-                            outline.setConvexPath(path)
-                        }
-                    }
-                }
-                clipToOutline = true
-                invalidateOutline()
+                topMargin = -ledHeight
             }
             return
         }
@@ -243,12 +177,10 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
-        originalIconTransforms.forEach { (icon, original) ->
-            icon.scaleType = original.first
-            icon.imageMatrix = original.second
-        }
-        originalIconTransforms.clear()
-        val row = nestedRow as? ViewGroup ?: return
+        updateLedConstraintTop()
+        rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.updateRows(this)
+        val row = nestedRow as? ViewGroup
+        if (row == null) return
         val originalContentHeight = row.height
         // A fixed-height row can be shorter than the requested overlap.
         // Anchor its actual bottom to the inner LED contour after layout.
@@ -285,84 +217,9 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
             }
             if (extraHeight > 0) extendContent(row)
         }
-        val curvedButtons = mutableListOf<View>()
-        fun collectCurvedButtons(view: View) {
-            if (view.background is rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable) {
-                curvedButtons.add(view)
-            }
-            if (view is ViewGroup) {
-                for (index in 0 until view.childCount) collectCurvedButtons(view.getChildAt(index))
-            }
-        }
-        collectCurvedButtons(row)
-
         if (contourIntegratedIndicators) {
-            fun containsExtendableButton(view: View): Boolean {
-                if (view.visibility != View.VISIBLE) return false
-                if (view.isClickable && view.background != null) return true
-                if (view is ViewGroup) {
-                    for (index in 0 until view.childCount) {
-                        if (containsExtendableButton(view.getChildAt(index))) return true
-                    }
-                }
-                return false
-            }
-            fun extendButtonBranches(view: ViewGroup, offsetY: Int) {
-                val calibration = rocks.pkb.plektra.T2eCornerCalibration.read(context)
-                val borderInset = kotlin.math.ceil(
-                    LedStatusView.CONTOUR_BUTTON_INSET_DP * resources.displayMetrics.density +
-                        (calibration.offsetPx - calibration.shiftYPx).coerceAtLeast(0f)
-                ).toInt()
-                val visibleBottom = (row.height - this@ImeChromeLayout.paddingBottom).coerceAtLeast(0)
-                for (index in 0 until view.childCount) {
-                    val child = view.getChildAt(index)
-                    if (!containsExtendableButton(child)) continue
-                    val absoluteBottom = offsetY + child.bottom
-                    val isButton = child.isClickable && child.background != null
-                    val targetBottom = visibleBottom - if (isButton) borderInset else 0
-                    val adjustment = targetBottom - absoluteBottom
-                    if (adjustment != 0 && child.bottom + adjustment > child.top) {
-                        child.layout(child.left, child.top, child.right, child.bottom + adjustment)
-                    }
-                    if (child is ViewGroup) extendButtonBranches(child, offsetY + child.top)
-                }
-            }
-            extendButtonBranches(row, 0)
-            val surface = surfaceView
-            if (surface != null && curvedButtons.size >= 2) {
-                val buttons = curvedButtons.map { button ->
-                    button to android.graphics.Rect(0, 0, button.width, button.height).also { rect ->
-                        offsetDescendantRectToMyCoords(button, rect)
-                    }
-                }.sortedBy { it.second.left }
-                val surfaceTop = surface.top.toFloat()
-                val surfaceLeft = surface.left.toFloat()
-                val (leftButtonView, leftButton) = buttons.first()
-                val (rightButtonView, rightButton) = buttons.last()
-                fun contourFor(button: View): LedStatusView.ButtonContour? {
-                    val drawable = button.background as?
-                        rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable
-                        ?: return null
-                    val contour = drawable.outerContourCenterline() ?: return null
-                    return LedStatusView.ButtonContour(
-                        points = contour.points.map { point ->
-                            android.graphics.PointF(point.x - surfaceLeft, point.y - surfaceTop)
-                        },
-                        borderHalfWidthPx = contour.borderHalfWidthPx
-                    )
-                }
-                onContourGeometryChanged?.invoke(
-                    LedStatusView.ContourGeometry(
-                        buttonTopPx = minOf(leftButton.top, rightButton.top) - surfaceTop,
-                        leftButtonEndPx = leftButton.right.toFloat(),
-                        rightButtonStartPx = rightButton.left.toFloat(),
-                        leftButtonContour = contourFor(leftButtonView),
-                        rightButtonContour = contourFor(rightButtonView)
-                    )
-                )
-            } else {
-                onContourGeometryChanged?.invoke(null)
-            }
+            updateLedConstraintTop()
+            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.updateRows(row)
         } else {
             // Keep the existing vertical alignment when the contour LEDs are not active.
             for (index in 0 until row.childCount) {
@@ -371,52 +228,46 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
                     child.offsetTopAndBottom(row.height - row.paddingBottom - child.bottom)
                 }
             }
-            onContourGeometryChanged?.invoke(null)
+            onLedGeometryChanged?.invoke()
         }
-        val radii = bottomCornerRadiiPx ?: return
-        fun fitIcons(view: View, offsetX: Int) {
-            if (view is ImageView && view.visibility == View.VISIBLE &&
-                view.background !is rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable
-            ) {
-                val onLeft = offsetX < radii.first
-                val onRight = offsetX + view.width > row.width - radii.second
-                val drawable = view.drawable
-                if ((onLeft || onRight) && drawable != null &&
-                    drawable.intrinsicWidth > 0 && drawable.intrinsicHeight > 0
-                ) {
-                    originalIconTransforms[view] = view.scaleType to Matrix(view.imageMatrix)
-                    val iconFraction = if (row === compactStatusRow) 0.64f else 0.48f
-                    val iconHeight = if (row === compactStatusRow) {
-                        (minOf(view.height, originalContentHeight) - 4f * resources.displayMetrics.density).coerceAtLeast(1f)
-                    } else view.height.toFloat()
-                    val size = minOf(view.width.toFloat(), iconHeight) * iconFraction
-                    val requestedScale = size / maxOf(drawable.intrinsicWidth, drawable.intrinsicHeight)
-                    val scale = if (row === compactStatusRow) requestedScale else minOf(1f, requestedScale)
-                    val iconCenterX = view.width / 2f
-                    view.scaleType = ImageView.ScaleType.MATRIX
-                    view.imageMatrix = Matrix().apply {
-                        setScale(scale, scale)
-                        postTranslate(
-                            iconCenterX - drawable.intrinsicWidth * scale / 2f - view.paddingLeft,
-                            (view.height / 2f) -
-                                drawable.intrinsicHeight * scale / 2f - view.paddingTop
-                        )
-                    }
-                }
-            }
-            if (view is ViewGroup) {
-                for (index in 0 until view.childCount) {
-                    val child = view.getChildAt(index)
-                    fitIcons(child, offsetX + child.left)
-                }
-            }
+    }
+
+    private fun updateLedConstraintTop() {
+        val indicator = indicatorView
+        val row = rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bottomRow(this)
+        val top = row?.top
+        geometry.ledRowTop = top?.toFloat()
+        geometry.ledRowRadius = row?.radius ?: 0f
+        geometry.leftSurface = row?.left
+        geometry.rightSurface = row?.right
+        if (!contourIntegratedIndicators || indicator == null) {
+            onLedGeometryChanged?.invoke()
+            return
         }
-        fitIcons(row, 0)
+        val bounds = android.graphics.Rect(0, 0, indicator.width, indicator.height).also {
+            offsetDescendantRectToMyCoords(indicator, it)
+        }
+        val calibration = rocks.pkb.plektra.T2eCornerCalibration.read(context)
+        val arcTop = kotlin.math.floor(height -
+            maxOf(bottomCornerRadiiPx?.first ?: 0, bottomCornerRadiiPx?.second ?: 0) * calibration.size +
+            calibration.shiftYPx).toInt()
+        val targetTop = minOf(top ?: arcTop, arcTop)
+        val targetHeight = height - targetTop
+        if (targetHeight > 0 && (indicator.height != targetHeight || bounds.top != targetTop ||
+                bounds.bottom != height || indicator.width != width)) {
+            val parentTop = bounds.top - indicator.top
+            indicator.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(targetHeight, MeasureSpec.EXACTLY))
+            indicator.layout(indicator.left, targetTop - parentTop, indicator.left + width, height - parentTop)
+            bounds.top = targetTop
+        }
+        onLedGeometryChanged?.invoke()
     }
 
     // (left, right) display corner radii in px; null disables the outline clip.
     var bottomCornerRadiiPx: Pair<Int, Int>? = null
         set(value) {
+            geometry.radii = value
             if (field == value) {
                 applyBottomCornerClip()
                 invalidate()
@@ -444,6 +295,8 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
         set(value) {
             if (field == value) return
             field = value
+            geometry.hardwareTopRounding = !value
+            applyBottomCornerClip()
             requestLayout()
         }
 
@@ -453,12 +306,35 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         screenAwakeController.onTouchAction(event.actionMasked)
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            ledTouchActive = ledOnlyReservedHeightPx == null &&
+                geometry.ledsVisible && android.graphics.Region().apply {
+                    setPath(geometry.ledExclusionPath(width.toFloat(), height.toFloat()),
+                        android.graphics.Region(0, 0, width, height))
+                }.contains(event.x.toInt(), event.y.toInt())
+        }
+        if (ledTouchActive) {
+            val indicator = indicatorView?.takeIf { it.visibility == View.VISIBLE } ?: return false
+            val bounds = android.graphics.Rect(0, 0, indicator.width, indicator.height).also {
+                offsetDescendantRectToMyCoords(indicator, it)
+            }
+            val local = MotionEvent.obtain(event).apply { offsetLocation(-bounds.left.toFloat(), -bounds.top.toFloat()) }
+            val handled = try { indicator.dispatchTouchEvent(local) } finally { local.recycle() }
+            if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) ledTouchActive = false
+            return handled
+        }
         return super.dispatchTouchEvent(event)
     }
 
     // Extend the shape above the view so even a bar shorter than the display
     // radius follows the original arc, rather than shrinking it to fit the bar.
     private fun applyBottomCornerClip() {
+        fun refresh(view: View) {
+            view.invalidate()
+            view.background?.invalidateSelf()
+            if (view is ViewGroup) for (index in 0 until view.childCount) refresh(view.getChildAt(index))
+        }
+        refresh(this)
         val radii = bottomCornerRadiiPx
         val radius = radii?.let { maxOf(it.first, it.second) } ?: 0
         if (radius <= 0) {
