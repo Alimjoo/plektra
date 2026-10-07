@@ -121,7 +121,8 @@ class AospKeyboardView @JvmOverloads constructor(
     private data class Key(
         val spec: KeySpec,
         val hitRect: RectF,
-        val visualRect: RectF
+        val visualRect: RectF,
+        var surface: rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.CanvasSurface? = null
     )
 
     data class LongPressLayerAlternative(
@@ -477,6 +478,37 @@ class AospKeyboardView @JvmOverloads constructor(
     private val returnIcon = drawable(R.drawable.keyboard_return_24)
     private val ctrlIcon = drawable(R.drawable.keyboard_control_key_24)
     private val altIcon = drawable(R.drawable.keyboard_option_key_24)
+    private val standaloneBarGeometry = rocks.pkb.plektra.inputmethod.KeyboardBarGeometry(context)
+    private var surfaceFrameKey: List<Any>? = null
+    private val preparedKeySurfaces = mutableMapOf<RectF, rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.CanvasSurface>()
+    private val inkOffsets = mutableMapOf<List<Any>, android.graphics.PointF>()
+
+    private fun prepareKeySurfaces() {
+        val frame = rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.canvasFrame(this, standaloneBarGeometry)
+        frame.geometry.prepare(frame.width, frame.height)
+        val radius = themeOverride?.let(::keyCornerRadius) ?: dp(6f).toFloat()
+        val key = listOf<Any>(frame.geometry, frame.geometry.revision, frame.x, frame.y, width, height, radius)
+        if (key != surfaceFrameKey) {
+            surfaceFrameKey = key
+            preparedKeySurfaces.clear()
+            for (cell in keys) {
+                val global = RectF(cell.visualRect).apply { offset(frame.x, frame.y) }
+                val left = cell.spec.xPercent <= 0f
+                val right = cell.spec.xPercent + cell.spec.widthPercent >= 100f
+                if (frame.geometry.needsSurface(frame.width, frame.height, global, left, right)) {
+                    preparedKeySurfaces[RectF(cell.visualRect)] = rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry
+                        .canvasSurface(frame, cell.visualRect, radius, left, right)
+                }
+            }
+        }
+        for (cell in keys) cell.surface = preparedKeySurfaces[cell.visualRect]
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        prepareKeySurfaces()
+    }
+
     private val shapedKeyPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.rgb(238, 238, 238)
@@ -537,14 +569,14 @@ class AospKeyboardView @JvmOverloads constructor(
         themeOverride?.let {
             canvas.drawColor(it.background)
         } ?: drawDrawable(canvas, keyboardBackground, RectF(0f, 0f, width.toFloat(), height.toFloat()))
+        prepareKeySurfaces()
         keys.forEach { key ->
-            val surface = rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.canvasSurface(this,
-                key.visualRect, themeOverride?.let(::keyCornerRadius) ?: dp(6f).toFloat(),
-                key.spec.xPercent <= 0f, key.spec.xPercent + key.spec.widthPercent >= 100f)
+            val surface = key.surface
+            val center = surface?.center ?: android.graphics.PointF(key.visualRect.centerX(), key.visualRect.centerY())
             val save = canvas.save()
-            canvas.clipPath(surface.path)
+            if (surface != null) canvas.clipPath(surface.path)
             val theme = themeOverride
-            if (surface.ledShaped && theme != null) {
+            if (surface?.ledShaped == true && theme != null) {
                 val base = themedKeyColor(theme, key.spec.type)
                 shapedKeyPaint.style = Paint.Style.FILL
                 shapedKeyPaint.color = if (key == pressedKey) blendColors(base, theme.accent, 0.28f) else base
@@ -559,7 +591,7 @@ class AospKeyboardView @JvmOverloads constructor(
             canvas.restoreToCount(save)
             val previewIcon = previewIconFor(key)
             if (previewIcon != null) {
-                drawCenteredIcon(canvas, previewIcon, key.visualRect, surface.center)
+                drawCenteredIcon(canvas, previewIcon, key.visualRect, center)
                 return@forEach
             }
             val previewLabel = previewLabelFor(key)
@@ -578,12 +610,19 @@ class AospKeyboardView @JvmOverloads constructor(
             textPaint.typeface = if (key.spec.type == KeyType.SPACE) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
             textPaint.color = themeOverride?.textAndIcons
                 ?: if (isFunctional(key.spec.type)) Color.rgb(202, 209, 216) else Color.rgb(238, 238, 238)
-            if (layerLabel == null && drawFunctionalIcon(canvas, key, surface.center)) {
+            if (layerLabel == null && drawFunctionalIcon(canvas, key, center)) {
                 return@forEach
             }
-            val ink = android.graphics.Rect().also { textPaint.getTextBounds(label, 0, label.length, it) }
-            val opticalOffsetX = ink.exactCenterX() - textPaint.measureText(label) / 2f
-            canvas.drawText(label, surface.center.x - opticalOffsetX, surface.center.y - ink.exactCenterY(), textPaint)
+            if (surface == null) {
+                val baseline = center.y - (textPaint.fontMetrics.ascent + textPaint.fontMetrics.descent) / 2f
+                canvas.drawText(label, center.x, baseline, textPaint)
+            } else {
+                val offset = inkOffsets.getOrPut(listOf(label, textPaint.textSize, textPaint.typeface)) {
+                    val ink = android.graphics.Rect().also { textPaint.getTextBounds(label, 0, label.length, it) }
+                    android.graphics.PointF(ink.exactCenterX() - textPaint.measureText(label) / 2f, ink.exactCenterY())
+                }
+                canvas.drawText(label, center.x - offset.x, center.y - offset.y, textPaint)
+            }
             val altHint = displayAltHint(key)
             val longPressHint = displayHint(key)
             if (previewLabel == null && altHint.isNotBlank()) {

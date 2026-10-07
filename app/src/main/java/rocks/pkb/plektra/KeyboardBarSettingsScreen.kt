@@ -441,4 +441,3 @@ internal fun KeyboardBarNavigationRow(icon: androidx.compose.ui.graphics.vector.
         supportingContent = summary?.let { { Text(it) } },
         trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) })
 }
-

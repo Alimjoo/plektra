@@ -315,6 +315,7 @@ class StatusBarController(
     private var symSurfaceContainer: FrameLayout? = null
     private var symSurfaceStack: LinearLayout? = null
     private var symSurfaceCloseButton: View? = null
+    private val surfaceCloseSlotTag = "plektra.surface_close_slot"
     private var emojiKeyboardContainer: LinearLayout? = null
     private var clipboardHistoryView: ClipboardHistoryView? = null
     private var lastClipboardCountRendered: Int = -1
@@ -1450,7 +1451,7 @@ class StatusBarController(
                             addKeyToRow(rowLayout, row[i], symMappings, fixedKeyWidth, keyHeight, keySpacing, page, inputConnection, false)
                         }
 
-                        rowLayout.addView(View(context), LinearLayout.LayoutParams(fixedKeyWidth, keyHeight))
+                        rowLayout.addView(createSurfaceCloseSlot(), LinearLayout.LayoutParams(fixedKeyWidth, keyHeight))
                     }
                 }
                 container.addView(rowLayout)
@@ -1504,7 +1505,7 @@ class StatusBarController(
                 rowLayout.addView(rightPlaceholder, LinearLayout.LayoutParams(fixedKeyWidth, keyHeight).apply {
                     marginStart = keySpacing
                 })
-                rowLayout.addView(View(context), LinearLayout.LayoutParams(fixedKeyWidth, keyHeight).apply {
+                rowLayout.addView(createSurfaceCloseSlot(), LinearLayout.LayoutParams(fixedKeyWidth, keyHeight).apply {
                     marginStart = keySpacing
                 })
             }
@@ -2400,12 +2401,16 @@ class StatusBarController(
         }
         
         // Aggiungi prima il contenuto (dietro) poi il testo (davanti)
-        keyLayout.addView(contentText)
-        keyLayout.addView(labelText)
+        val contentGroup = FrameLayout(context).apply {
+            layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            addView(contentText)
+            addView(labelText)
+        }
+        keyLayout.addView(contentGroup)
         rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.setStyle(keyLayout,
             rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.Style(
                 theme.normalKey, theme.accent, cornerRadius, theme.divider, dpToPx(1f), drawable),
-            content = contentText)
+            content = contentGroup)
         
         return keyLayout
     }
@@ -2541,7 +2546,11 @@ class StatusBarController(
     private fun applySurfaceCloseButtonTheme(theme: KeyboardThemeColors) {
         (symSurfaceCloseButton as? ImageView)?.apply {
             setColorFilter(theme.textAndIcons)
-            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.placeTrailingControl(this, hardwareSymKeyHeightPx(theme))
+            if ((parent as? View)?.tag == surfaceCloseSlotTag) {
+                fillSurfaceCloseSlot(this)
+            } else {
+                rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.placeTrailingControl(this, hardwareSymKeyHeightPx(theme))
+            }
             rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.style(this,
                 theme.statusBarButton, theme.accent, hardwareSymKeyHeightPx(theme) * theme.chromeCornerRadiusRatio,
                 theme.divider, dpToPx(1f), right = true)
@@ -3475,6 +3484,8 @@ class StatusBarController(
             stackParams.height = ViewGroup.LayoutParams.MATCH_PARENT
             stack.layoutParams = stackParams
         }
+        placeSurfaceCloseInContent(surface, content)
+        symSurfaceCloseButton?.let { rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bindTrailingSurface(surface, it) }
         updateSurfaceCloseBottomMargin(if (reserveLedSpace) reservedExpandedLedHeight() else 0)
         if (content is ViewGroup) bindExpandedRows(content)
 
@@ -3500,16 +3511,64 @@ class StatusBarController(
     }
 
     private fun setSurfaceCloseVisible(visible: Boolean) {
-        symSurfaceCloseButton?.visibility = if (visible) View.VISIBLE else View.GONE
+        val close = symSurfaceCloseButton ?: return
+        val visibility = if (visible) View.VISIBLE else View.GONE
+        if (close.visibility == visibility) return
+        close.visibility = visibility
+        val slot = (close.parent as? ViewGroup)?.takeIf { it.tag == surfaceCloseSlotTag } ?: return
+        (slot.parent as? ViewGroup)?.let { row ->
+            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bind(row,
+                rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.surfaces(row))
+        }
+    }
+
+    private fun createSurfaceCloseSlot(): FrameLayout = FrameLayout(context).apply { tag = surfaceCloseSlotTag }
+
+    private fun placeSurfaceCloseInContent(surface: FrameLayout, content: View) {
+        fun findSlot(view: View): FrameLayout? {
+            if (view.tag == surfaceCloseSlotTag) return view as? FrameLayout
+            if (view is ViewGroup) for (index in 0 until view.childCount) {
+                findSlot(view.getChildAt(index))?.let { return it }
+            }
+            return null
+        }
+        val close = symSurfaceCloseButton ?: return
+        val slot = findSlot(content)
+        val target = slot ?: surface
+        if (close.parent !== target) {
+            val oldParent = close.parent as? ViewGroup
+            oldParent?.removeView(close)
+            if (oldParent?.tag == surfaceCloseSlotTag) {
+                (oldParent.parent as? ViewGroup)?.let { row ->
+                    rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bind(row,
+                        rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.surfaces(row))
+                }
+            }
+            target.addView(close)
+        }
+        if (slot != null) {
+            fillSurfaceCloseSlot(close)
+        } else {
+            rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.placeTrailingControl(close, hardwareSymKeyHeightPx())
+        }
+    }
+
+    private fun fillSurfaceCloseSlot(close: View) {
+        val params = close.layoutParams as? FrameLayout.LayoutParams
+        if (params?.width == ViewGroup.LayoutParams.MATCH_PARENT &&
+            params.height == ViewGroup.LayoutParams.MATCH_PARENT &&
+            params.leftMargin == 0 && params.topMargin == 0 && params.rightMargin == 0 && params.bottomMargin == 0) return
+        close.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
     }
 
     private fun updateSurfaceCloseBottomMargin(bottomMargin: Int) {
         val button = symSurfaceCloseButton ?: return
         val params = button.layoutParams as? FrameLayout.LayoutParams ?: return
-        if (params.bottomMargin == bottomMargin) {
+        val margin = if ((button.parent as? View)?.tag == surfaceCloseSlotTag) 0 else bottomMargin
+        if (params.bottomMargin == margin) {
             return
         }
-        params.bottomMargin = bottomMargin
+        params.bottomMargin = margin
         button.layoutParams = params
     }
 

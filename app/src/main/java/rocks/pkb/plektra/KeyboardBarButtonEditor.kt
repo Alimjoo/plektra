@@ -294,4 +294,3 @@ internal fun stringResourceForButton(context: android.content.Context, buttonId:
         else -> buttonId
     }
 }
-

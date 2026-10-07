@@ -20,12 +20,15 @@ internal class ImeContentLayout(context: Context) : LinearLayout(context) {
         val save = canvas.save()
         canvas.clipRect(0, 0, width, height)
         val chrome = chrome()
-        val path = chrome?.geometry?.contentPath(chrome.width.toFloat(), chrome.height.toFloat())
+        val path = chrome?.geometry?.displayPathRef(chrome.width.toFloat(), chrome.height.toFloat())
         if (path != null) {
             getLocationInWindow(position)
             chrome.getLocationInWindow(chromePosition)
-            path.offset((chromePosition[0] - position[0]).toFloat(), (chromePosition[1] - position[1]).toFloat())
+            val dx = (chromePosition[0] - position[0]).toFloat()
+            val dy = (chromePosition[1] - position[1]).toFloat()
+            canvas.translate(dx, dy)
             canvas.clipPath(path)
+            canvas.translate(-dx, -dy)
         }
         draw()
         canvas.restoreToCount(save)

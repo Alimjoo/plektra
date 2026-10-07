@@ -21,24 +21,32 @@ import rocks.pkb.plektra.SettingsManager
 internal object KeyboardBarRowGeometry {
     data class CanvasSurface(val path: Path, val center: PointF, val ledShaped: Boolean)
 
-    fun canvasSurface(view: View, bounds: RectF, radius: Float, left: Boolean, right: Boolean): CanvasSurface {
+    data class CanvasFrame(val geometry: rocks.pkb.plektra.inputmethod.KeyboardBarGeometry,
+        val width: Float, val height: Float, val x: Float, val y: Float)
+
+    fun canvasFrame(view: View, standalone: rocks.pkb.plektra.inputmethod.KeyboardBarGeometry): CanvasFrame {
         var ancestor = view.parent
         while (ancestor != null && ancestor !is rocks.pkb.plektra.inputmethod.ImeChromeLayout) ancestor = ancestor.parent
         val chrome = ancestor as? rocks.pkb.plektra.inputmethod.ImeChromeLayout
         val location = IntArray(2).also(view::getLocationInWindow)
         val origin = IntArray(2).also { chrome?.getLocationInWindow(it) }
-        val x = if (chrome != null) (location[0] - origin[0]).toFloat() else 0f
-        val y = if (chrome != null) (location[1] - origin[1]).toFloat() else 0f
-        val global = RectF(bounds).apply { offset(x, y) }
-        val geometry = chrome?.geometry ?: rocks.pkb.plektra.inputmethod.KeyboardBarGeometry(view.context)
-        val width = chrome?.width?.toFloat() ?: view.width.toFloat()
-        val height = chrome?.height?.toFloat() ?: view.height.toFloat()
-        val path = geometry.surfacePath(width, height, global, radius, left, right).apply { offset(-x, -y) }
-        val region = Region().apply { setPath(path, Region(bounds.left.toInt(), bounds.top.toInt(),
-            kotlin.math.ceil(bounds.right).toInt(), kotlin.math.ceil(bounds.bottom).toInt())) }
-        return CanvasSurface(path, rocks.pkb.plektra.inputmethod.KeyboardBarGeometry.centroid(region,
-            PointF(bounds.centerX(), bounds.centerY())), geometry.ownsLedSurface(global, left, right))
+        return CanvasFrame(chrome?.geometry ?: standalone, chrome?.width?.toFloat() ?: view.width.toFloat(),
+            chrome?.height?.toFloat() ?: view.height.toFloat(),
+            if (chrome != null) (location[0] - origin[0]).toFloat() else 0f,
+            if (chrome != null) (location[1] - origin[1]).toFloat() else 0f)
     }
+
+    fun canvasSurface(view: View, bounds: RectF, radius: Float, left: Boolean, right: Boolean): CanvasSurface =
+        canvasSurface(canvasFrame(view, rocks.pkb.plektra.inputmethod.KeyboardBarGeometry(view.context)), bounds, radius, left, right)
+
+    fun canvasSurface(frame: CanvasFrame, bounds: RectF, radius: Float, left: Boolean, right: Boolean): CanvasSurface {
+        val global = RectF(bounds).apply { offset(frame.x, frame.y) }
+        val surface = frame.geometry.preparedSurface(frame.width, frame.height, global, radius, left, right)
+        val path = Path(surface.path).apply { offset(-frame.x, -frame.y) }
+        return CanvasSurface(path, PointF(surface.center.x - frame.x, surface.center.y - frame.y),
+            frame.geometry.ownsLedSurface(global, left, right))
+    }
+
     data class Style(val normal: Int, val pressed: Int, val radius: Float,
         val border: Int?, val borderWidth: Int, val flat: Drawable)
     private data class Surface(
@@ -49,10 +57,19 @@ internal object KeyboardBarRowGeometry {
         val content: View,
         val padding: IntArray,
         val textSize: Float?,
+        var placementKey: List<Any?>? = null,
+        val memberSizes: MutableMap<View, Float> = mutableMapOf(),
+        var contentTransformed: Boolean = false,
         val scaleType: ImageView.ScaleType?,
         val imageMatrix: Matrix?
     )
     private data class Row(val surfaces: List<View>)
+    private data class TrailingSurface(val view: View)
+
+    fun bindTrailingSurface(parent: ViewGroup, control: View) {
+        val current = parent.getTag(R.id.keyboard_bar_row_geometry) as? TrailingSurface
+        if (current?.view !== control) parent.setTag(R.id.keyboard_bar_row_geometry, TrailingSurface(control))
+    }
     private data class CanvasRow(val top: Float, val bottom: Float, val radius: Float, val left: RectF, val right: RectF)
 
     fun bindCanvasRow(view: View, top: Float, bottom: Float, radius: Float,
@@ -93,7 +110,9 @@ internal object KeyboardBarRowGeometry {
                 }
             })
         }
+        val geometryChanged = surface.style.radius != style.radius || surface.style.borderWidth != style.borderWidth
         surface.style = style
+        if (geometryChanged) view.requestLayout()
         if (!surface.rowOwned) { surface.left = fallbackLeft; surface.right = fallbackRight }
         view.setTag(R.id.keyboard_bar_surface_geometry, surface)
         drawSurface(view, surface)
@@ -138,6 +157,7 @@ internal object KeyboardBarRowGeometry {
     }
 
     fun bind(row: ViewGroup, surfaces: List<View>) {
+        if ((row.getTag(R.id.keyboard_bar_row_geometry) as? Row)?.surfaces == surfaces) return
         if (row.getTag(R.id.keyboard_bar_row_geometry) == null) {
             row.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> update(row) }
         }
@@ -164,8 +184,12 @@ internal object KeyboardBarRowGeometry {
 
     fun bottomRow(chrome: rocks.pkb.plektra.inputmethod.ImeChromeLayout): VisibleRow? {
         var lowest: VisibleRow? = null
+        val trailing = ArrayList<View>()
         fun visit(view: View) {
             if (view.visibility != View.VISIBLE) return
+            (view.getTag(R.id.keyboard_bar_row_geometry) as? TrailingSurface)?.view?.let {
+                if (it.visibility == View.VISIBLE && it.width > 0) trailing += it
+            }
             val canvasRow = view.getTag(R.id.keyboard_bar_canvas_geometry) as? CanvasRow
             val row = view.getTag(R.id.keyboard_bar_row_geometry) as? Row
             if (canvasRow != null || row != null) {
@@ -181,12 +205,23 @@ internal object KeyboardBarRowGeometry {
                     bounds.top + canvasRow.bottom.toInt(), canvasRow.radius,
                     canvasSurface(canvasRow.left), canvasSurface(canvasRow.right))
                 else VisibleRow(bounds.top + view.paddingTop, bounds.bottom,
-                    surfaces.firstOrNull()?.radius ?: 0f, surfaces.firstOrNull(), surfaces.lastOrNull())
+                    surfaces.firstOrNull()?.radius ?: 0f,
+                    surfaces.firstOrNull()?.takeIf { it.bounds.left <= chrome.paddingLeft + 3f * chrome.resources.displayMetrics.density },
+                    surfaces.lastOrNull()?.takeIf { it.bounds.right >= chrome.width - chrome.paddingRight - 3f * chrome.resources.displayMetrics.density })
                 if (lowest == null || candidate.bottom >= lowest!!.bottom - 1) lowest = candidate
             }
             if (view is ViewGroup) for (index in 0 until view.childCount) visit(view.getChildAt(index))
         }
         for (index in 0 until chrome.childCount) visit(chrome.getChildAt(index))
+        for (control in trailing) {
+            val style = (control.getTag(R.id.keyboard_bar_surface_geometry) as? Surface)?.style ?: continue
+            val bounds = Rect(0, 0, control.width, control.height).also { chrome.offsetDescendantRectToMyCoords(control, it) }
+            if (bounds.right < chrome.width - chrome.paddingRight - 3f * chrome.resources.displayMetrics.density ||
+                lowest != null && kotlin.math.abs(bounds.bottom - lowest!!.bottom) > 1) continue
+            val owner = rocks.pkb.plektra.inputmethod.KeyboardBarGeometry.OuterSurface(RectF(bounds), style.radius, style.borderWidth / 2f)
+            lowest = lowest?.copy(top = minOf(lowest!!.top, bounds.top), right = owner)
+                ?: VisibleRow(bounds.top, bounds.bottom, style.radius, null, owner)
+        }
         return lowest
     }
 
@@ -216,9 +251,13 @@ internal object KeyboardBarRowGeometry {
         val rounded = SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(view.context) &&
             (surface.left || surface.right)
         val current = view.background as? CurvedCornerButtonDrawable
-        if (!force && rounded && current != null &&
-            current.leftEdge == surface.left && current.rightEdge == surface.right) return
+        if (rounded && current != null && current.leftEdge == surface.left && current.rightEdge == surface.right &&
+            current.matchesStyle(style.radius, style.borderWidth)) {
+            current.updateColors(style.normal, style.pressed, style.border)
+            return
+        }
         if (!force && !rounded && current == null) return
+        surface.placementKey = null
         view.background = if (rounded) CurvedCornerButtonDrawable(
             view, style.normal, style.pressed, style.radius,
             style.border, style.borderWidth, surface.left, surface.right
@@ -232,11 +271,35 @@ internal object KeyboardBarRowGeometry {
             restoreContent(content, surface)
             return
         }
+        fun signature(member: View): List<Any?> = when (member) {
+            is TextView -> listOf(member.text?.toString(), member.typeface, member.includeFontPadding,
+                member.width, member.height, member.left, member.top, member.compoundDrawablePadding,
+                member.compoundDrawables.map { it?.intrinsicWidth to it?.intrinsicHeight })
+            is ImageView -> listOf(member.drawable?.intrinsicWidth, member.drawable?.intrinsicHeight,
+                member.width, member.height, member.left, member.top)
+            is ViewGroup -> (0 until member.childCount).flatMap { signature(member.getChildAt(it)) }
+            else -> listOf(member.width, member.height)
+        }
+        val key = listOf(contour, contour?.placementRevision(), view.width, view.height, signature(content))
+        if (surface.placementKey == key) return
+        surface.placementKey = key
+        if (content is ViewGroup && contour != null) {
+            placeGroup(view, content, contour, surface)
+            return
+        }
         var opticalOffsetX = 0f
         var opticalOffsetY = 0f
         val contentSize = when (content) {
             is ImageView -> content.drawable?.takeIf { it.intrinsicWidth > 0 && it.intrinsicHeight > 0 }?.let {
-                it.intrinsicWidth.toFloat() to it.intrinsicHeight.toFloat()
+                val availableWidth = (content.width - surface.padding[0] - surface.padding[2]).coerceAtLeast(1)
+                val availableHeight = (content.height - surface.padding[1] - surface.padding[3]).coerceAtLeast(1)
+                val scale = when (surface.scaleType) {
+                    ImageView.ScaleType.CENTER_INSIDE -> minOf(1f, availableWidth.toFloat() / it.intrinsicWidth, availableHeight.toFloat() / it.intrinsicHeight)
+                    ImageView.ScaleType.FIT_CENTER, ImageView.ScaleType.FIT_START, ImageView.ScaleType.FIT_END ->
+                        minOf(availableWidth.toFloat() / it.intrinsicWidth, availableHeight.toFloat() / it.intrinsicHeight)
+                    else -> 1f
+                }
+                it.intrinsicWidth * scale to it.intrinsicHeight * scale
             }
             is TextView -> {
                 val paint = TextPaint(content.paint).apply { surface.textSize?.let { textSize = it } }
@@ -270,7 +333,6 @@ internal object KeyboardBarRowGeometry {
             is ImageView -> {
                 val drawable = content.drawable ?: return
                 val baseScale = minOf(
-                    1f,
                     contentSize.first / drawable.intrinsicWidth,
                     contentSize.second / drawable.intrinsicHeight
                 )
@@ -304,9 +366,62 @@ internal object KeyboardBarRowGeometry {
         }
     }
 
+    private fun placeGroup(owner: View, group: ViewGroup, contour: CurvedCornerButtonDrawable, surface: Surface) {
+        surface.contentTransformed = true
+        val obstacles = ArrayList<RectF>()
+        for (index in 0 until group.childCount) {
+            val child = group.getChildAt(index)
+            if (child.visibility != View.VISIBLE) continue
+            val text = (child as? TextView)?.text?.toString() ?: continue
+            if (text.isEmpty()) continue
+            val baseSize = surface.memberSizes.getOrPut(child) { child.textSize }
+            val paint = TextPaint(child.paint).apply { textSize = baseSize }
+            val ink = Rect().also { paint.getTextBounds(text, 0, text.length, it) }
+            val metrics = paint.fontMetrics
+            val advance = paint.measureText(text)
+            val horizontal = child.gravity and android.view.Gravity.HORIZONTAL_GRAVITY_MASK
+            val vertical = child.gravity and android.view.Gravity.VERTICAL_GRAVITY_MASK
+            val startX = when (horizontal) {
+                android.view.Gravity.RIGHT -> child.width - child.paddingRight - advance
+                android.view.Gravity.CENTER_HORIZONTAL -> (child.width + child.paddingLeft - child.paddingRight - advance) / 2f
+                else -> child.paddingLeft.toFloat()
+            }
+            val upper = if (child.includeFontPadding) metrics.top else metrics.ascent
+            val lower = if (child.includeFontPadding) metrics.bottom else metrics.descent
+            val baseline = when (vertical) {
+                android.view.Gravity.BOTTOM -> child.height - child.paddingBottom - lower
+                android.view.Gravity.CENTER_VERTICAL -> (child.height + child.paddingTop - child.paddingBottom - upper - lower) / 2f
+                else -> child.paddingTop - upper
+            }
+            val inkX = startX + ink.exactCenterX()
+            val inkY = baseline + ink.exactCenterY()
+            val offsetX = group.left + child.left
+            val offsetY = group.top + child.top
+            val preferred = if (index == 0) contour.visibleCenter() else PointF(offsetX + inkX, offsetY + inkY)
+            val placement = contour.fitContentAt(ink.width().toFloat(), ink.height().toFloat(), preferred, obstacles)
+            child.pivotX = inkX; child.pivotY = inkY
+            child.scaleX = placement.scale; child.scaleY = placement.scale
+            child.translationX = placement.x - offsetX - inkX
+            child.translationY = placement.y - offsetY - inkY
+            obstacles += RectF(placement.x - ink.width() * placement.scale / 2f,
+                placement.y - ink.height() * placement.scale / 2f,
+                placement.x + ink.width() * placement.scale / 2f,
+                placement.y + ink.height() * placement.scale / 2f).apply {
+                    inset(-owner.resources.displayMetrics.density, -owner.resources.displayMetrics.density)
+                }
+        }
+    }
+
     private fun Int?.orZero(): Int = this ?: 0
 
     private fun restoreContent(view: View, surface: Surface) {
+        surface.placementKey = null
+        if (view is ViewGroup && surface.contentTransformed) {
+            for (index in 0 until view.childCount) {
+                view.getChildAt(index).apply { translationX = 0f; translationY = 0f; scaleX = 1f; scaleY = 1f }
+            }
+            surface.contentTransformed = false
+        }
         if (view.paddingLeft != surface.padding[0] || view.paddingTop != surface.padding[1] ||
             view.paddingRight != surface.padding[2] || view.paddingBottom != surface.padding[3]) {
             view.setPadding(surface.padding[0], surface.padding[1], surface.padding[2], surface.padding[3])

@@ -24,7 +24,9 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
     var compactCornerColors: Pair<Int, Int> = Color.BLACK to Color.BLACK
     var bottomFillColors: Pair<Int, Int> = Color.BLACK to Color.BLACK
     private val cornerFillPaint = Paint()
+    private var clipRevision = -1L
     private val calibrationPreviewListener: () -> Unit = {
+        geometry.refreshSettings(forceCalibration = true)
         applyBottomCornerClip()
         requestLayout()
         invalidate()
@@ -48,12 +50,8 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
             super.draw(canvas)
             return
         }
-        val calibration = rocks.pkb.plektra.T2eCornerCalibration.read(context)
-        val path = geometry.displayPath(width.toFloat(), height.toFloat()) ?: return
-        val bottomContour = rocks.pkb.plektra.T2eCornerGeometry.bottomContourPath(
-            width.toFloat(), height.toFloat(), radii.first.toFloat(), radii.second.toFloat(),
-            calibration
-        )
+        val path = geometry.displayPathRef(width.toFloat(), height.toFloat()) ?: return
+        val bottomContour = geometry.bottomContourPathRef(width.toFloat(), height.toFloat()) ?: return
         cornerFillPaint.color = bottomFillColors.first
         cornerFillPaint.style = Paint.Style.STROKE
         cornerFillPaint.strokeWidth = 2f * resources.displayMetrics.density
@@ -240,6 +238,7 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
         geometry.ledRowRadius = row?.radius ?: 0f
         geometry.leftSurface = row?.left
         geometry.rightSurface = row?.right
+        geometry.prepare(width.toFloat(), height.toFloat())
         if (!contourIntegratedIndicators || indicator == null) {
             onLedGeometryChanged?.invoke()
             return
@@ -247,7 +246,7 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
         val bounds = android.graphics.Rect(0, 0, indicator.width, indicator.height).also {
             offsetDescendantRectToMyCoords(indicator, it)
         }
-        val calibration = rocks.pkb.plektra.T2eCornerCalibration.read(context)
+        val calibration = geometry.calibration
         val arcTop = kotlin.math.floor(height -
             maxOf(bottomCornerRadiiPx?.first ?: 0, bottomCornerRadiiPx?.second ?: 0) * calibration.size +
             calibration.shiftYPx).toInt()
@@ -308,10 +307,7 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
         screenAwakeController.onTouchAction(event.actionMasked)
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
             ledTouchActive = ledOnlyReservedHeightPx == null &&
-                geometry.ledsVisible && android.graphics.Region().apply {
-                    setPath(geometry.ledExclusionPath(width.toFloat(), height.toFloat()),
-                        android.graphics.Region(0, 0, width, height))
-                }.contains(event.x.toInt(), event.y.toInt())
+                geometry.ledsVisible && geometry.ledContains(width.toFloat(), height.toFloat(), event.x, event.y)
         }
         if (ledTouchActive) {
             val indicator = indicatorView?.takeIf { it.visibility == View.VISIBLE } ?: return false
@@ -329,6 +325,9 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
     // Extend the shape above the view so even a bar shorter than the display
     // radius follows the original arc, rather than shrinking it to fit the bar.
     private fun applyBottomCornerClip() {
+        geometry.prepare(width.toFloat(), height.toFloat())
+        if (clipRevision == geometry.revision) return
+        clipRevision = geometry.revision
         fun refresh(view: View) {
             view.invalidate()
             view.background?.invalidateSelf()
@@ -348,7 +347,7 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
                 val right = radii.second.coerceIn(0, view.width / 2).toFloat()
                 val path = rocks.pkb.plektra.T2eCornerGeometry.path(
                     view.width.toFloat(), view.height.toFloat(), left, right,
-                    rocks.pkb.plektra.T2eCornerCalibration.read(context)
+                    geometry.calibration
                 )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     outline.setPath(path)

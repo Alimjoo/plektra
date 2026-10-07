@@ -106,12 +106,19 @@ class LedStatusView(
     internal var barGeometry = rocks.pkb.plektra.inputmethod.KeyboardBarGeometry(context)
         set(value) { field = value; invalidateGeometry() }
 
+    private var geometryInvalidationKey: List<Any?>? = null
+
     internal fun invalidateGeometry() {
         barGeometry.ledRadii = bottomCornerRadiiPx
         barGeometry.ledLayout = layout
         barGeometry.ledContentHeight = ledHeight.toFloat()
         barGeometry.ledTopPadding = topPadding.toFloat()
         barGeometry.followDisplayContour = followDisplayContour
+        val frame = geometryFrame()
+        barGeometry.prepare(frame.width, frame.height)
+        val key = listOf(barGeometry, barGeometry.revision, frame)
+        if (key == geometryInvalidationKey) return
+        geometryInvalidationKey = key
         container?.let { canvas ->
             for (index in 0 until canvas.childCount) canvas.getChildAt(index).invalidate()
             canvas.invalidate()
@@ -221,19 +228,11 @@ class LedStatusView(
                 val density = context.resources.displayMetrics.density
                 paint.strokeWidth = barGeometry.ledStrokeWidth(segment)
                 val frame = geometryFrame()
-                val path = barGeometry.ledRailPath(frame.width, frame.height, segment)
-                val measure = PathMeasure(path, false)
-                val section = Path()
-                val leftSide = segment.x < 0.5f
-                val halfDivider = (SEGMENT_DIVIDER_DP * density + paint.strokeWidth) / 2f
-                val range = if (followDisplayContour && layout == ModifierLedLayouts.TITAN_2_ELITE &&
-                    !leftSide && segment.y > 0.5f) {
-                    if (segment.state == ModifierLedState.SHIFT) 0f to measure.length / 2f - halfDivider
-                    else measure.length / 2f + halfDivider to measure.length
-                } else 0f to measure.length
-                measure.getSegment(range.first, range.second, section, true)
-                section.offset(-frame.x, -frame.y)
+                val section = barGeometry.ledSectionPath(frame.width, frame.height, segment)
+                val save = canvas.save()
+                canvas.translate(-frame.x, -frame.y)
                 canvas.drawPath(section, paint)
+                canvas.restoreToCount(save)
             }
         }.apply {
             shape = GradientDrawable.RECTANGLE
@@ -296,11 +295,7 @@ class LedStatusView(
         override fun dispatchTouchEvent(event: MotionEvent): Boolean {
             if (cornerRadiiPx != null && event.actionMasked == MotionEvent.ACTION_DOWN) {
                 val frame = geometryFrame()
-                val occupied = android.graphics.Region().apply {
-                    setPath(barGeometry.ledExclusionPath(frame.width, frame.height),
-                        android.graphics.Region(0, 0, frame.width.toInt(), frame.height.toInt()))
-                }
-                if (!occupied.contains((event.x + frame.x).toInt(), (event.y + frame.y).toInt())) return false
+                if (!barGeometry.ledContains(frame.width, frame.height, event.x + frame.x, event.y + frame.y)) return false
             }
             return super.dispatchTouchEvent(event)
         }
