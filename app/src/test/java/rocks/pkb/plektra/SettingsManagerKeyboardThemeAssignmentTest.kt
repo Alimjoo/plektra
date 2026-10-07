@@ -26,6 +26,122 @@ class SettingsManagerKeyboardThemeAssignmentTest {
     }
 
     @Test
+    fun systemThemeEditSourceDoesNotTargetDormantSavedThemeOrActiveSavedOverride() {
+        val context = RuntimeEnvironment.getApplication()
+        val target = SettingsManager.KeyboardThemeTarget.HARDWARE
+        val dormant = theme(0xFF123456.toInt())
+        SettingsManager.saveKeyboardTheme(context, "MyTheme", dormant)
+        SettingsManager.setKeyboardTheme(context, target, dormant)
+        SettingsManager.setKeyboardThemeAssignmentMode(context, target, SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM)
+        val override = theme(0xFF654321.toInt())
+        SettingsManager.saveKeyboardTheme(context, "Override", override)
+        SettingsManager.upsertKeyboardThemeLayoutOverride(context, target, "de-DE", "qwertz", override)
+        val options = themeOptions(target) + SettingsManager.getSavedKeyboardThemes(context).map { it.toKeyboardThemeOption() }
+        val systemTheme = SettingsManager.getKeyboardThemeSystemSlot(context, target, dark = true)
+        assertEquals("saved:Override", matchKeyboardThemeOption(options,
+            SettingsManager.getEffectiveKeyboardTheme(context, target, "de-DE", "qwertz").toKeyboardThemePreset("Custom")))
+        assertEquals("builtin:Plektra Dark", keyboardThemeEditSourceKey(
+            SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM, "saved:MyTheme", options,
+            systemTheme.toKeyboardThemePreset("Custom")))
+        assertEquals("saved:MyTheme", keyboardThemeEditSourceKey(
+            SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED, "saved:MyTheme", options,
+            dormant.toKeyboardThemePreset("MyTheme")))
+        SettingsManager.setKeyboardTheme(context, target, systemTheme.copy(accent = 0xFFABCDEF.toInt()))
+        assertEquals(dormant, SettingsManager.getSavedKeyboardThemes(context).first { it.name == "MyTheme" }.theme)
+        assertEquals(override, SettingsManager.getSavedKeyboardThemes(context).first { it.name == "Override" }.theme)
+    }
+
+    @Test
+    fun activePresetUsesResolvedDefaultInsteadOfDormantEpaper() {
+        val context = RuntimeEnvironment.getApplication()
+        for (target in SettingsManager.KeyboardThemeTarget.entries) {
+            for (dark in listOf(false, true)) {
+                RuntimeEnvironment.setQualifiers(if (dark) "+night" else "+notnight")
+                val options = themeOptions(target)
+                assertEquals("builtin:ePaper", matchKeyboardThemeOption(options,
+                    SettingsManager.getKeyboardTheme(context, target).toKeyboardThemePreset("Custom")))
+                val effective = SettingsManager.getEffectiveKeyboardTheme(context, target)
+                assertEquals(if (dark) "builtin:Plektra Dark" else "builtin:Plektra Light",
+                    matchKeyboardThemeOption(options, effective.toKeyboardThemePreset("Custom")))
+            }
+        }
+    }
+
+    @Test
+    fun storedLegacyEpaperRemainsActiveWithoutAnAssignmentPreference() {
+        val context = RuntimeEnvironment.getApplication()
+        for (target in SettingsManager.KeyboardThemeTarget.entries) {
+            val epaper = themeOptions(target).first { it.key == "builtin:ePaper" }.preset.toSettingsTheme()
+            SettingsManager.getPreferences(context).edit()
+                .putString(SettingsManager.keyboardThemeKeyForTarget(target), SettingsManager.keyboardThemeToJsonString(epaper))
+                .commit()
+            assertEquals(SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED,
+                SettingsManager.getKeyboardThemeAssignmentMode(context, target))
+            assertEquals(epaper, SettingsManager.getEffectiveKeyboardTheme(context, target))
+        }
+    }
+
+    @Test
+    fun followSystemRetainsDormantEpaperAndChoosingItExplicitlyActivatesFixedMode() {
+        val context = RuntimeEnvironment.getApplication()
+        for (target in SettingsManager.KeyboardThemeTarget.entries) {
+            val epaper = themeOptions(target).first { it.key == "builtin:ePaper" }.preset.toSettingsTheme()
+            SettingsManager.setKeyboardTheme(context, target, epaper)
+            SettingsManager.setKeyboardThemeAssignmentMode(context, target, SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM)
+            assertEquals(epaper, SettingsManager.getKeyboardTheme(context, target))
+            assertEquals("builtin:Plektra Light", matchKeyboardThemeOption(themeOptions(target),
+                SettingsManager.getEffectiveKeyboardTheme(context, target).toKeyboardThemePreset("Custom")))
+            SettingsManager.setKeyboardTheme(context, target, epaper)
+            assertEquals(SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED,
+                SettingsManager.getKeyboardThemeAssignmentMode(context, target))
+            assertEquals(epaper, SettingsManager.getEffectiveKeyboardTheme(context, target))
+        }
+    }
+
+    @Test
+    fun activePresetUsesCurrentInputStyleOverride() {
+        val context = RuntimeEnvironment.getApplication()
+        val target = SettingsManager.KeyboardThemeTarget.HARDWARE
+        val options = themeOptions(target)
+        val epaper = options.first { it.key == "builtin:ePaper" }.preset.toSettingsTheme()
+        SettingsManager.upsertKeyboardThemeLayoutOverride(context, target, "de-DE", "qwertz", epaper)
+        assertEquals("builtin:ePaper", matchKeyboardThemeOption(options,
+            SettingsManager.getEffectiveKeyboardTheme(context, target, "de-DE", "qwertz").toKeyboardThemePreset("Custom")))
+        assertEquals("builtin:Plektra Light", matchKeyboardThemeOption(options,
+            SettingsManager.getEffectiveKeyboardTheme(context, target, "en-US", "qwerty").toKeyboardThemePreset("Custom")))
+    }
+
+    private fun themeOptions(target: SettingsManager.KeyboardThemeTarget): List<KeyboardThemeOption> =
+        keyboardThemePresets().map {
+            val preset = if (target == SettingsManager.KeyboardThemeTarget.SOFTWARE) it.withSoftwareKeyboardDefaults() else it
+            KeyboardThemeOption("builtin:${it.name}", preset, preset)
+        }
+
+    @Test
+    fun unconfiguredTargetsFollowSystemLightAndDark() {
+        val context = RuntimeEnvironment.getApplication()
+        for (target in SettingsManager.KeyboardThemeTarget.entries) {
+            assertEquals(SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM,
+                SettingsManager.getKeyboardThemeAssignmentMode(context, target))
+            RuntimeEnvironment.setQualifiers("+notnight")
+            assertEquals(SettingsManager.getKeyboardThemeSystemSlot(context, target, false),
+                SettingsManager.getEffectiveKeyboardTheme(context, target))
+            RuntimeEnvironment.setQualifiers("+night")
+            assertEquals(SettingsManager.getKeyboardThemeSystemSlot(context, target, true),
+                SettingsManager.getEffectiveKeyboardTheme(context, target))
+        }
+    }
+
+    @Test
+    fun explicitlyFixedModeIsPreservedWithoutStoredTheme() {
+        val context = RuntimeEnvironment.getApplication()
+        val target = SettingsManager.KeyboardThemeTarget.HARDWARE
+        SettingsManager.setKeyboardThemeAssignmentMode(context, target, SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED)
+        assertEquals(SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED,
+            SettingsManager.getKeyboardThemeAssignmentMode(context, target))
+    }
+
+    @Test
     fun fixedMode_returnsFixedTargetTheme_evenWhenSystemSlotsExist() {
         val context = RuntimeEnvironment.getApplication()
         val fixed = theme(0xFF101010.toInt())

@@ -922,9 +922,13 @@ object SettingsManager {
     }
 
     fun getKeyboardThemeAssignmentMode(context: Context, target: KeyboardThemeTarget): String {
-        val stored = getPreferences(context).getString(
-            keyboardThemeAssignmentModeKeyForTarget(target),
+        val prefs = getPreferences(context)
+        val fallback = if (prefs.contains(keyboardThemeKeyForTarget(target))) {
             KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED
+        } else KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM
+        val stored = prefs.getString(
+            keyboardThemeAssignmentModeKeyForTarget(target),
+            fallback
         )
         return if (stored == KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM) {
             KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM
@@ -1138,6 +1142,7 @@ object SettingsManager {
         val json = keyboardThemeToJson(theme)
         getPreferences(context).edit()
             .putString(keyboardThemeKeyForTarget(target), json.toString())
+            .putString(keyboardThemeAssignmentModeKeyForTarget(target), KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED)
             .apply()
     }
 

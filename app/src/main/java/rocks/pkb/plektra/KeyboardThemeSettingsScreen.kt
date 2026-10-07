@@ -236,19 +236,40 @@ fun KeyboardThemeScreen(
     } else {
         SettingsManager.KeyboardThemeTarget.SOFTWARE
     }
-    val activeTheme = if (activePreviewPage == 0) hardwareTheme else softwareTheme
-    val activePreset = if (activePreviewPage == 0) hardwarePreset else softwarePreset
-    val activeSelectionKey = if (activePreviewPage == 0) hardwareSelectionKey else softwareSelectionKey
+    val activeFixedTheme = if (activePreviewPage == 0) hardwareTheme else softwareTheme
+    val fixedPreset = if (activePreviewPage == 0) hardwarePreset else softwarePreset
+    val fixedSelectionKey = if (activePreviewPage == 0) hardwareSelectionKey else softwareSelectionKey
     val activeThemeOptions = if (activePreviewPage == 0) hardwareThemeOptions else softwareThemeOptions
     val presetListState = rememberLazyListState()
     val systemIsDark = isSystemInDarkTheme()
     val activeAssignmentMode = if (activePreviewPage == 0) hardwareAssignmentMode else softwareAssignmentMode
     val activeLightTheme = if (activePreviewPage == 0) hardwareLightTheme else softwareLightTheme
     val activeDarkTheme = if (activePreviewPage == 0) hardwareDarkTheme else softwareDarkTheme
-    val activePreviewTheme = if (activeAssignmentMode == SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM) {
+    val currentInputStyle = keyboardThemeCurrentInputStyle(context)
+    val hardwarePreviewTheme = SettingsManager.getEffectiveKeyboardTheme(context,
+        SettingsManager.KeyboardThemeTarget.HARDWARE, currentInputStyle.first, currentInputStyle.second)
+        .toKeyboardThemePreset("Custom")
+    val softwarePreviewTheme = SettingsManager.getEffectiveKeyboardTheme(context,
+        SettingsManager.KeyboardThemeTarget.SOFTWARE, currentInputStyle.first, currentInputStyle.second)
+        .toKeyboardThemePreset("Custom")
+    val activePreviewTheme = if (activePreviewPage == 0) hardwarePreviewTheme else softwarePreviewTheme
+    val activeSelectionKey = matchKeyboardThemeOption(activeThemeOptions, activePreviewTheme)
+        ?: "custom:${activeTarget.name.lowercase()}"
+    val activeTheme = if (activeAssignmentMode == SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM) {
         if (systemIsDark) activeDarkTheme else activeLightTheme
-    } else {
-        activeTheme
+    } else activeFixedTheme
+    val activePreset = if (activeAssignmentMode == SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM) {
+        activeThemeOptions.firstOrNull { it.key == matchKeyboardThemeOption(activeThemeOptions, activeTheme) }
+            ?.resetPreset ?: activeTheme
+    } else fixedPreset
+
+    fun setFixedTheme(target: SettingsManager.KeyboardThemeTarget, theme: SettingsManager.KeyboardThemeSettings) {
+        SettingsManager.setKeyboardTheme(context, target, theme)
+        if (target == SettingsManager.KeyboardThemeTarget.HARDWARE) {
+            hardwareAssignmentMode = SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED
+        } else {
+            softwareAssignmentMode = SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED
+        }
     }
 
     LaunchedEffect(
@@ -275,15 +296,26 @@ fun KeyboardThemeScreen(
     fun updateActiveTheme(theme: KeyboardThemePreset) {
         // Ignore callbacks retained by the normal editor while a draft is opening.
         if (draftEditingGuard.value) return
+        val editingSelectionKey = keyboardThemeEditSourceKey(activeAssignmentMode,
+            fixedSelectionKey, activeThemeOptions, activeTheme)
+        if (activeAssignmentMode == SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM) {
+            if (activePreviewPage == 0) {
+                hardwarePreset = activePreset
+                hardwareSelectionKey = editingSelectionKey
+            } else {
+                softwarePreset = activePreset
+                softwareSelectionKey = editingSelectionKey
+            }
+        }
         if (activePreviewPage == 0) {
             hardwareTheme = theme
-            SettingsManager.setKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, theme.toSettingsTheme())
+            setFixedTheme(SettingsManager.KeyboardThemeTarget.HARDWARE, theme.toSettingsTheme())
         } else {
             softwareTheme = theme
-            SettingsManager.setKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.SOFTWARE, theme.toSettingsTheme())
+            setFixedTheme(SettingsManager.KeyboardThemeTarget.SOFTWARE, theme.toSettingsTheme())
         }
-        if (activeSelectionKey.startsWith("saved:")) {
-            val savedName = activeSelectionKey.removePrefix("saved:")
+        if (editingSelectionKey.startsWith("saved:")) {
+            val savedName = editingSelectionKey.removePrefix("saved:")
             SettingsManager.saveKeyboardTheme(context, savedName, theme.copy(name = savedName).toSettingsTheme())
             savedThemes = SettingsManager.getSavedKeyboardThemes(context).map { it.toKeyboardThemeOption() }
         }
@@ -293,19 +325,20 @@ fun KeyboardThemeScreen(
         draftEditingGuard.value = false
         draftEditorName = null
         val preset = option.preset
-        if (activeSelectionKey == option.key) {
+        if (activeAssignmentMode == SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED &&
+            fixedSelectionKey == option.key) {
             return
         }
         if (activePreviewPage == 0) {
             hardwareSelectionKey = option.key
             hardwarePreset = option.resetPreset
             hardwareTheme = preset
-            SettingsManager.setKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, preset.toSettingsTheme())
+            setFixedTheme(SettingsManager.KeyboardThemeTarget.HARDWARE, preset.toSettingsTheme())
         } else {
             softwareSelectionKey = option.key
             softwarePreset = option.resetPreset
             softwareTheme = preset
-            SettingsManager.setKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.SOFTWARE, preset.toSettingsTheme())
+            setFixedTheme(SettingsManager.KeyboardThemeTarget.SOFTWARE, preset.toSettingsTheme())
         }
     }
 
@@ -374,12 +407,12 @@ fun KeyboardThemeScreen(
             hardwareSelectionKey = "saved:${draft.name}"
             hardwarePreset = savedPreset
             hardwareTheme = savedPreset
-            SettingsManager.setKeyboardTheme(context, activeTarget, draft.theme)
+            setFixedTheme(activeTarget, draft.theme)
         } else {
             softwareSelectionKey = "saved:${draft.name}"
             softwarePreset = savedPreset
             softwareTheme = savedPreset
-            SettingsManager.setKeyboardTheme(context, activeTarget, draft.theme)
+            setFixedTheme(activeTarget, draft.theme)
         }
         draftEditingGuard.value = false
         draftEditorName = null
@@ -668,22 +701,10 @@ fun KeyboardThemeScreen(
                     ) { page ->
                         when (page) {
                             0 -> HardwareKeyboardThemePreview(
-                                theme = draftPreset ?: if (
-                                    hardwareAssignmentMode == SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM
-                                ) {
-                                    if (systemIsDark) hardwareDarkTheme else hardwareLightTheme
-                                } else {
-                                    hardwareTheme
-                                }
+                                theme = draftPreset ?: hardwarePreviewTheme
                             )
                             else -> VirtualKeyboardThemePreview(
-                                theme = draftPreset ?: if (
-                                    softwareAssignmentMode == SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM
-                                ) {
-                                    if (systemIsDark) softwareDarkTheme else softwareLightTheme
-                                } else {
-                                    softwareTheme
-                                },
+                                theme = draftPreset ?: softwarePreviewTheme,
                                 viewportScale = softwarePreviewViewportScale
                             )
                         }
@@ -847,10 +868,12 @@ fun KeyboardThemeScreen(
                             hardwareSelectionKey = "saved:$normalizedName"
                             hardwarePreset = savedPreset
                             hardwareTheme = savedPreset
+                            hardwareAssignmentMode = SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED
                         } else {
                             softwareSelectionKey = "saved:$normalizedName"
                             softwarePreset = savedPreset
                             softwareTheme = savedPreset
+                            softwareAssignmentMode = SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED
                         }
                     }
                     pendingImportedTheme = null
@@ -1596,6 +1619,12 @@ private fun themeDisplayName(
         ?.name
         ?: theme.name
 
+private fun keyboardThemeCurrentInputStyle(context: Context): Pair<String?, String?> {
+    val subtype = (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+        ?.currentInputMethodSubtype
+    return subtype?.localeString() to AdditionalSubtypeUtils.resolveInputStyleLayout(context.assets, context, subtype)
+}
+
 private fun keyboardThemeOverrideTargets(context: Context): List<KeyboardThemeOverrideTarget> {
     val targets = mutableListOf<KeyboardThemeOverrideTarget>()
     val seen = mutableSetOf<String>()
@@ -1611,9 +1640,7 @@ private fun keyboardThemeOverrideTargets(context: Context): List<KeyboardThemeOv
     }
 
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-    val activeSubtype = imm?.currentInputMethodSubtype
-    val activeLocale = activeSubtype?.localeString()
-    val activeLayout = AdditionalSubtypeUtils.resolveInputStyleLayout(context.assets, context, activeSubtype)
+    val (activeLocale, activeLayout) = keyboardThemeCurrentInputStyle(context)
     add(
         locale = activeLocale,
         layout = activeLayout,
@@ -1758,7 +1785,16 @@ private fun KeyboardThemePreviewPickerRow(
     }
 }
 
-private fun matchKeyboardThemeOption(
+internal fun keyboardThemeEditSourceKey(
+    assignmentMode: String,
+    fixedSelectionKey: String,
+    options: List<KeyboardThemeOption>,
+    editorTheme: KeyboardThemePreset
+): String = if (assignmentMode == SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM) {
+    matchKeyboardThemeOption(options, editorTheme) ?: "custom"
+} else fixedSelectionKey
+
+internal fun matchKeyboardThemeOption(
     options: List<KeyboardThemeOption>,
     theme: KeyboardThemePreset
 ): String? {
