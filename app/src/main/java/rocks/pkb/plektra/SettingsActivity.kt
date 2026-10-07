@@ -28,6 +28,8 @@ class SettingsActivity : LocalizedComponentActivity() {
         const val CUSTOMIZATION_DESTINATION_APP_ENTER_BEHAVIOR = "app_enter_behavior"
         const val CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS = "status_bar_buttons"
         const val CUSTOMIZATION_DESTINATION_KEYBOARD_THEME = "keyboard_theme"
+        const val CUSTOMIZATION_DESTINATION_APP_ICON = "app_icon"
+        const val CUSTOMIZATION_DESTINATION_MAIN_BACKGROUND = "main_background"
         const val EXTRA_KEYBOARD_THEME_TARGET = "rocks.pkb.plektra.KEYBOARD_THEME_TARGET"
         const val KEYBOARD_THEME_TARGET_SOFTWARE = "software"
     }

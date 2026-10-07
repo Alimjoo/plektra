@@ -252,32 +252,10 @@ fun CustomizationSettingsScreen(
             CustomizationDestination.Main -> {
                 Scaffold(
                     topBar = {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .windowInsetsPadding(WindowInsets.statusBars),
-                            tonalElevation = 1.dp
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                IconButton(onClick = { navigateBack() }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = stringResource(R.string.settings_back_content_description)
-                                    )
-                                }
-                                Text(
-                                    text = stringResource(R.string.settings_category_customization),
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-                        }
+                        PlektraSettingsHeader(
+                            title = stringResource(R.string.settings_category_customization),
+                            onBack = { navigateBack() }
+                        )
                     }
                 ) { paddingValues ->
                     Column(
@@ -286,6 +264,90 @@ fun CustomizationSettingsScreen(
                             .padding(paddingValues)
                             .verticalScroll(rememberScrollState())
                     ) {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(72.dp)
+                                .settingRow(SettingLinkIds.CUSTOMIZATION_APP_ICON) {
+                                    navigateTo(CustomizationDestination.AppIcon)
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Apps,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(R.string.app_icon_title),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Medium,
+                                        maxLines = 1
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.app_icon_description),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(72.dp)
+                                .settingRow("customization.main_background") {
+                                    navigateTo(CustomizationDestination.MainBackground)
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Waves,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(R.string.main_background_title),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Medium,
+                                        maxLines = 1
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.main_background_description),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
                         // Variations Customization
                         Surface(
                             modifier = Modifier
@@ -553,6 +615,20 @@ fun CustomizationSettingsScreen(
 
             CustomizationDestination.Sounds -> {
                 SoundSettingsScreen(
+                    modifier = modifier,
+                    onBack = { navigateBack() }
+                )
+            }
+
+            CustomizationDestination.AppIcon -> {
+                AppIconSettingsScreen(
+                    modifier = modifier,
+                    onBack = { navigateBack() }
+                )
+            }
+
+            CustomizationDestination.MainBackground -> {
+                MainBackgroundSettingsScreen(
                     modifier = modifier,
                     onBack = { navigateBack() }
                 )
@@ -2106,7 +2182,9 @@ private enum class CustomizationDestination {
     LauncherShortcutAssignments,
     StatusBarButtons,
     KeyboardTheme,
-    Sounds
+    Sounds,
+    AppIcon,
+    MainBackground
 }
 
 
@@ -2117,6 +2195,8 @@ private fun customizationDestination(destination: String?): CustomizationDestina
     SettingsActivity.CUSTOMIZATION_DESTINATION_APP_ENTER_BEHAVIOR -> CustomizationDestination.AppEnterBehavior
     SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS -> CustomizationDestination.StatusBarButtons
     SettingsActivity.CUSTOMIZATION_DESTINATION_KEYBOARD_THEME, "keyboard_theme_assignment" -> CustomizationDestination.KeyboardTheme
+    SettingsActivity.CUSTOMIZATION_DESTINATION_APP_ICON -> CustomizationDestination.AppIcon
+    SettingsActivity.CUSTOMIZATION_DESTINATION_MAIN_BACKGROUND -> CustomizationDestination.MainBackground
     "launcher_shortcut_behavior" -> CustomizationDestination.LauncherShortcutBehavior
     "launcher_shortcut_cosmetic" -> CustomizationDestination.LauncherShortcutCosmetic
     "launcher_shortcut_assignments" -> CustomizationDestination.LauncherShortcutAssignments

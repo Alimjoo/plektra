@@ -26,6 +26,9 @@ object SettingLinkIds {
     const val MAIN_ACCESSIBILITY = "main.accessibility"
     const val MAIN_ABOUT = "main.about"
 
+    // App appearance
+    const val CUSTOMIZATION_APP_ICON = "customization.app_icon"
+
     // Text input screen
     const val TEXT_INPUT_TEXT_EXPANSION = "text_input.text_expansion"
     const val TEXT_INPUT_AUTO_CAPITALIZE = "text_input.auto_capitalize"
@@ -323,6 +326,13 @@ object SettingLinkRegistry {
             SettingLinkIds.MAIN_ABOUT,
             R.string.about_title,
             destination = SettingsDestination.About
+        ),
+        entry(
+            SettingLinkIds.CUSTOMIZATION_APP_ICON,
+            R.string.app_icon_title,
+            R.string.app_icon_description,
+            destination = SettingsDestination.Customization,
+            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_APP_ICON
         ),
 
         entry(
@@ -1047,7 +1057,11 @@ object SettingLinkRegistry {
         SettingsActivity.CUSTOMIZATION_DESTINATION_APP_ENTER_BEHAVIOR to
             R.string.app_enter_behaviour_title,
         SettingsActivity.CUSTOMIZATION_DESTINATION_KEYBOARD_THEME to
-            R.string.keyboard_theme_title
+            R.string.keyboard_theme_title,
+        SettingsActivity.CUSTOMIZATION_DESTINATION_APP_ICON to
+            R.string.app_icon_title,
+        SettingsActivity.CUSTOMIZATION_DESTINATION_MAIN_BACKGROUND to
+            R.string.main_background_title
     ) + customizationSettingSubtitles()
 
     /**

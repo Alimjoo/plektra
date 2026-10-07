@@ -1293,6 +1293,22 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="tutorial_android16_ime_caption_missing_requirement">Missing: %1$s.</string>
     <string name="tutorial_android16_ime_caption_vendor_toast">This is vendor-specific behaviour from Unihertz. The shortcut only works on supported Titan 2 firmware where Android exposes the OEM gesture setting.</string>
     <string name="tutorial_android16_ime_caption_fallback">Could not open the Titan 2 gesture setting. Opening Android Settings instead.</string>
+
+    <string name="app_icon_title">App icon</string>
+    <string name="main_background_title">Main screen background</string>
+    <string name="main_background_description">Choose flowing strings or the Titan 2 keyboard</string>
+    <string name="main_background_intro">Plektra alternates the background each day until you choose one. Typing in the test field animates the selected background.</string>
+    <string name="main_background_daily">Change daily</string>
+    <string name="main_background_daily_description">Alternates between strings and keyboard each day</string>
+    <string name="main_background_strings">Flowing strings</string>
+    <string name="main_background_keyboard">Titan 2 keyboard</string>
+    <string name="app_icon_description">Choose the colour and shape of the Plektra icon. The framed shape stays distinct even with strong launcher masks.</string>
+    <string name="app_icon_orange">Orange</string>
+    <string name="app_icon_blue">Blue</string>
+    <string name="app_icon_closed">Framed</string>
+    <string name="app_icon_open">Open</string>
+    <string name="app_icon_selected">Selected</string>
+    <string name="app_icon_update_hint">Your launcher may need a moment to update the icon.</string>
     <string name="tutorial_software_keyboard_auto_checker_title">Auto detection</string>
     <string name="tutorial_software_keyboard_auto_selected">Auto currently selects: %1$s</string>
     <string name="tutorial_software_keyboard_auto_overridden">Current override: %1$s. Auto would select: %2$s</string>

@@ -47,6 +47,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.TextFieldValue
 import rocks.pkb.plektra.R
 import rocks.pkb.plektra.inputmethod.DebugCaptureStore
 import rocks.pkb.plektra.inputmethod.KeyboardEventTracker
@@ -226,23 +227,6 @@ class MainActivity : LocalizedComponentActivity() {
                         )
                     }
 
-                    // Status bar overlay - responsive to theme
-                    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                    val isDarkTheme = isSystemInDarkTheme()
-                    val overlayColor = if (isDarkTheme) {
-                        // Dark theme: use black overlay
-                        Color.Black.copy(alpha = 0.3f)
-                    } else {
-                        // Light theme: use white overlay
-                        Color.White.copy(alpha = 0.2f)
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(statusBarHeight)
-                            .background(overlayColor)
-                    )
                 }
             }
         }
@@ -356,7 +340,14 @@ fun KeyboardSetupScreen(
 ) {
     val context = LocalContext.current
 
-    var testText by remember { mutableStateOf("") }
+    var testText by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(""))
+    }
+    var textMotionEvent by remember { mutableStateOf<TextMotionEvent?>(null) }
+    var textMotionToken by remember { mutableLongStateOf(0L) }
+    var backgroundPreference by remember {
+        mutableStateOf(MainBackgroundPreferences.get(context))
+    }
     val rawLastKeyEventState = remember { mutableStateOf<KeyboardEventTracker.KeyEventInfo?>(null) }
     val rawLastKeyEvent by rawLastKeyEventState
     var displayedLastKeyEvent by remember { mutableStateOf<KeyboardEventTracker.KeyEventInfo?>(null) }
@@ -456,7 +447,14 @@ fun KeyboardSetupScreen(
 
     // Clear state when the composable is removed
     DisposableEffect(Unit) {
+        val preferenceListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == MainBackgroundPreferences.KEY) {
+                backgroundPreference = MainBackgroundPreferences.get(context)
+            }
+        }
+        SettingsManager.getPreferences(context).registerOnSharedPreferenceChangeListener(preferenceListener)
         onDispose {
+            SettingsManager.getPreferences(context).unregisterOnSharedPreferenceChangeListener(preferenceListener)
             KeyboardEventTracker.unregisterState()
         }
     }
@@ -515,8 +513,9 @@ fun KeyboardSetupScreen(
         )
     }
 
-    Column(
-        modifier = modifier
+    Box(modifier = modifier) {
+        Column(
+        modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -524,6 +523,9 @@ fun KeyboardSetupScreen(
     ) {
         // Custom top bar with personalized graphics
         CustomTopBar(
+            background = MainBackgroundPreferences.resolve(backgroundPreference),
+            textEvent = textMotionEvent,
+            hardwareEvent = rawLastKeyEvent,
             onSettingsClick = {
                 val settingsIntent = Intent(context, SettingsActivity::class.java)
                 context.startActivity(settingsIntent)
@@ -619,15 +621,25 @@ fun KeyboardSetupScreen(
         }
 
         // Test field
-        OutlinedTextField(
+        SmoothCaretTextField(
             value = testText,
-            onValueChange = { testText = it },
+            onValueChange = { updated ->
+                val signal = when {
+                    updated.text.length < testText.text.length -> MotionBackgroundView.DELETE_MARKER
+                    updated.text.length > testText.text.length -> updated.text.substring(testText.text.length).lastOrNull()?.toString().orEmpty()
+                    updated.text != testText.text -> updated.text.lastOrNull()?.toString().orEmpty()
+                    else -> ""
+                }
+                testText = updated
+                if (signal.isNotEmpty()) {
+                    textMotionToken++
+                    textMotionEvent = TextMotionEvent(textMotionToken, signal)
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            placeholder = { Text(stringResource(R.string.test_field_placeholder)) },
-            minLines = 1,
-            maxLines = 2,
+            placeholder = stringResource(R.string.test_field_placeholder),
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Sentences
             )
@@ -928,6 +940,7 @@ fun KeyboardSetupScreen(
                 onCopy = { copyReportToClipboard(latestDebugReport) },
                 onShare = { shareReport(latestDebugReport) }
             )
+        }
         }
     }
 }

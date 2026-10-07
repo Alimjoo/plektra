@@ -339,6 +339,7 @@ internal object BackupPreferenceContract {
             "quick_launcher_highlight_favorites" to PreferenceValueType.BOOLEAN,
             "quick_launcher_favorite_color" to PreferenceValueType.INT,
             "quick_launcher_icon_colors" to PreferenceValueType.BOOLEAN,
+            "main_background_preference" to PreferenceValueType.STRING,
             "quick_launcher_show_alias_first" to PreferenceValueType.BOOLEAN,
             "quick_launcher_static_top_highlight" to PreferenceValueType.BOOLEAN,
             "quick_launcher_static_top_highlight_color" to PreferenceValueType.INT,

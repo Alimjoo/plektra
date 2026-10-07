@@ -1279,6 +1279,22 @@ Jede Taste kann als Keycode, Aktion, Native Ctrl oder Keine konfiguriert werden.
     <string name="tutorial_android16_ime_caption_missing_requirement">Fehlt: %1$s.</string>
     <string name="tutorial_android16_ime_caption_vendor_toast">Das ist ein herstellerspezifisches Unihertz-Verhalten. Die Verknüpfung funktioniert nur auf unterstützter Titan-2-Firmware, wenn Android die OEM-Gesteneinstellung bereitstellt.</string>
     <string name="tutorial_android16_ime_caption_fallback">Die Titan-2-Gesteneinstellung konnte nicht geöffnet werden. Öffne stattdessen die Android-Einstellungen.</string>
+
+    <string name="app_icon_title">App-Symbol</string>
+    <string name="main_background_title">Hintergrund der Hauptseite</string>
+    <string name="main_background_description">Fließende Saiten oder Titan-2-Tastatur auswählen</string>
+    <string name="main_background_intro">Plektra wechselt den Hintergrund täglich, bis Sie einen auswählen. Eingaben im Testfeld animieren den gewählten Hintergrund.</string>
+    <string name="main_background_daily">Täglich wechseln</string>
+    <string name="main_background_daily_description">Wechselt jeden Tag zwischen Saiten und Tastatur</string>
+    <string name="main_background_strings">Fließende Saiten</string>
+    <string name="main_background_keyboard">Titan-2-Tastatur</string>
+    <string name="app_icon_description">Wähle Farbe und Form des Plektra-Symbols. Die gerahmte Form bleibt auch bei starken Launcher-Masken klar erkennbar.</string>
+    <string name="app_icon_orange">Orange</string>
+    <string name="app_icon_blue">Blau</string>
+    <string name="app_icon_closed">Gerahmt</string>
+    <string name="app_icon_open">Offen</string>
+    <string name="app_icon_selected">Ausgewählt</string>
+    <string name="app_icon_update_hint">Der Launcher braucht möglicherweise einen Moment, um das Symbol zu aktualisieren.</string>
     <string name="tutorial_software_keyboard_auto_checker_title">Auto-Erkennung</string>
     <string name="tutorial_software_keyboard_auto_selected">Auto wählt aktuell: %1$s</string>
     <string name="tutorial_software_keyboard_auto_overridden">Aktuelle Übersteuerung: %1$s. Auto würde wählen: %2$s</string>

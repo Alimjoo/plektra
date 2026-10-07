@@ -27,6 +27,15 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         )
     ),
     SettingEntry(
+        id = "customization.main_background",
+        titleRes = R.string.main_background_title,
+        summaryRes = R.string.main_background_description,
+        route = SettingRoute(
+            destination = SettingsDestination.Customization,
+            customizationDestination = "main_background"
+        )
+    ),
+    SettingEntry(
         id = "customization.sounds",
         titleRes = R.string.settings_category_sounds,
         route = SettingRoute(
