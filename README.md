@@ -23,7 +23,7 @@ Plektra is currently prepared for four independent channels:
 - **Google Play stable** — planned Play build under a separate app identity
 - **Google Play Nightly** — planned Play test build under a separate app identity
 
-The first stable release is planned for **26.10**. September builds use the `26.09-nightly.DD.HHmmssZ` format. Installation instructions are in [Getting started](docs/getting-started.md).
+The first stable release is planned for **26.10**. Current Nightlies use the `26.10-nightly.DD.HHmmssZ` format. Installation instructions are in [Getting started](docs/getting-started.md).
 
 ## Devices
 

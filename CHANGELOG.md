@@ -1,5 +1,15 @@
 # Changelog
 
+## Plektra 26.10 Nightly
+
+- Independent Plektra identity, canonical Stable/Nightly channels, launcher appearance and selectable animated main-screen backgrounds.
+- Configurable Normal/Slim keyboard-bar profiles, content order, shared rows and modifier indicator locations.
+- Shared display/LED contours across bar, SYM, emoji, clipboard and software keyboard; correctly owned outer slots and fitted key hints.
+- Prepared geometry, content placement, LED paths and touch regions replace repeated pixel searches.
+- Effective system-theme selection and previews, dynamic snippet visibility, safer accent-aware autocorrection and 250px Titan 2 Elite flick defaults.
+- Optional keyboard-bar visibility on the Niagara home screen.
+
+
 ## New Features Pastiera 0.2
 
 ### Keyboard Enhancements

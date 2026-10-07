@@ -3,7 +3,7 @@
 set -euo pipefail
 
 usage() {
-  printf 'Usage: %s <base-version> <output-apk> [--timestamp YYYYMMDD.HHMMSS] [--fdroid]\n' "$0" >&2
+  printf 'Usage: %s <base-version> <output-apk> [--timestamp YYYYMMDD.HHMMSS] [--fdroid] [--skip-unit-tests]\n' "$0" >&2
   exit 2
 }
 
@@ -19,6 +19,7 @@ shift 2
 
 timestamp=
 fdroid=false
+skip_unit_tests=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --timestamp)
@@ -30,12 +31,16 @@ while [[ $# -gt 0 ]]; do
       fdroid=true
       shift
       ;;
+    --skip-unit-tests)
+      skip_unit_tests=true
+      shift
+      ;;
     *) usage ;;
   esac
 done
 
 if [[ -z "$timestamp" ]]; then
-  timestamp=$(TZ=Europe/Brussels date +'%Y%m%d.%H%M%S')
+  timestamp=$(date -u +'%Y%m%d.%H%M%S')
 fi
 [[ "$timestamp" =~ ^[0-9]{8}\.[0-9]{6}$ ]] || fail "invalid timestamp: $timestamp"
 
@@ -64,7 +69,11 @@ if [[ "$fdroid" == true ]]; then
 fi
 
 cd "$root_dir"
-./gradlew :app:testNightlyReleaseUnitTest "${gradle_args[@]}"
+if [[ "$skip_unit_tests" == false ]]; then
+  ./gradlew :app:testNightlyReleaseUnitTest "${gradle_args[@]}"
+else
+  printf 'Skipping unit tests; use only after the relevant checks have passed.\n'
+fi
 ./gradlew :app:assembleNightlyRelease "${gradle_args[@]}"
 
 [[ -f "$gradle_apk" ]] || fail "Gradle did not create the expected unsigned APK: $gradle_apk"

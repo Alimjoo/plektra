@@ -368,80 +368,87 @@ android {
     }
 }
 
-// The last stable APK carries a machine-readable inventory of its runtime
-// dependencies and the third-party assets documented in third_party_notices.md.
-val stableSbomAssets = layout.buildDirectory.dir("generated/sbom/stableRelease/assets")
-android.sourceSets.getByName("stable").assets.srcDir(stableSbomAssets)
-val stableRuntimeClasspath = provider { configurations.getByName("stableReleaseRuntimeClasspath") }
-val generateStableReleaseSbom = tasks.register("generateStableReleaseSbom") {
-    inputs.files(stableRuntimeClasspath)
-    inputs.property("versionName", android.defaultConfig.versionName ?: "")
-    inputs.property("versionCode", android.defaultConfig.versionCode ?: 0)
-    outputs.dir(stableSbomAssets)
-    doLast {
-        val versionName = android.defaultConfig.versionName ?: "unknown"
-        val appRef = "pkg:generic/plektra@$versionName"
-        val libraries = stableRuntimeClasspath.get().resolvedConfiguration.resolvedArtifacts
-            .map { artifact ->
-                val id = artifact.moduleVersion.id
+// Release APKs carry their runtime dependencies and bundled third-party assets.
+listOf("stable", "nightly").forEach { flavor ->
+    val flavorTitle = flavor.replaceFirstChar { it.uppercase() }
+    val sbomAssets = layout.buildDirectory.dir("generated/sbom/${flavor}Release/assets")
+    android.sourceSets.maybeCreate("${flavor}Release").assets.srcDir(sbomAssets)
+    val runtimeClasspath = provider { configurations.getByName("${flavor}ReleaseRuntimeClasspath") }
+    val generateReleaseSbom = tasks.register("generate${flavorTitle}ReleaseSbom") {
+        inputs.files(runtimeClasspath)
+        val releaseVersionName = (android.defaultConfig.versionName ?: "unknown") +
+            if (flavor == "nightly") providers.gradleProperty("PLEKTRA_NIGHTLY_VERSION_SUFFIX").orElse("-nightly").get() else ""
+        val releaseVersionCode = if (flavor == "nightly") {
+            providers.gradleProperty("PLEKTRA_NIGHTLY_VERSION_CODE").orNull?.toIntOrNull() ?: android.defaultConfig.versionCode ?: 0
+        } else android.defaultConfig.versionCode ?: 0
+        inputs.property("versionName", releaseVersionName)
+        inputs.property("versionCode", releaseVersionCode)
+        outputs.dir(sbomAssets)
+        doLast {
+            val versionName = releaseVersionName
+            val appRef = "pkg:generic/plektra${if (flavor == "nightly") "-nightly" else ""}@$versionName"
+            val libraries = runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts
+                .map { artifact ->
+                    val id = artifact.moduleVersion.id
+                    linkedMapOf<String, Any>(
+                        "type" to "library",
+                        "group" to id.group,
+                        "name" to id.name,
+                        "version" to id.version,
+                        "bom-ref" to "pkg:maven/${id.group}/${id.name}@${id.version}",
+                        "purl" to "pkg:maven/${id.group}/${id.name}@${id.version}"
+                    )
+                }
+                .distinctBy { it["bom-ref"] }
+                .sortedBy { it["bom-ref"].toString() }
+            fun bundled(name: String, ref: String, source: String, license: String) =
                 linkedMapOf<String, Any>(
-                    "type" to "library",
-                    "group" to id.group,
-                    "name" to id.name,
-                    "version" to id.version,
-                    "bom-ref" to "pkg:maven/${id.group}/${id.name}@${id.version}",
-                    "purl" to "pkg:maven/${id.group}/${id.name}@${id.version}"
+                    "type" to "data",
+                    "name" to name,
+                    "bom-ref" to ref,
+                    "externalReferences" to listOf(mapOf("type" to "website", "url" to source)),
+                    "licenses" to listOf(mapOf("license" to mapOf("id" to license)))
                 )
-            }
-            .distinctBy { it["bom-ref"] }
-            .sortedBy { it["bom-ref"].toString() }
-        fun bundled(name: String, ref: String, source: String, license: String) =
-            linkedMapOf<String, Any>(
-                "type" to "data",
-                "name" to name,
-                "bom-ref" to ref,
-                "externalReferences" to listOf(mapOf("type" to "website", "url" to source)),
-                "licenses" to listOf(mapOf("license" to mapOf("id" to license)))
+            val bundledAssets = listOf(
+                bundled("AOSP LatinIME-derived visuals", "vendored:aosp-latinime:127336e9f29d69607eab55982324b210279ae8c5", "https://android.googlesource.com/platform/packages/inputmethods/LatinIME", "Apache-2.0"),
+                bundled("Google Material Symbols / Material Icons artwork", "vendored:material-icons", "https://github.com/google/material-design-icons", "Apache-2.0"),
+                bundled("OpenGameArt keyboard soundpack", "vendored:opengameart-keyboard-soundpack", "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes", "CC0-1.0"),
+                bundled("OpenGameArt typewriter sounds", "vendored:opengameart-typewriter-sounds", "https://opengameart.org/content/typewriter-sounds", "CC0-1.0"),
+                bundled("OpenGameArt mechanical sounds", "vendored:opengameart-mechanical-sounds", "https://opengameart.org/content/mechanical-sounds", "CC0-1.0"),
+                bundled("Unicode CLDR emoji annotations", "vendored:unicode-cldr-annotations", "https://github.com/unicode-org/cldr-json", "Unicode-DFS-2016"),
+                bundled("Leipzig Corpora frequency data", "vendored:leipzig-corpora", "https://corpora.uni-leipzig.de/", "CC-BY-3.0")
             )
-        val bundledAssets = listOf(
-            bundled("AOSP LatinIME-derived visuals", "vendored:aosp-latinime:127336e9f29d69607eab55982324b210279ae8c5", "https://android.googlesource.com/platform/packages/inputmethods/LatinIME", "Apache-2.0"),
-            bundled("Google Material Symbols / Material Icons artwork", "vendored:material-icons", "https://github.com/google/material-design-icons", "Apache-2.0"),
-            bundled("OpenGameArt keyboard soundpack", "vendored:opengameart-keyboard-soundpack", "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes", "CC0-1.0"),
-            bundled("OpenGameArt typewriter sounds", "vendored:opengameart-typewriter-sounds", "https://opengameart.org/content/typewriter-sounds", "CC0-1.0"),
-            bundled("OpenGameArt mechanical sounds", "vendored:opengameart-mechanical-sounds", "https://opengameart.org/content/mechanical-sounds", "CC0-1.0"),
-            bundled("Unicode CLDR emoji annotations", "vendored:unicode-cldr-annotations", "https://github.com/unicode-org/cldr-json", "Unicode-DFS-2016"),
-            bundled("Leipzig Corpora frequency data", "vendored:leipzig-corpora", "https://corpora.uni-leipzig.de/", "CC-BY-3.0")
-        )
-        val components = libraries + bundledAssets
-        val bom = linkedMapOf<String, Any>(
-            "bomFormat" to "CycloneDX",
-            "specVersion" to "1.6",
-            "version" to 1,
-            "metadata" to mapOf("component" to mapOf(
-                "type" to "application",
-                "name" to "Plektra",
-                "version" to versionName,
-                "bom-ref" to appRef,
-                "purl" to appRef,
-                "properties" to listOf(mapOf(
-                    "name" to "android:versionCode",
-                    "value" to (android.defaultConfig.versionCode ?: 0).toString()
+            val components = libraries + bundledAssets
+            val bom = linkedMapOf<String, Any>(
+                "bomFormat" to "CycloneDX",
+                "specVersion" to "1.6",
+                "version" to 1,
+                "metadata" to mapOf("component" to mapOf(
+                    "type" to "application",
+                    "name" to if (flavor == "nightly") "Plektra Nightly" else "Plektra",
+                    "version" to versionName,
+                    "bom-ref" to appRef,
+                    "purl" to appRef,
+                    "properties" to listOf(mapOf(
+                        "name" to "android:versionCode",
+                        "value" to releaseVersionCode.toString()
+                    ))
+                )),
+                "components" to components,
+                "dependencies" to listOf(mapOf(
+                    "ref" to appRef,
+                    "dependsOn" to components.map { it["bom-ref"] }
                 ))
-            )),
-            "components" to components,
-            "dependencies" to listOf(mapOf(
-                "ref" to appRef,
-                "dependsOn" to components.map { it["bom-ref"] }
-            ))
-        )
-        stableSbomAssets.get().file("plektra-sbom.cdx.json").asFile.apply {
-            parentFile.mkdirs()
-            writeText(JsonOutput.prettyPrint(JsonOutput.toJson(bom)) + "\n")
+            )
+            sbomAssets.get().file("plektra-sbom.cdx.json").asFile.apply {
+                parentFile.mkdirs()
+                writeText(JsonOutput.prettyPrint(JsonOutput.toJson(bom)) + "\n")
+            }
         }
     }
-}
-tasks.matching { it.name == "mergeStableReleaseAssets" }.configureEach {
-    dependsOn(generateStableReleaseSbom)
+    tasks.matching { it.name == "merge${flavorTitle}ReleaseAssets" }.configureEach {
+        dependsOn(generateReleaseSbom)
+    }
 }
 
 dependencies {
