@@ -1041,6 +1041,7 @@ Jede Taste kann als Keycode, Aktion, Native Ctrl oder Keine konfiguriert werden.
     <string name="trackpad_debug_axis_value">%1$s = %2$.2f</string>
     <string name="trackpad_gestures_description">Nach oben wischen auf dem Trackpad, um Vorschläge zu akzeptieren</string>
     <string name="trackpad_gestures_enabled_title">Trackpad-Gesten Aktivieren</string>
+    <string name="trackpad_titan2_elite_scroll_assistant_note">Aktiviere für native Trackpad-Gesten auf dem Titan 2 Elite den Unihertz Scroll assistant unter Einstellungen → Gesten → Tastaturgesten.</string>
     <string name="trackpad_gestures_enabled_description">Nach oben wischen auf dem Trackpad, um Wortvorschläge zu akzeptieren</string>
     <string name="trackpad_gestures_show_tutorial">Tutorial Anzeigen</string>
     <string name="trackpad_gestures_tutorial_description">Lernen Sie, wie Sie Trackpad-Gesten verwenden</string>

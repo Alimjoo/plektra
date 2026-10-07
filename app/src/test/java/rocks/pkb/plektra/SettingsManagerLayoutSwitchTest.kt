@@ -211,6 +211,27 @@ class SettingsManagerLayoutSwitchTest {
     }
 
     @Test
+    fun trackpadSwipeDefaultsAreDeviceSpecificAndKeepSavedValues() {
+        val context = RuntimeEnvironment.getApplication()
+        assertEquals(500f, SettingsManager.getDefaultTrackpadSwipeThreshold(), 0.01f)
+        DeviceSpecific.setBuildFingerprintForTests(
+            brand = "unihertz", manufacturer = "unihertz", model = "Titan 2 Elite",
+            device = "titan2", product = "titan2", display = "Titan 2 Elite_V02.00.04"
+        )
+        try {
+            assertEquals(250f, SettingsManager.getDefaultTrackpadSwipeThreshold(), 0.01f)
+            assertEquals(250f, SettingsManager.getTrackpadSuggestionSwipeThreshold(context), 0.01f)
+            assertEquals(250f, SettingsManager.getTrackpadDeleteSwipeThreshold(context), 0.01f)
+            SettingsManager.getPreferences(context).edit().putFloat("trackpad_swipe_threshold", 420f).commit()
+            assertEquals(420f, SettingsManager.getTrackpadDeleteSwipeThreshold(context), 0.01f)
+            SettingsManager.setTrackpadSuggestionSwipeThreshold(context, 310f)
+            assertEquals(310f, SettingsManager.getTrackpadSuggestionSwipeThreshold(context), 0.01f)
+        } finally {
+            DeviceSpecific.clearTestOverrides()
+        }
+    }
+
+    @Test
     fun trackpadSwipeThresholds_fallBackToLegacyValue() {
         val context = RuntimeEnvironment.getApplication()
 
