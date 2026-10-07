@@ -30,6 +30,34 @@ class TextExpansionControllerTest {
     )
 
     @Test
+    fun clearingSuggestionBarCanReenterFromImeFinishWithoutRecursion() {
+        val connection = mock(InputConnection::class.java)
+        `when`(connection.getTextBeforeCursor(TextExpansionEngine.MAX_CONTEXT_CHARS, 0)).thenReturn("!id")
+        var clears = 0
+        lateinit var expansion: TextExpansionController
+        expansion = TextExpansionController(
+            context = RuntimeEnvironment.getApplication(), handler = Handler(Looper.getMainLooper()),
+            inputConnectionProvider = { connection }, inputContextProvider = { editableState },
+            anchorProvider = { null }, configsProvider = {
+                listOf(ExpansionRuntimeConfig(
+                    source = SnippetExpansionSource { mapOf("id" to "value") },
+                    triggerKind = ExpansionTriggerKind.PREFIX, prefix = '!', enabled = true,
+                    presentation = ExpansionPresentation.SUGGESTION_BAR,
+                    activationPolicy = ExpansionActivationPolicy(false, false, true, false)
+                ))
+            }, showSuggestionBar = { _, _ -> }, clearSuggestionBar = {
+                clears++
+                check(clears == 1) { "IME teardown must not clear the same bar recursively" }
+                expansion.clear()
+            }, requestSurfaceUpdate = {}, onCommitted = {}
+        )
+        expansion.refresh()
+        expansion.clear()
+        expansion.clear()
+        assertEquals(1, clears)
+    }
+
+    @Test
     fun disabledProvidersDoNotLoadAssetsOrQueryTheEditor() {
         val source = EmojiShortcodeSource(RuntimeEnvironment.getApplication().assets)
         var editorQueries = 0

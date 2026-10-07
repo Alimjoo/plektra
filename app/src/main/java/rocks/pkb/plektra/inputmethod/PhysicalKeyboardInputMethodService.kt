@@ -1755,8 +1755,12 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             },
             showSuggestionBar = { labels, onSelected ->
                 candidatesBarController.showExpansionSuggestions(labels, onSelected)
+                ensureImeSurfaceVisible()
             },
-            clearSuggestionBar = { candidatesBarController.clearExpansionSuggestions() },
+            clearSuggestionBar = {
+                candidatesBarController.clearExpansionSuggestions()
+                keyboardVisibilityController.onKeyboardBarConfigurationChanged()
+            },
             requestSurfaceUpdate = { updateStatusBarText() },
             onCommitted = {
                 markSelectionUpdateSkipAfterCommit()

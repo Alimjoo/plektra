@@ -145,8 +145,8 @@ class TextExpansionController(
         activeMatches = emptyList()
         selectedIndex = 0
         if (suggestionBarVisible) {
-            clearSuggestionBar()
             suggestionBarVisible = false
+            clearSuggestionBar()
         }
         if (surfaceChanged) requestSurfaceUpdate()
     }
@@ -183,15 +183,15 @@ class TextExpansionController(
                 popup?.dismiss()
                 popup = null
                 if (suggestionBarVisible) {
-                    clearSuggestionBar()
                     suggestionBarVisible = false
+                    clearSuggestionBar()
                 }
                 if (surfaceChanged) requestSurfaceUpdate()
             }
             ExpansionPresentation.FLOATING_POPUP -> {
                 if (suggestionBarVisible) {
-                    clearSuggestionBar()
                     suggestionBarVisible = false
+                    clearSuggestionBar()
                     requestSurfaceUpdate()
                 }
                 val anchor = anchorProvider() ?: return
