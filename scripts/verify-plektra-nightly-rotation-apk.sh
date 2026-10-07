@@ -22,7 +22,6 @@ apkanalyzer="$sdk_root/cmdline-tools/latest/bin/apkanalyzer"
 zipalign="$sdk_root/build-tools/36.0.0/zipalign"
 apksigner_jar="$sdk_root/build-tools/36.0.0/lib/apksigner.jar"
 java_source="$root_dir/scripts/VerifyApkSigningLineage.java"
-legacy_sha256=8c5dce860a65a7a3c3befcb7f7f35a1f3523c1d01462271d6ae03f4df402e685
 nightly_a_sha256=9866536b5a6da5152b0ba30b12b3cffae54990c5200647f352f40edb0f04f51e
 
 [[ -f "$apk" ]] || fail "APK does not exist: $apk"
@@ -48,9 +47,9 @@ classes_dir=$(mktemp -d "${TMPDIR:-/tmp}/plektra-nightly-apk-verifier.XXXXXX")
 trap 'rm -rf -- "$classes_dir"' EXIT
 javac -cp "$apksigner_jar" -d "$classes_dir" "$java_source"
 java -cp "$classes_dir:$apksigner_jar" VerifyApkSigningLineage \
-  "$apk" "$nightly_a_sha256" "$legacy_sha256" "$nightly_a_sha256"
+  "$apk" "$nightly_a_sha256" "$nightly_a_sha256"
 
-printf 'Success: Plektra Nightly A rotation APK verified.\n'
+printf 'Success: Plektra Nightly A APK verified.\n'
 printf 'application_id=%s\n' "$actual_app_id"
 printf 'version_name=%s\n' "$actual_version_name"
 printf 'version_code=%s\n' "$actual_version_code"
