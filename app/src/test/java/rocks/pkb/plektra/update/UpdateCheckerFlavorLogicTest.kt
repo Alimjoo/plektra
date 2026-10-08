@@ -5,6 +5,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import rocks.pkb.plektra.BuildConfig
+import rocks.pkb.plektra.inputDeviceSettingEntries
 
 class UpdateCheckerFlavorLogicTest {
     @Test
@@ -12,6 +13,7 @@ class UpdateCheckerFlavorLogicTest {
         val reduced = BuildConfig.FLAVOR == "nightlyNoAccessibility"
         assertEquals(if (reduced) "no-accessibility" else "full", BuildConfig.APK_VARIANT)
         assertEquals(!reduced, BuildConfig.ENABLE_ACCESSIBILITY_SERVICE)
+        assertEquals(!reduced, inputDeviceSettingEntries().any { it.id == "clicks.buttons.launcher_button" })
     }
 
     @Test

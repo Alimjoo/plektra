@@ -61,4 +61,4 @@ internal fun inputDeviceSettingEntries(): List<SettingEntry> = listOf(
     SettingEntry("sym.pages", R.string.sym_swap_pages_title, route = SettingRoute(SettingsDestination.Modifiers, symCustomization = true)),
     SettingEntry("clicks.charging_reserve", R.string.clicks_charging_reserve_title, route = SettingRoute(SettingsDestination.KeyboardsDevices, keyboardsDevicesDestination = KeyboardsDevicesDestination.PowerKeyboard)),
     SettingEntry("clicks.manual_wireless_charging", R.string.clicks_manual_wireless_charging_title, route = SettingRoute(SettingsDestination.KeyboardsDevices, keyboardsDevicesDestination = KeyboardsDevicesDestination.PowerKeyboard)),
-)
+).filter { BuildConfig.ENABLE_ACCESSIBILITY_SERVICE || it.id != "clicks.buttons.launcher_button" }
