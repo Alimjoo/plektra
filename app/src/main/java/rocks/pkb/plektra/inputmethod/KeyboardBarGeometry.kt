@@ -202,7 +202,16 @@ internal class KeyboardBarGeometry(private val context: Context) {
         }
         atScale(1f)?.let { return it }
         val minimum = atScale(minimumScale)
-        if (minimum == null) return Placement(preferred.x, preferred.y, minimumScale, false)
+        if (minimum == null) {
+            fun boundedCenter(preferred: Float, start: Float, end: Float, extent: Float): Float =
+                if (extent <= end - start) preferred.coerceIn(start + extent / 2f, end - extent / 2f)
+                else (start + end) / 2f
+            return Placement(
+                boundedCenter(preferred.x, surface.bounds.left, surface.bounds.right, inkWidth * minimumScale),
+                boundedCenter(preferred.y, surface.bounds.top, surface.bounds.bottom, inkHeight * minimumScale),
+                minimumScale, false
+            )
+        }
         var low = minimumScale
         var high = 1f
         var best: Placement = minimum

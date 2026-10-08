@@ -381,6 +381,8 @@ class CornerButtonThemeTest {
         host.themeOverride = StatusBarButtonStyles.ThemeOverride(Color.GRAY, Color.BLUE, Color.WHITE)
         val hosted = requireNotNull(host.getOrCreateButton(StatusBarButtonId.Microphone, 80, StatusBarCallbacks(), 120, 100))
         host.setOuterEdge(StatusBarButtonId.Microphone, StatusBarButtonPosition.RIGHT)
+        hosted.container.layout(0, 0, 120, 100)
+        hosted.button.layout(0, 0, 120, 100)
         fun color(): Int {
             org.junit.Assert.assertTrue(hosted.button.background is CurvedCornerButtonDrawable)
             val bitmap = android.graphics.Bitmap.createBitmap(120, 100, android.graphics.Bitmap.Config.ARGB_8888)
@@ -429,6 +431,7 @@ class CornerButtonThemeTest {
         SettingsManager.setTitan2EliteMaxIconShrink(activity, 0)
         val unshrunk = background.contentCenter(90f, 75f, 57f, 40f, true)
         assertEquals(1f, unshrunk.scale)
+        org.junit.Assert.assertFalse("Oversized ink cannot fit the contour without shrinking", unshrunk.fits)
         org.junit.Assert.assertTrue(unshrunk.x - 45f >= 0f && unshrunk.x + 45f <= 94f)
         org.junit.Assert.assertTrue(unshrunk.y - 37.5f >= 0f && unshrunk.y + 37.5f <= 80f)
         SettingsManager.setTitan2EliteMaxIconShrink(activity, 20)

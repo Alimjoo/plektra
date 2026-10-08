@@ -105,8 +105,8 @@ class NestedStatusBarGeometryTest {
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
         chrome.layout(0, 0, chrome.measuredWidth, chrome.measuredHeight)
-        assertTrue(content.clipToOutline)
-        assertEquals((6.5f * context.resources.displayMetrics.density).toInt(), surface.height - content.height)
+        assertTrue(!content.clipToOutline)
+        assertEquals(surface.height, content.height)
         assertTrue(lights.top < content.bottom)
         assertEquals(surface.height, lights.bottom)
     }

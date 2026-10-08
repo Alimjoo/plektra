@@ -705,6 +705,9 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
 )
 
 internal fun customizationSettingSubtitles(): Map<String, Int> = mapOf(
+    "display_geometry" to R.string.keyboard_bar_geometry,
+    "keyboard_bar_buttons" to R.string.status_bar_buttons_section,
+    "keyboard_bar_variations" to R.string.keyboard_bar_variations_title,
     "variations" to R.string.variation_customize_title,
     "sounds" to R.string.settings_category_sounds,
     "launcher_shortcut_behavior" to R.string.quick_launcher_behaviour_title,
