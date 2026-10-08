@@ -42,7 +42,7 @@ class RestoreManagerAndBackupContractTest {
     }
 
     @Test
-    fun deviceChange_requiresTwoDifferentRecognizedStableIds() {
+    fun deviceChange_usesStableIdsAndRejectsIncompleteHardwareIdentity() {
         val titan2 = device("titan2", "Titan 2")
         val elite = device("titan2-elite", "Titan 2 Elite")
         val unknown = device(null, "Unknown device")
@@ -54,6 +54,14 @@ class RestoreManagerAndBackupContractTest {
         assertNull(RestoreManager.detectDeviceChange(elite, elite))
         assertNull(RestoreManager.detectDeviceChange(null, elite))
         assertNull(RestoreManager.detectDeviceChange(titan2, unknown))
+    }
+
+    @Test
+    fun deviceChange_detectsPixelWithoutARecognizedKeyboardProfile() {
+        val source = device("titan2", "Titan 2")
+        val pixel = device(null, "Pixel 7a").copy(manufacturer = "Google", device = "lynx")
+        assertEquals(RestoreManager.DeviceChange(source, pixel), RestoreManager.detectDeviceChange(source, pixel))
+        assertNull(RestoreManager.detectDeviceChange(pixel, pixel.copy(buildDisplay = "new OTA")))
     }
 
     @Test

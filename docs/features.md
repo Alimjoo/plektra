@@ -25,4 +25,4 @@ Plektra focuses on efficient text input on Android devices with physical keyboar
 
 ## Data
 
-Plektra stores its input data locally. Backups can include settings, layouts, mappings, themes, dictionaries, snippets, and other user-created data. The planned Pastiera migration uses a separate, versioned import flow.
+Plektra stores its input data locally. Backups can include settings, layouts, mappings, themes, dictionaries, snippets, and other user-created data. Pastiera backup ZIPs can be imported in Advanced settings. Legacy preference names are translated, and settings absent from the backup remain unchanged.

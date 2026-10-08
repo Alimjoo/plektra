@@ -1,0 +1,53 @@
+{
+  "name": "pastiera_prefs",
+  "entries": {
+    "keyboard_layout": {
+      "type": "string",
+      "value": "qwertz"
+    },
+    "keyboard_layout_auto_by_locale": {
+      "type": "boolean",
+      "value": false
+    },
+    "long_press_threshold": {
+      "type": "long",
+      "value": 450
+    },
+    "pastierina_mode_override": {
+      "type": "string",
+      "value": "pastierina"
+    },
+    "pastierina_status_bar_slots_left": {
+      "type": "string",
+      "value": "[\"language\"]"
+    },
+    "pastierina_status_bar_slots_right": {
+      "type": "string",
+      "value": "[\"hamburger\"]"
+    },
+    "pastierina_mode_active": {
+      "type": "boolean",
+      "value": true
+    },
+    "software_keyboard_mode_runtime_override": {
+      "type": "string",
+      "value": "force_software"
+    },
+    "physical_keyboard_profile_override": {
+      "type": "string",
+      "value": "titan2"
+    },
+    "user_dictionary_entries": {
+      "type": "string",
+      "value": "[\"PastieraWord\"]"
+    },
+    "custom_input_styles": {
+      "type": "string",
+      "value": "de:qwertz"
+    },
+    "alt_character_layer_binding": {
+      "type": "string",
+      "value": "emoji"
+    }
+  }
+}

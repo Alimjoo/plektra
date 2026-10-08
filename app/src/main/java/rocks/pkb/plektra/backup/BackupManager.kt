@@ -168,24 +168,62 @@ object PreferencesBackupHelper {
         }
         val result = mutableMapOf<String, Map<String, PreferenceValue>>()
         prefsDir.listFiles { file -> file.extension == "json" }?.forEach { file ->
+            val targetName = PreferenceSchemas.restorePreferenceFileName(file.nameWithoutExtension)
+            if (targetName != "plektra_prefs") return@forEach
             try {
                 val content = file.readText()
                 val json = JSONObject(content)
-                val entriesJson = json.optJSONObject("entries") ?: JSONObject()
+                require(json.optString("name", file.nameWithoutExtension) == file.nameWithoutExtension) {
+                    "Preference file name does not match its contents"
+                }
+                val entriesJson = json.getJSONObject("entries")
                 val entries = mutableMapOf<String, PreferenceValue>()
                 val keys = entriesJson.keys()
                 while (keys.hasNext()) {
                     val key = keys.next()
-                    val valueJson = entriesJson.optJSONObject(key) ?: continue
-                    val prefValue = PreferenceValue.fromJson(valueJson) ?: continue
+                    val targetKey = PreferenceSchemas.restoreKey(targetName, key)
+                    if (!PreferenceSchemas.isRecognized(targetName, targetKey)) continue
+                    val valueJson = entriesJson.getJSONObject(key)
+                    if (valueJson.optString("type").equals("string_set", ignoreCase = true)) {
+                        val items = valueJson.getJSONArray("value")
+                        require((0 until items.length()).all { items.get(it) is String }) {
+                            "Invalid string set: $key"
+                        }
+                    }
+                    val prefValue = PreferenceValue.fromJson(valueJson)
+                        ?: throw IOException("Invalid preference type: $key")
+                    requireValidPreferenceValue(prefValue)
+                    val coerced = prefValue.coerceTo(PreferenceSchemas.expectedType(targetName, targetKey))
+                    require(coerced != null) {
+                        "Incompatible preference type: $key"
+                    }
+                    requireValidPreferenceValue(coerced)
+                    if (prefValue.value is Number && coerced.value is Number) {
+                        require(prefValue.value.toString().toBigDecimal().compareTo(
+                            coerced.value.toString().toBigDecimal()) == 0) { "Lossy preference conversion: $key" }
+                    }
                     entries[key] = prefValue
                 }
                 result[file.nameWithoutExtension] = entries
             } catch (e: Exception) {
-                Log.w(TAG, "Skipping malformed prefs backup file: ${file.name}", e)
+                throw IOException("Invalid preferences backup: ${file.name}", e)
             }
         }
-        return result
+        return PreferenceSchemas.normalizeForRestore(result)
+    }
+
+    private fun requireValidPreferenceValue(value: PreferenceValue) {
+        val valid = when (value.type) {
+            PreferenceValueType.BOOLEAN -> value.value is Boolean
+            PreferenceValueType.INT -> value.value is Number &&
+                value.value.toString().toBigDecimal().compareTo(value.value.toInt().toBigDecimal()) == 0
+            PreferenceValueType.LONG -> value.value is Number &&
+                value.value.toString().toBigDecimal().compareTo(value.value.toLong().toBigDecimal()) == 0
+            PreferenceValueType.FLOAT -> value.value is Number && value.value.toFloat().isFinite()
+            PreferenceValueType.STRING -> value.value is String
+            PreferenceValueType.STRING_SET -> value.value is Set<*> && value.value.all { it is String }
+        }
+        require(valid) { "Invalid preference value" }
     }
 
     fun restorePreferences(
@@ -197,7 +235,11 @@ object PreferencesBackupHelper {
         val applied = mutableListOf<String>()
         val skipped = mutableListOf<String>()
 
-        backedUpPrefs.forEach { (prefName, entries) ->
+        PreferenceSchemas.normalizeForRestore(backedUpPrefs).forEach { (prefName, entries) ->
+            if (prefName != "plektra_prefs") {
+                skipped.addAll(entries.keys.map { "$prefName:$it" })
+                return@forEach
+            }
             val prefs = context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
             val editor = prefs.edit()
 
@@ -258,7 +300,7 @@ object PreferencesBackupHelper {
             }
             // Use commit() instead of apply() to ensure values are written synchronously
             // This ensures listeners are called immediately and UI updates work correctly
-            editor.commit()
+            check(editor.commit()) { "Unable to save restored preferences" }
         }
 
         return PreferencesRestoreSummary(appliedKeys = applied, skippedKeys = skipped)
@@ -293,6 +335,33 @@ object FileBackupHelper {
     private val allowedDirectories = setOf(
         "keyboard_layouts"
     )
+
+    internal fun validateRestoreFiles(filesDir: File): Int {
+        validateTypingSoundPack(filesDir)
+        var count = 0
+        filesDir.walkTopDown().filter { it.isFile }.forEach { file ->
+            val relative = file.toRelativeString(filesDir).replace("\\", "/")
+            if (shouldBackupPath(relative, includeTypingSoundPack = true)) {
+                require(!file.extension.equals("json", ignoreCase = true) || isJsonValid(file)) {
+                    "Invalid JSON file in backup: $relative"
+                }
+                if (relative.startsWith("keyboard_layouts/")) {
+                    require(file.extension.equals("json", ignoreCase = true) &&
+                        file.inputStream().use { LayoutFileStore.loadLayoutFromStream(it) } != null) {
+                        "Invalid keyboard layout in backup: $relative"
+                    }
+                }
+                if (relative in allowedFiles && relative != "user_defaults.json") {
+                    JSONObject(file.readText())
+                }
+                count++
+            }
+        }
+        return count
+    }
+
+    internal fun managedRestoreRoots(): Set<String> =
+        allowedFiles + allowedDirectories + SettingsManager.TYPING_SOUND_CUSTOM_DIR
 
     fun snapshotInternalFiles(
         context: Context,

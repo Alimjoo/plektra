@@ -31,7 +31,7 @@ Plektra is developed and release-tested on the Unihertz Titan 2 and Titan 2 Elit
 
 ## Moving from Pastiera
 
-Plektra has its own app identity. An assisted, versioned import from Pastiera is planned before the first Plektra stable release. See [Migration from Pastiera](docs/migration-from-pastiera.md).
+Plektra has its own app identity. Pastiera backup ZIPs can be imported in Advanced settings. An assisted migration flow is planned before the first Plektra stable release. See [Migration from Pastiera](docs/migration-from-pastiera.md).
 
 ## Development and contributions
 

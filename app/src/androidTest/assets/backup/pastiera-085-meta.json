@@ -1,0 +1,11 @@
+{
+  "versionCode": 85,
+  "versionName": "0.85",
+  "timestamp": "2026-02-25T00:00:00Z",
+  "components": [
+    "prefs/pastiera_prefs.json",
+    "files/user_defaults.json",
+    "files/variations.json",
+    "files/keyboard_layouts/custom-pastiera.json"
+  ]
+}

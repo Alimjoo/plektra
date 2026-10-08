@@ -1409,7 +1409,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="backup_now">Backup now</string>
     <string name="backup_now_description">Export all settings and custom layouts to a ZIP</string>
     <string name="restore_from_file">Restore from file</string>
-    <string name="restore_from_file_description">Import a Plektra backup ZIP</string>
+    <string name="restore_from_file_description">Import a Plektra or Pastiera backup ZIP</string>
     <string name="backup_completed">Backup completed</string>
     <string name="restore_completed">Restore completed</string>
     <string name="backup_failed">Backup failed: %1$s</string>

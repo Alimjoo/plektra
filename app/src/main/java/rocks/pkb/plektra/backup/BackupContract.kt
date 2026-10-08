@@ -471,6 +471,37 @@ internal object BackupPreferenceContract {
 }
 
 object PreferenceSchemas {
+    fun restorePreferenceFileName(name: String): String =
+        if (name == "pastiera_prefs") "plektra_prefs" else name
+
+    internal fun normalizeForRestore(
+        preferences: Map<String, Map<String, PreferenceValue>>
+    ): Map<String, Map<String, PreferenceValue>> {
+        val result = linkedMapOf<String, MutableMap<String, PreferenceValue>>()
+        // Canonical names win independently of archive entry order.
+        preferences.entries.sortedBy { it.key == "plektra_prefs" }.forEach { (name, entries) ->
+            val targetName = restorePreferenceFileName(name)
+            val target = result.getOrPut(targetName) { linkedMapOf() }
+            entries.entries.sortedBy { restoreKey(targetName, it.key) == it.key }.forEach { (key, value) ->
+                val targetKey = restoreKey(targetName, key)
+                target[targetKey] = if (targetName == "plektra_prefs" &&
+                    targetKey == "slim_mode_override" && value.type == PreferenceValueType.STRING) {
+                    val mode = when (value.value) {
+                        "pastierina", "force_minimal" -> "slim"
+                        "force_full", "follow_system" -> "full_status_bar"
+                        else -> value.value
+                    }
+                    PreferenceValue(PreferenceValueType.STRING, mode)
+                } else if (targetName == "plektra_prefs" && key == "alt_character_layer_binding" &&
+                    value.type == PreferenceValueType.STRING && value.value is String) {
+                    PreferenceValue(PreferenceValueType.STRING,
+                        rocks.pkb.plektra.AltModifierBinding.fromPersistedValue(value.value).persistedValue)
+                } else value
+            }
+        }
+        return result
+    }
+
     private val restoreOnlyPlektraKeys = mapOf(
         // Accepted so backups from releases before the Device-SYM terminology migration restore cleanly.
         "alt_character_layer_binding" to PreferenceValueType.STRING,
@@ -489,6 +520,8 @@ object PreferenceSchemas {
     )
 
     private val legacyPlektraKeyAliases = mapOf(
+        "alt_character_layer_binding" to "alt_modifier_binding",
+        "pastierina_mode_active" to "slim_mode_active",
         "pastierina_mode_override" to "slim_mode_override",
         "pastierina_status_bar_slots_left" to "slim_status_bar_slots_left",
         "pastierina_status_bar_slots_right" to "slim_status_bar_slots_right"

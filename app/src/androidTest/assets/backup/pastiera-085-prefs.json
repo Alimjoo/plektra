@@ -1,0 +1,44 @@
+{
+  "name": "pastiera_prefs",
+  "entries": {
+    "keyboard_layout": {
+      "type": "string",
+      "value": "qwertz"
+    },
+    "long_press_threshold": {
+      "type": "long",
+      "value": 450
+    },
+    "pastierina_mode_override": {
+      "type": "string",
+      "value": "force_minimal"
+    },
+    "pastierina_mode_active": {
+      "type": "boolean",
+      "value": true
+    },
+    "software_keyboard_mode_runtime_override": {
+      "type": "string",
+      "value": "force_software"
+    },
+    "user_dictionary_entries": {
+      "type": "string",
+      "value": "[\"PastieraWord\"]"
+    },
+    "custom_input_styles": {
+      "type": "string",
+      "value": "de:qwertz"
+    },
+    "swipe_incremental_threshold": {
+      "type": "float",
+      "value": 7.5
+    },
+    "recent_emojis": {
+      "type": "string_set",
+      "value": [
+        "😀",
+        "🎹"
+      ]
+    }
+  }
+}

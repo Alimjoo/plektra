@@ -12,6 +12,7 @@ import rocks.pkb.plektra.inputmethod.subtype.AdditionalSubtypeUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.IOException
 
 object RestoreManager {
     private const val TAG = "RestoreManager"
@@ -62,7 +63,7 @@ object RestoreManager {
                     ZipHelper.unzip(input, extractedDir)
                 } ?: return@withContext RestoreInspectionResult.Failure("Unable to open source backup")
 
-                val metadata = BackupMetadata.fromFile(File(extractedDir, "backup_meta.json"))
+                val (metadata, _) = readAndValidateBackup(extractedDir)
                 val currentDevice = DeviceSpecific.detectedDeviceIdentity()
                 RestoreInspectionResult.Success(
                     metadata = metadata,
@@ -83,50 +84,124 @@ object RestoreManager {
     ): RestoreResult = withContext(Dispatchers.IO) {
         val workingDir = File(context.cacheDir, "restore_${System.currentTimeMillis()}").apply { mkdirs() }
         val extractedDir = File(workingDir, "unzipped").apply { mkdirs() }
+        var retainRecoveryData = false
 
         try {
             context.contentResolver.openInputStream(sourceUri)?.use { input ->
                 ZipHelper.unzip(input, extractedDir)
             } ?: return@withContext RestoreResult.Failure("Unable to open source backup")
 
-            val metadata = BackupMetadata.fromFile(File(extractedDir, "backup_meta.json"))
-            val prefsDir = File(extractedDir, "prefs")
+            val (metadata, prefsData) = readAndValidateBackup(extractedDir)
             val filesDir = File(extractedDir, "files")
 
-            val prefsData = PreferencesBackupHelper.readPreferencesFromBackup(prefsDir)
-            val fileSummary = FileBackupHelper.restoreFiles(context, filesDir)
-            val excludedKeys = BackupPreferencePolicy.runtimeDerivedKeys +
-                if (importMode == ImportMode.ADAPT_TO_CURRENT_DEVICE) {
-                    BackupPreferencePolicy.targetDeviceDerivedKeys
-                } else {
-                    emptySet()
-                }
-            val prefsSummary = PreferencesBackupHelper.restorePreferences(
-                context,
-                prefsData,
-                excludedKeys = excludedKeys,
-                hasRestoredTypingSoundPack = fileSummary.restoredFiles.any { path ->
-                    path.startsWith(
-                        "${SettingsManager.TYPING_SOUND_CUSTOM_DIR}/" +
-                            "${SettingsManager.TYPING_SOUND_CUSTOM_PACK_DIR}/"
-                    )
-                }
-            )
-            val postRestoreActions = collectTriggeredPostRestoreActions(prefsSummary, fileSummary)
-            notifyPostRestoreEffects(context, postRestoreActions)
+            val snapshot = RestoreSnapshot(context, File(workingDir, "rollback"))
+            try {
+                val fileSummary = FileBackupHelper.restoreFiles(context, filesDir)
+                val excludedKeys = BackupPreferencePolicy.runtimeDerivedKeys +
+                    if (importMode == ImportMode.ADAPT_TO_CURRENT_DEVICE) {
+                        BackupPreferencePolicy.targetDeviceDerivedKeys
+                    } else {
+                        emptySet()
+                    }
+                val prefsSummary = PreferencesBackupHelper.restorePreferences(
+                    context,
+                    prefsData,
+                    excludedKeys = excludedKeys,
+                    hasRestoredTypingSoundPack = fileSummary.restoredFiles.any { path ->
+                        path.startsWith(
+                            "${SettingsManager.TYPING_SOUND_CUSTOM_DIR}/" +
+                                "${SettingsManager.TYPING_SOUND_CUSTOM_PACK_DIR}/"
+                        )
+                    }
+                )
+                val postRestoreActions = collectTriggeredPostRestoreActions(prefsSummary, fileSummary)
+                notifyPostRestoreEffects(context, postRestoreActions)
 
-            RestoreResult.Success(
-                metadata = metadata,
-                preferencesSummary = prefsSummary,
-                fileSummary = fileSummary,
-                postActionsTriggered = postRestoreActions
-            )
+                RestoreResult.Success(
+                    metadata = metadata,
+                    preferencesSummary = prefsSummary,
+                    fileSummary = fileSummary,
+                    postActionsTriggered = postRestoreActions
+                )
+            } catch (failure: Exception) {
+                try {
+                    snapshot.rollback()
+                } catch (rollbackFailure: Exception) {
+                    failure.addSuppressed(rollbackFailure)
+                    retainRecoveryData = true
+                    throw IOException("Import failed and recovery is incomplete. Recovery data retained in " +
+                        "cache/${workingDir.name}/rollback", failure)
+                }
+                throw failure
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Restore failed", e)
             RestoreResult.Failure(e.message ?: "Restore failed")
         } finally {
             extractedDir.deleteRecursively()
-            workingDir.deleteRecursively()
+            if (!retainRecoveryData) workingDir.deleteRecursively()
+        }
+    }
+
+    private fun readAndValidateBackup(
+        extractedDir: File
+    ): Pair<BackupMetadata?, Map<String, Map<String, PreferenceValue>>> {
+        val metadataFile = File(extractedDir, "backup_meta.json")
+        val metadata = BackupMetadata.fromFile(metadataFile)
+        require(!metadataFile.exists() || metadata != null) { "Invalid backup metadata" }
+        val prefs = PreferencesBackupHelper.readPreferencesFromBackup(File(extractedDir, "prefs"))
+        val fileCount = FileBackupHelper.validateRestoreFiles(File(extractedDir, "files"))
+        require(prefs.values.any { it.isNotEmpty() } || fileCount > 0) {
+            "Backup contains no supported settings or user files"
+        }
+        return metadata to prefs
+    }
+
+    private class RestoreSnapshot(private val context: Context, private val directory: File) {
+        private val prefs = SettingsManager.getPreferences(context)
+        private val preferences = prefs.all.mapValues { (_, value) -> PreferenceValue.fromAny(value)!! }
+        private val roots = FileBackupHelper.managedRestoreRoots()
+
+        init {
+            directory.mkdirs()
+            val entries = org.json.JSONObject()
+            preferences.forEach { (key, value) -> entries.put(key, value.toJson()) }
+            File(directory, "preferences.json").writeText(entries.toString())
+            roots.forEach { name ->
+                val source = File(context.filesDir, name)
+                if (source.exists()) copy(source, File(directory, name))
+            }
+        }
+
+        fun rollback() {
+            roots.forEach { name ->
+                val target = File(context.filesDir, name)
+                check(!target.exists() || target.deleteRecursively()) { "Unable to roll back $name" }
+                val original = File(directory, name)
+                if (original.exists()) copy(original, target)
+            }
+            val editor = prefs.edit().clear()
+            preferences.forEach { (key, value) ->
+                when (value.type) {
+                    PreferenceValueType.BOOLEAN -> editor.putBoolean(key, value.value as Boolean)
+                    PreferenceValueType.INT -> editor.putInt(key, value.value as Int)
+                    PreferenceValueType.LONG -> editor.putLong(key, value.value as Long)
+                    PreferenceValueType.FLOAT -> editor.putFloat(key, value.value as Float)
+                    PreferenceValueType.STRING -> editor.putString(key, value.value as String)
+                    PreferenceValueType.STRING_SET -> editor.putStringSet(key,
+                        (value.value as Set<*>).map { it as String }.toSet())
+                }
+            }
+            check(editor.commit()) { "Unable to roll back restored preferences" }
+        }
+
+        private fun copy(source: File, target: File) {
+            if (source.isDirectory) {
+                if (!source.copyRecursively(target, overwrite = true)) throw IOException("Unable to stage restore")
+            } else {
+                target.parentFile?.mkdirs()
+                source.copyTo(target, overwrite = true)
+            }
         }
     }
 
@@ -134,9 +209,20 @@ object RestoreManager {
         source: DeviceIdentitySnapshot?,
         target: DeviceIdentitySnapshot
     ): DeviceChange? {
-        val sourceId = source?.stableId ?: return null
-        val targetId = target.stableId ?: return null
-        return if (sourceId != targetId) DeviceChange(source, target) else null
+        source ?: return null
+        val changed = if (source.stableId != null && target.stableId != null) {
+            source.stableId != target.stableId
+        } else {
+            fun hardwareIdentity(device: DeviceIdentitySnapshot): List<String>? {
+                if (device.model.isBlank() || device.device.isBlank()) return null
+                return listOf(device.manufacturer, device.model, device.device)
+                    .map { it.lowercase(java.util.Locale.ROOT) }
+            }
+            val sourceIdentity = hardwareIdentity(source) ?: return null
+            val targetIdentity = hardwareIdentity(target) ?: return null
+            sourceIdentity != targetIdentity
+        }
+        return if (changed) DeviceChange(source, target) else null
     }
 
     internal fun shouldNotifyUserDictionaryRefresh(

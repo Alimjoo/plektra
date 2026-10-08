@@ -908,7 +908,7 @@ Jede Taste kann als Keycode, Aktion, Native Ctrl oder Keine konfiguriert werden.
     <string name="backup_now">Jetzt sichern</string>
     <string name="backup_now_description">Alle Einstellungen und benutzerdefinierten Layouts in eine ZIP-Datei exportieren</string>
     <string name="restore_from_file">Von Datei wiederherstellen</string>
-    <string name="restore_from_file_description">Eine Plektra-Sicherungsdatei ZIP importieren</string>
+    <string name="restore_from_file_description">Eine ZIP-Sicherung von Plektra oder Pastiera importieren</string>
     <string name="backup_completed">Sicherung abgeschlossen</string>
     <string name="restore_completed">Wiederherstellung abgeschlossen</string>
     <string name="backup_failed">Sicherung fehlgeschlagen: %1$s</string>
