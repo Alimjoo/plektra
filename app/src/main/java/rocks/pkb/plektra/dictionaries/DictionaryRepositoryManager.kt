@@ -20,7 +20,7 @@ import java.security.MessageDigest
 import rocks.pkb.plektra.core.suggestions.DictionaryIndex
 
 private const val TAG = "DictionaryRepositoryManager"
-private const val MANIFEST_URL = "https://palsoftware.github.io/plektra-dict/dicts-manifest.json"
+private const val MANIFEST_URL = "https://pkb.rocks/plektra-dict/dicts-manifest.json"
 private val client = OkHttpClient()
 
 @Serializable

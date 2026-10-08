@@ -16,7 +16,7 @@ import java.io.InputStream
 import java.security.MessageDigest
 
 private const val TAG = "LayoutRepositoryManager"
-private const val MANIFEST_URL = "https://palsoftware.github.io/plektra-dict/layouts-manifest.json"
+private const val MANIFEST_URL = "https://pkb.rocks/plektra-dict/layouts-manifest.json"
 private val httpClient = OkHttpClient()
 
 @Serializable
