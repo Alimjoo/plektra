@@ -129,7 +129,7 @@ private fun checkRelease(
                 }
 
                 val latestRelease = try {
-                    val releases = parseGitHubReleases(JSONArray(body))
+                    val releases = parseGitHubReleases(JSONArray(body), BuildConfig.APK_VARIANT)
                     when (feed) {
                         ReleaseFeed.PLEKTRA_NIGHTLY -> findNewerNightlyRelease(releases, BuildConfig.VERSION_NAME)
                         ReleaseFeed.PLEKTRA_STABLE -> findNewerStableRelease(releases, BuildConfig.VERSION_NAME)

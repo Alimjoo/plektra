@@ -3,7 +3,7 @@
 set -euo pipefail
 
 usage() {
-  printf 'Usage: %s <base-version> <output-apk> [--timestamp YYYYMMDD.HHMMSS] [--fdroid] [--skip-unit-tests]\n' "$0" >&2
+  printf 'Usage: %s <base-version> <output-apk> [--variant full|no-accessibility] [--timestamp YYYYMMDD.HHMMSS] [--fdroid] [--skip-unit-tests]\n' "$0" >&2
   exit 2
 }
 
@@ -20,8 +20,14 @@ shift 2
 timestamp=
 fdroid=false
 skip_unit_tests=false
+variant=full
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --variant)
+      [[ $# -ge 2 ]] || usage
+      variant=$2
+      shift 2
+      ;;
     --timestamp)
       [[ $# -ge 2 ]] || usage
       timestamp=$2
@@ -39,6 +45,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+case "$variant" in
+  full) flavor=nightly; task_flavor=Nightly ;;
+  no-accessibility) flavor=nightlyNoAccessibility; task_flavor=NightlyNoAccessibility ;;
+  *) fail "unknown APK variant: $variant" ;;
+esac
+
 if [[ -z "$timestamp" ]]; then
   timestamp=$(date -u +'%Y%m%d.%H%M%S')
 fi
@@ -48,7 +60,7 @@ root_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 sdk_root=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}
 apksigner="$sdk_root/build-tools/36.0.0/apksigner"
 apkanalyzer="$sdk_root/cmdline-tools/latest/bin/apkanalyzer"
-gradle_apk="$root_dir/app/build/outputs/apk/nightly/release/app-nightly-release-unsigned.apk"
+gradle_apk="$root_dir/app/build/outputs/apk/$flavor/release/app-$flavor-release-unsigned.apk"
 
 [[ -x "$apksigner" && -x "$apkanalyzer" ]] || fail "required Android SDK tools are unavailable"
 mkdir -p "$(dirname -- "$output_apk")"
@@ -70,11 +82,11 @@ fi
 
 cd "$root_dir"
 if [[ "$skip_unit_tests" == false ]]; then
-  ./gradlew :app:testNightlyReleaseUnitTest "${gradle_args[@]}"
+  ./gradlew ":app:test${task_flavor}ReleaseUnitTest" "${gradle_args[@]}"
 else
   printf 'Skipping unit tests; use only after the relevant checks have passed.\n'
 fi
-./gradlew :app:assembleNightlyRelease "${gradle_args[@]}"
+./gradlew ":app:assemble${task_flavor}Release" "${gradle_args[@]}"
 
 [[ -f "$gradle_apk" ]] || fail "Gradle did not create the expected unsigned APK: $gradle_apk"
 if "$apksigner" verify "$gradle_apk" >/dev/null 2>&1; then
@@ -90,12 +102,26 @@ actual_debuggable=$("$apkanalyzer" manifest debuggable "$gradle_apk")
 [[ "$actual_version_name" == "$full_version" ]] || fail "unexpected version name: $actual_version_name"
 [[ "$actual_debuggable" == "false" ]] || fail "release APK is debuggable"
 
+manifest=$("$apkanalyzer" manifest print "$gradle_apk")
+service_present=false
+if [[ "$manifest" == *'android.permission.BIND_ACCESSIBILITY_SERVICE'* ||
+      "$manifest" == *'android.accessibilityservice.AccessibilityService'* ]]; then
+  service_present=true
+fi
+if [[ "$variant" == "no-accessibility" && "$service_present" == true ]]; then
+  fail "no-accessibility APK still declares an accessibility service"
+fi
+if [[ "$variant" == "full" && "$service_present" == false ]]; then
+  fail "full APK is missing its accessibility service"
+fi
+
 cp -- "$gradle_apk" "$output_apk"
 shasum -a 256 "$output_apk" >"${output_apk}.sha256"
 
 printf 'Success: unsigned Plektra Nightly release built and verified.\n'
 printf 'delivery=%s\n' "$([[ "$fdroid" == true ]] && printf fdroid || printf github)"
 printf 'application_id=%s\n' "$actual_app_id"
+printf 'apk_variant=%s\n' "$variant"
 printf 'version_name=%s\n' "$actual_version_name"
 printf 'version_code=%s\n' "$actual_version_code"
 printf 'apk=%s\n' "$output_apk"

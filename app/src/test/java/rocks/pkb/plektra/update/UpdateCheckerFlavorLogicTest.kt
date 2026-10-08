@@ -4,8 +4,16 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import rocks.pkb.plektra.BuildConfig
 
 class UpdateCheckerFlavorLogicTest {
+    @Test
+    fun buildVariantAndServiceCapabilityAgree() {
+        val reduced = BuildConfig.FLAVOR == "nightlyNoAccessibility"
+        assertEquals(if (reduced) "no-accessibility" else "full", BuildConfig.APK_VARIANT)
+        assertEquals(!reduced, BuildConfig.ENABLE_ACCESSIBILITY_SERVICE)
+    }
+
     @Test
     fun calVerOrdersMonthsAndYears() {
         assertTrue(compareReleaseVersions("26.09", "26.10")!! < 0)

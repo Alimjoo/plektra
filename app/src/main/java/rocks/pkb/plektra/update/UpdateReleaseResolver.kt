@@ -18,7 +18,7 @@ internal data class ReleaseInfo(
     val downloadUrl: String? = null
 )
 
-internal fun parseGitHubReleases(releases: JSONArray): List<GitHubRelease> =
+internal fun parseGitHubReleases(releases: JSONArray, apkVariant: String = "full"): List<GitHubRelease> =
     buildList {
         for (index in 0 until releases.length()) {
             val release = releases.optJSONObject(index) ?: continue
@@ -31,15 +31,25 @@ internal fun parseGitHubReleases(releases: JSONArray): List<GitHubRelease> =
                     prerelease = release.optBoolean("prerelease"),
                     draft = release.optBoolean("draft"),
                     htmlUrl = release.optString("html_url").takeIf(String::isNotBlank),
-                    downloadUrl = release.optJSONArray("assets")?.let { assets ->
-                        (0 until assets.length()).mapNotNull { assets.optJSONObject(it) }
-                            .firstOrNull { it.optString("name").endsWith(".apk", ignoreCase = true) }
-                            ?.optString("browser_download_url")?.takeIf { it.startsWith("https://") }
-                    }
+                    downloadUrl = selectApkDownloadUrl(release.optJSONArray("assets"), tagName, apkVariant)
                 )
             )
         }
     }
+
+private fun selectApkDownloadUrl(assets: JSONArray?, tagName: String, apkVariant: String): String? {
+    if (assets == null) return null
+    val prefix = "Plektra-${normalizeReleaseVersion(tagName)}"
+    val names = when (apkVariant) {
+        "full" -> setOf("$prefix-full.apk", "$prefix-github.apk")
+        "no-accessibility" -> setOf("$prefix-no-accessibility.apk")
+        else -> return null
+    }
+    val matches = (0 until assets.length()).mapNotNull { assets.optJSONObject(it) }
+        .filter { it.optString("name") in names }
+    return matches.singleOrNull()?.optString("browser_download_url")
+        ?.takeIf { it.startsWith("https://") }
+}
 
 internal fun findLatestRelease(releases: List<GitHubRelease>, releaseChannel: String): ReleaseInfo? {
     val normalizedChannel = releaseChannel.lowercase()

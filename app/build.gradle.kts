@@ -49,7 +49,12 @@ fun shouldValidateNightlySigning(taskNames: List<String>): Boolean {
         "bundleNightlyRelease",
         "packageNightlyRelease",
         "publishNightlyRelease",
-        "installNightlyRelease"
+        "installNightlyRelease",
+        "assembleNightlyNoAccessibilityRelease",
+        "bundleNightlyNoAccessibilityRelease",
+        "packageNightlyNoAccessibilityRelease",
+        "publishNightlyNoAccessibilityRelease",
+        "installNightlyNoAccessibilityRelease"
     )
     return taskNames.any { task ->
         signingTaskHints.any { hint -> task.contains(hint, ignoreCase = true) }
@@ -107,6 +112,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GITHUB_REPOSITORY", "\"$githubRepository\"")
+        buildConfigField("String", "APK_VARIANT", "\"full\"")
+        buildConfigField("boolean", "ENABLE_ACCESSIBILITY_SERVICE", "true")
     }
 
     signingConfigs {
@@ -207,6 +214,11 @@ android {
                 signingConfig = signingConfigs.getByName("nightly")
             }
         }
+        create("nightlyNoAccessibility") {
+            initWith(getByName("nightly"))
+            buildConfigField("String", "APK_VARIANT", "\"no-accessibility\"")
+            buildConfigField("boolean", "ENABLE_ACCESSIBILITY_SERVICE", "false")
+        }
         create("playStable") {
             dimension = "channel"
             applicationIdSuffix = ".unsovereign"
@@ -298,7 +310,10 @@ android {
                 }
             }
         }
-        if (name.equals("preNightlyReleaseBuild", ignoreCase = true)) {
+        if (
+            name.equals("preNightlyReleaseBuild", ignoreCase = true) ||
+            name.equals("preNightlyNoAccessibilityReleaseBuild", ignoreCase = true)
+        ) {
             doFirst {
                 if (isUnsignedReleaseBuild) {
                     logger.lifecycle("Building an unsigned nightly release for separate PIV signing.")
@@ -369,7 +384,8 @@ android {
 }
 
 // Release APKs carry their runtime dependencies and bundled third-party assets.
-listOf("stable", "nightly").forEach { flavor ->
+listOf("stable", "nightly", "nightlyNoAccessibility").forEach { flavor ->
+    val nightlyFlavor = flavor.startsWith("nightly", ignoreCase = true)
     val flavorTitle = flavor.replaceFirstChar { it.uppercase() }
     val sbomAssets = layout.buildDirectory.dir("generated/sbom/${flavor}Release/assets")
     android.sourceSets.maybeCreate("${flavor}Release").assets.srcDir(sbomAssets)
@@ -377,8 +393,8 @@ listOf("stable", "nightly").forEach { flavor ->
     val generateReleaseSbom = tasks.register("generate${flavorTitle}ReleaseSbom") {
         inputs.files(runtimeClasspath)
         val releaseVersionName = (android.defaultConfig.versionName ?: "unknown") +
-            if (flavor == "nightly") providers.gradleProperty("PLEKTRA_NIGHTLY_VERSION_SUFFIX").orElse("-nightly").get() else ""
-        val releaseVersionCode = if (flavor == "nightly") {
+            if (nightlyFlavor) providers.gradleProperty("PLEKTRA_NIGHTLY_VERSION_SUFFIX").orElse("-nightly").get() else ""
+        val releaseVersionCode = if (nightlyFlavor) {
             providers.gradleProperty("PLEKTRA_NIGHTLY_VERSION_CODE").orNull?.toIntOrNull() ?: android.defaultConfig.versionCode ?: 0
         } else android.defaultConfig.versionCode ?: 0
         inputs.property("versionName", releaseVersionName)
@@ -386,7 +402,7 @@ listOf("stable", "nightly").forEach { flavor ->
         outputs.dir(sbomAssets)
         doLast {
             val versionName = releaseVersionName
-            val appRef = "pkg:generic/plektra${if (flavor == "nightly") "-nightly" else ""}@$versionName"
+            val appRef = "pkg:generic/plektra${if (nightlyFlavor) "-nightly" else ""}@$versionName"
             val libraries = runtimeClasspath.get().resolvedConfiguration.resolvedArtifacts
                 .map { artifact ->
                     val id = artifact.moduleVersion.id
@@ -425,7 +441,7 @@ listOf("stable", "nightly").forEach { flavor ->
                 "version" to 1,
                 "metadata" to mapOf("component" to mapOf(
                     "type" to "application",
-                    "name" to if (flavor == "nightly") "Plektra Nightly" else "Plektra",
+                    "name" to if (nightlyFlavor) "Plektra Nightly" else "Plektra",
                     "version" to versionName,
                     "bom-ref" to appRef,
                     "purl" to appRef,

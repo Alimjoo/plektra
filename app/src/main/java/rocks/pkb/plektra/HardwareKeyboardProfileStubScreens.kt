@@ -1187,7 +1187,7 @@ private fun ClicksButtonMappingsScreen(
         description = stringResource(R.string.clicks_button_bindings_screen_description),
         onBack = onBack
     ) {
-        ClicksDeviceInfoRow(
+        if (BuildConfig.ENABLE_ACCESSIBILITY_SERVICE) ClicksDeviceInfoRow(
             icon = if (launcherInterceptionEnabled) Icons.Filled.CheckCircle else Icons.Filled.Warning,
             title = stringResource(R.string.clicks_launcher_interception_title),
             description = stringResource(
@@ -1199,7 +1199,7 @@ private fun ClicksButtonMappingsScreen(
             ),
             onClick = onOpenLauncherInterceptionSettings
         )
-        ClicksButtonBindingRow(
+        if (BuildConfig.ENABLE_ACCESSIBILITY_SERVICE) ClicksButtonBindingRow(
             title = stringResource(R.string.clicks_launcher_button_title),
             linkId = "clicks.buttons.launcher_button",
             hardwareDescription = stringResource(R.string.clicks_launcher_button_hardware_description),
@@ -1342,6 +1342,7 @@ private fun hasClicksBluetoothPermission(context: android.content.Context): Bool
 }
 
 private fun isClicksLauncherInterceptionEnabled(context: android.content.Context): Boolean {
+    if (!BuildConfig.ENABLE_ACCESSIBILITY_SERVICE) return false
     val expected = ComponentName(context, ClicksLauncherButtonAccessibilityService::class.java)
     val manager = context.getSystemService(android.content.Context.ACCESSIBILITY_SERVICE)
         as? AccessibilityManager ?: return false
