@@ -495,6 +495,7 @@ dependencies {
     implementation("dev.rikka.shizuku:api:13.1.5")
     implementation("dev.rikka.shizuku:provider:13.1.5")
     testImplementation(libs.junit)
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
     testImplementation(libs.robolectric)
     testImplementation("org.mockito:mockito-core:5.11.0")
     androidTestImplementation(libs.androidx.junit)

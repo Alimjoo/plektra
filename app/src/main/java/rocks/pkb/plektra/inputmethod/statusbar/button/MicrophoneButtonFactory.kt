@@ -3,6 +3,11 @@ package rocks.pkb.plektra.inputmethod.statusbar.button
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PixelFormat
+import android.graphics.ColorFilter
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.view.HapticFeedbackConstants
@@ -36,6 +41,13 @@ class MicrophoneButtonFactory : StatusBarButtonFactory {
         button.setOnClickListener {
             button.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
             callbacks.onSpeechRecognitionRequested?.invoke()
+        }
+        button.setOnLongClickListener {
+            context.startActivity(android.content.Intent(context, rocks.pkb.plektra.SettingsActivity::class.java).apply {
+                data = android.net.Uri.parse("plektra://setting/main.speech_recognition")
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            })
+            true
         }
         
         // Initialize state holder
@@ -86,7 +98,30 @@ class MicrophoneButtonFactory : StatusBarButtonFactory {
      * Call this when speech recognition starts/stops.
      */
     fun setActive(view: View, isActive: Boolean) {
+        if (!isActive) setSpeechFeedback(view, false, null)
         update(view, ButtonState.MicrophoneState(isActive = isActive))
+    }
+
+    fun setSpeechFeedback(view: View, processing: Boolean, countdown: Int?) {
+        val button = view as? ImageView ?: return
+        val holder = view.getTag(R.id.tag_microphone_state) as? MicrophoneStateHolder ?: return
+        holder.processing = processing
+        holder.countdown = countdown
+        if (countdown != null) {
+            button.setImageDrawable(CountdownIcon(button.context.getDrawable(R.drawable.ic_baseline_mic_24)!!, countdown))
+        } else button.setImageResource(R.drawable.ic_baseline_mic_24)
+        if (!holder.isActive) return
+        val color = when {
+            processing -> Color.rgb(36, 106, 180)
+            countdown != null -> Color.rgb(174, 103, 0)
+            else -> StatusBarButtonStyles.RECOGNITION_RED
+        }
+        holder.backgroundRenderer?.invoke(color) ?: holder.currentDrawable?.setColor(color)
+        setStateDescriptionIfChanged(button, button.context.getString(when {
+            processing -> R.string.speech_processing_state
+            countdown != null -> R.string.speech_pause_countdown
+            else -> R.string.speech_recording_state
+        }, countdown ?: 0))
     }
     
     /**
@@ -99,6 +134,7 @@ class MicrophoneButtonFactory : StatusBarButtonFactory {
     fun updateAudioLevel(view: View, rmsdB: Float) {
         val stateHolder = view.getTag(R.id.tag_microphone_state) as? MicrophoneStateHolder ?: return
         if (!stateHolder.isActive) return
+        if (stateHolder.processing || stateHolder.countdown != null) return
         
         val button = view as? ImageView ?: return
         updateAudioLevel(button, stateHolder, rmsdB)
@@ -207,6 +243,24 @@ class MicrophoneButtonFactory : StatusBarButtonFactory {
         var isActive: Boolean = false
         var currentDrawable: GradientDrawable? = null
         var pulseAnimator: ValueAnimator? = null
+        var processing = false
+        var countdown: Int? = null
+    }
+
+    private class CountdownIcon(private val icon: Drawable, private val seconds: Int) : Drawable() {
+        private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; textAlign = Paint.Align.RIGHT; isFakeBoldText = true }
+        override fun draw(canvas: Canvas) {
+            icon.setBounds(bounds.left, bounds.top, bounds.left + bounds.width() * 3 / 4, bounds.bottom)
+            icon.draw(canvas)
+            paint.textSize = bounds.height() * 0.52f
+            canvas.drawText(seconds.toString(), bounds.right.toFloat(), bounds.bottom.toFloat() - bounds.height() * 0.04f, paint)
+        }
+        override fun setAlpha(alpha: Int) { icon.alpha = alpha; paint.alpha = alpha }
+        override fun setColorFilter(filter: ColorFilter?) { icon.colorFilter = filter; paint.colorFilter = filter }
+        @Deprecated("Deprecated in Android")
+        override fun getOpacity() = PixelFormat.TRANSLUCENT
+        override fun getIntrinsicWidth() = icon.intrinsicWidth
+        override fun getIntrinsicHeight() = icon.intrinsicHeight
     }
 
     private fun resolveHeightPx(button: View, stateHolder: MicrophoneStateHolder): Int {

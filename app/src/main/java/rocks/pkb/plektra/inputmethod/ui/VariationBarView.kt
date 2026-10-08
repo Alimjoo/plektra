@@ -97,6 +97,18 @@ class VariationBarView(
      * Changes the red color intensity based on audio volume.
      * @param rmsdB The RMS audio level in decibels (typically -10 to 0, lower is quieter)
      */
+    fun updateSpeechFeedback(processing: Boolean, countdown: Int?) {
+        buttonHost?.updateSpeechFeedback(processing, countdown)
+        if (isShowingSpeechRecognitionHint) {
+            val text = context.getString(when {
+                processing -> R.string.speech_processing
+                countdown != null -> R.string.speech_pause_countdown
+                else -> R.string.speech_recognition_prompt
+            }, countdown ?: 0)
+            emptyHintView?.let { if (it.text.toString() != text) it.text = text }
+        }
+    }
+
     fun updateMicrophoneAudioLevel(rmsdB: Float) {
         if (!isMicrophoneActive) return
         buttonHost?.updateMicrophoneAudioLevel(rmsdB)

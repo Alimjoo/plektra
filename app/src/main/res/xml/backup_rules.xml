@@ -12,6 +12,7 @@
          Restored device values stay stale until a matching GATT serial is freshly validated. -->
     <include domain="sharedpref" path="."/>
     <exclude domain="sharedpref" path="recent_emojis_prefs.xml"/>
+    <exclude domain="sharedpref" path="speech_credentials.xml"/>
     
     <!-- Include custom keyboard layouts directory -->
     <include domain="file" path="keyboard_layouts/"/>

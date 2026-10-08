@@ -9,6 +9,9 @@ import android.content.res.Configuration
 import rocks.pkb.plektra.AppBroadcastActions
 import rocks.pkb.plektra.ClicksPowerKeyboardController
 import rocks.pkb.plektra.SettingsManager
+import rocks.pkb.plektra.inputmethod.speech.*
+import rocks.pkb.plektra.speechErrorMessage
+import kotlinx.coroutines.SupervisorJob
 import rocks.pkb.plektra.SoftwareKeyboardModeActions
 import android.inputmethodservice.InputMethodService
 import android.hardware.input.InputManager
@@ -131,6 +134,11 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     private lateinit var alternateCharacterManager: AlternateCharacterManager
     
     // Speech recognition using SpeechRecognizer (modern approach)
+    private val speechScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var speechEditorSession = 0L
+    private var liveSpeechEditor: SpeechComposingEditor? = null
+    private var systemSpeechGeneration = 0L
+    private var cloudSpeechController: SpeechSessionController? = null
     private var speechRecognitionManager: SpeechRecognitionManager? = null
     private var isSpeechRecognitionActive: Boolean = false
     private var pendingSpeechRecognition: Boolean = false
@@ -728,55 +736,159 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             return
         }
         
-        // Initialize manager if not already created
-        if (speechRecognitionManager == null) {
-            speechRecognitionManager = SpeechRecognitionManager(
-                context = this,
-                inputConnectionProvider = { currentInputConnection },
-                onError = { errorMessage ->
-                    Log.e(TAG, "Speech recognition error: $errorMessage")
-                },
-                onRecognitionStateChanged = { isActive ->
-                    // Update internal state
-                    isSpeechRecognitionActive = isActive
-                    
-                    // Reset Alt and Ctrl modifiers when recognition starts
-                    if (isActive) {
+        val provider = SpeechSettings.provider(this)
+        if (provider != SpeechProvider.SYSTEM) {
+            val apiKey = try { SpeechSettings.readKey(this, provider) } catch (_: Exception) { null }
+            if (apiKey.isNullOrBlank()) {
+                Toast.makeText(this, R.string.speech_key_missing, Toast.LENGTH_LONG).show()
+                startActivity(Intent(this, rocks.pkb.plektra.SettingsActivity::class.java).apply {
+                    data = android.net.Uri.parse("plektra://setting/speech.credentials")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                })
+                return
+            }
+            if (currentInputConnection == null) return
+            speechRecognitionManager?.cancelRecognition()
+            if (cloudSpeechController == null) {
+                val api = SpeechApiClient()
+                cloudSpeechController = SpeechSessionController(
+                    scope = speechScope,
+                    recorderFactory = { PcmSpeechRecorder() },
+                    transcribe = { request, audio -> api.transcribe(request, audio) },
+                    liveTranscriber = OpenAiLiveSpeechClient(),
+                    onPartial = { request, text ->
+                        if (request.editorSession == speechEditorSession) liveSpeechEditor?.partial(text)
+                    },
+                    prepareRequest = { request ->
+                        api.prepareRequest(request).also { prepared ->
+                            if (prepared.provider == SpeechProvider.OPENROUTER) {
+                                SpeechSettings.setModel(this, prepared.provider, prepared.model)
+                            }
+                        }
+                    },
+                    onState = { state -> updateCloudSpeechState(state) },
+                    onLevel = { rms, remaining ->
+                        candidatesBarController.updateMicrophoneAudioLevel(rms)
+                        candidatesBarController.updateSpeechFeedback(false, remaining?.let { ((it + 999) / 1000).toInt() })
+                    },
+                    onResult = { request, audio, result ->
+                        SpeechUsageStore(this).record(request, audio, result)
+                        if (request.editorSession == speechEditorSession) {
+                            if (request.model.protocol == SpeechProtocol.LIVE_TRANSCRIPTION) {
+                                val editor = liveSpeechEditor
+                                liveSpeechEditor = null
+                                editor?.complete(result.text)
+                                suggestionController.onContextReset()
+                            } else if (result.text.isNotBlank()) insertCloudSpeech(result.text, request.languageTag)
+                            if (result.text.isBlank()) {
+                                Toast.makeText(this, R.string.speech_recognition_error_no_match, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    },
+                    onError = { error ->
+                        Toast.makeText(this, speechErrorMessage(this, error), Toast.LENGTH_LONG).show()
+                    }
+                )
+            }
+            val subtype = getSystemService(InputMethodManager::class.java)?.currentInputMethodSubtype?.localeString()
+            val languageTag = SpeechRecognitionManager.buildRecognitionLanguageTag(subtype, resources.configuration.locales[0])
+            val model = SpeechSettings.model(this, provider)
+            if (provider == SpeechProvider.OPENAI && model.protocol == SpeechProtocol.LIVE_TRANSCRIPTION) {
+                val connection = currentInputConnection ?: return
+                connection.finishComposingText()
+                suggestionController.onContextReset()
+                liveSpeechEditor = SpeechComposingEditor(connection, languageTag,
+                    !shouldDisableAutoCapitalize && SettingsManager.getAutoCapitalizeFirstLetter(this) &&
+                        AutoCapitalizeHelper.shouldAutoCapitalizeAtCursor(this, connection, shouldDisableAutoCapitalize))
+            }
+            cloudSpeechController?.start(SpeechRequest(provider, model, apiKey,
+                languageTag, speechEditorSession, SpeechSettings.silenceMs(this)))
+            return
+        }
+
+        cloudSpeechController?.cancel()
+        speechRecognitionManager?.destroy()
+        val generation = ++systemSpeechGeneration
+        val editorSession = speechEditorSession
+        val connection = currentInputConnection
+        speechRecognitionManager = SpeechRecognitionManager(
+            context = this,
+            inputConnectionProvider = {
+                connection.takeIf { editorSession == speechEditorSession && generation == systemSpeechGeneration }
+            },
+            onError = { errorMessage -> Log.w(TAG, errorMessage) },
+            onRecognitionStateChanged = { active ->
+                if (generation == systemSpeechGeneration) {
+                    isSpeechRecognitionActive = active
+                    if (active) {
                         modifierStateController.clearAltState()
                         modifierStateController.clearCtrlState()
                     }
-                    
-                    // Update microphone button color and hint message based on recognition state
-                    uiHandler.post {
-                        candidatesBarController.setMicrophoneButtonActive(isActive)
-                        candidatesBarController.showSpeechRecognitionHint(isActive)
-                        // Reset audio level when recognition stops
-                        if (!isActive) {
-                            candidatesBarController.updateMicrophoneAudioLevel(-10f)
-                        } else {
-                            // Update status bar after resetting modifiers
-                            updateStatusBarText()
-                        }
-                    }
-                },
-                shouldDisableAutoCapitalize = { shouldDisableAutoCapitalize },
-                onAudioLevelChanged = { rmsdB ->
-                    // Update microphone button based on audio level
-                    uiHandler.post {
-                        candidatesBarController.updateMicrophoneAudioLevel(rmsdB)
-                    }
+                    candidatesBarController.setMicrophoneButtonActive(active)
+                    candidatesBarController.showSpeechRecognitionHint(active)
+                    if (active) updateStatusBarText()
                 }
-            )
-        }
-        
+            },
+            shouldDisableAutoCapitalize = { shouldDisableAutoCapitalize },
+            onAudioLevelChanged = { rms ->
+                if (generation == systemSpeechGeneration) candidatesBarController.updateMicrophoneAudioLevel(rms)
+            },
+            onProcessing = {
+                if (generation == systemSpeechGeneration) candidatesBarController.updateSpeechFeedback(true, null)
+            }
+        )
         speechRecognitionManager?.startRecognition()
     }
 
-    /**
-     * Stops voice input if active.
-     */
+    private fun updateCloudSpeechState(state: SpeechState) {
+        if (state == SpeechState.IDLE) {
+            liveSpeechEditor?.finish()
+            liveSpeechEditor = null
+        }
+        isSpeechRecognitionActive = state != SpeechState.IDLE
+        if (state == SpeechState.RECORDING) {
+            modifierStateController.clearAltState()
+            modifierStateController.clearCtrlState()
+            updateStatusBarText()
+        }
+        candidatesBarController.setMicrophoneButtonActive(isSpeechRecognitionActive)
+        candidatesBarController.showSpeechRecognitionHint(isSpeechRecognitionActive)
+        candidatesBarController.updateSpeechFeedback(state == SpeechState.TRANSCRIBING, null)
+    }
+
+    private fun insertCloudSpeech(text: String, languageTag: String) {
+        val connection = currentInputConnection ?: return
+        val locale = Locale.forLanguageTag(languageTag)
+        var formatted = text.trim()
+        if (!shouldDisableAutoCapitalize && SettingsManager.getAutoCapitalizeFirstLetter(this) &&
+            AutoCapitalizeHelper.shouldAutoCapitalizeAtCursor(this, connection, shouldDisableAutoCapitalize)) {
+            formatted = formatted.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
+        }
+        val before = connection.getTextBeforeCursor(1, 0)?.lastOrNull()
+        if (before?.isLetterOrDigit() == true) formatted = " $formatted"
+        val after = connection.getTextAfterCursor(1, 0)?.firstOrNull()
+        if (after == null || after.isLetterOrDigit()) formatted += " "
+        connection.commitText(formatted, 1)
+        suggestionController.onContextReset()
+    }
+
     private fun stopSpeechRecognition() {
-        speechRecognitionManager?.stopRecognition()
+        if (cloudSpeechController?.state != null && cloudSpeechController?.state != SpeechState.IDLE) {
+            cloudSpeechController?.toggleStop()
+        } else speechRecognitionManager?.stopRecognition()
+    }
+
+    private fun cancelSpeechRecognition() {
+        cloudSpeechController?.cancel()
+        speechRecognitionManager?.cancelRecognition()
+        ++systemSpeechGeneration
+        speechRecognitionManager?.destroy()
+        speechRecognitionManager = null
+        isSpeechRecognitionActive = false
+        if (::candidatesBarController.isInitialized) {
+            candidatesBarController.setMicrophoneButtonActive(false)
+            candidatesBarController.showSpeechRecognitionHint(false)
+        }
     }
 
     private fun getSuggestionSettings(): SuggestionSettings {
@@ -2487,6 +2599,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         inputConnection: InputConnection?,
         snapshot: StatusBarController.StatusSnapshot
     ): Boolean {
+        if (liveSpeechEditor != null) cancelSpeechRecognition()
         val ic = inputConnection ?: return false
 
         if (text == " ") {
@@ -2545,6 +2658,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         shouldDisableSuggestions: Boolean = inputContextState.shouldDisableSuggestions,
         shouldDisableAutoCorrect: Boolean = inputContextState.shouldDisableAutoCorrect
     ): Boolean {
+        if (liveSpeechEditor != null) cancelSpeechRecognition()
         val ic = inputConnection ?: return false
         if (text.length != 1) return false
         val boundary = rocks.pkb.plektra.core.Punctuation.normalizeApostrophe(text[0])
@@ -2788,6 +2902,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             prefs.unregisterOnSharedPreferenceChangeListener(it)
         }
         
+        cancelSpeechRecognition()
+        speechScope.cancel()
         // Cleanup SpeechRecognitionManager
         speechRecognitionManager?.destroy()
         speechRecognitionManager = null
@@ -3414,6 +3530,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     override fun onStartInput(info: EditorInfo?, restarting: Boolean) {
         pendingKeyboardSurfaceTransition?.let(uiHandler::removeCallbacks)
         pendingKeyboardSurfaceTransition = null
+        if (!restarting) {
+            cancelSpeechRecognition()
+            ++speechEditorSession
+        }
         super.onStartInput(info, restarting)
         if (::textExpansionController.isInitialized) textExpansionController.clear()
         if (
@@ -3585,6 +3705,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
 
     override fun onFinishInput() {
+        cancelSpeechRecognition()
+        ++speechEditorSession
         disableSmoothCaretExperiment()
         pendingKeyboardSurfaceTransition?.let(uiHandler::removeCallbacks)
         pendingKeyboardSurfaceTransition = null
@@ -4162,6 +4284,13 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     ) {
         val perfStart = ImePerfLogger.mark()
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
+        liveSpeechEditor?.let { editor ->
+            val expected = if (candidatesEnd >= 0) candidatesEnd else editor.expectedCursor
+            if ((oldSelStart != newSelStart || oldSelEnd != newSelEnd) &&
+                (newSelStart != newSelEnd || (expected != null && newSelEnd != expected))) {
+                cancelSpeechRecognition()
+            } else return
+        }
         
         val state = inputContextState
         val cursorPositionChanged = (oldSelStart != newSelStart) || (oldSelEnd != newSelEnd)
@@ -4416,6 +4545,11 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
 
     override fun onKeyDown(keyCode_: Int, event_: KeyEvent?): Boolean {
+        if (liveSpeechEditor != null && (event_?.unicodeChar?.let { it != 0 } == true ||
+            keyCode_ in listOf(KeyEvent.KEYCODE_DEL, KeyEvent.KEYCODE_FORWARD_DEL, KeyEvent.KEYCODE_ENTER,
+                KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN))) {
+            cancelSpeechRecognition()
+        }
         val perfStart = ImePerfLogger.mark()
         try {
         if (!replayingProtectedNumberKey) {

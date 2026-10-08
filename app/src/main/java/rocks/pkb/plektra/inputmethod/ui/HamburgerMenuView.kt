@@ -100,6 +100,11 @@ class HamburgerMenuView(
         buttonHost.setMicrophoneActive(isActive)
     }
 
+    fun updateSpeechFeedback(processing: Boolean, countdown: Int?) {
+        lastSpeechFeedback = processing to countdown
+        buttonHost.updateSpeechFeedback(processing, countdown)
+    }
+
     fun updateMicrophoneAudioLevel(rmsdB: Float) {
         lastMicrophoneRms = rmsdB
         buttonHost.updateMicrophoneAudioLevel(rmsdB)
@@ -263,10 +268,13 @@ class HamburgerMenuView(
     }
 
 
+    private var lastSpeechFeedback: Pair<Boolean, Int?> = false to null
+
     private fun applyStoredStates() {
         lastClipboardCount?.let { buttonHost.updateClipboardCount(it) }
         lastMicrophoneActive?.let { buttonHost.setMicrophoneActive(it) }
         lastMicrophoneRms?.let { buttonHost.updateMicrophoneAudioLevel(it) }
+        buttonHost.updateSpeechFeedback(lastSpeechFeedback.first, lastSpeechFeedback.second)
         lastMinimalUiActive?.let { buttonHost.setMinimalUiActive(it) }
         buttonHost.refreshLanguageText()
     }

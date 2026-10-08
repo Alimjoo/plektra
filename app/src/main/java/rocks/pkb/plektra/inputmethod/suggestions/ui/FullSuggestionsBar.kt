@@ -272,6 +272,11 @@ class FullSuggestionsBar(
     /**
      * Updates the microphone button visual feedback based on audio level.
      */
+    fun updateSpeechFeedback(processing: Boolean, countdown: Int?) {
+        hamburgerMenuView?.updateSpeechFeedback(processing, countdown)
+        buttonHost.updateSpeechFeedback(processing, countdown)
+    }
+
     fun updateMicrophoneAudioLevel(rmsdB: Float) {
         hamburgerMenuView?.updateMicrophoneAudioLevel(rmsdB)
         buttonHost.updateMicrophoneAudioLevel(rmsdB)

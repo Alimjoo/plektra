@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import io
+import argparse
 import subprocess
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -41,8 +43,13 @@ FOREGROUND_NAMES = {
 }
 
 
-def render_svg(path: Path, accent: str) -> Image.Image:
+def render_svg(path: Path, accent: str, *, omit_framed_background: bool = False) -> Image.Image:
     source = path.read_text(encoding="utf-8").replace(ORANGE, accent)
+    if omit_framed_background:
+        root = ET.fromstring(source)
+        background = next(child for child in root if child.get("id") == "framed-panel-background")
+        root.remove(background)
+        source = ET.tostring(root, encoding="unicode")
     result = subprocess.run(
         ["rsvg-convert", "--width", "1024", "--height", "1024", "--format", "png"],
         input=source.encode(),
@@ -85,7 +92,26 @@ def save_webp(image: Image.Image, path: Path, *, lossless: bool = True) -> None:
     image.save(path, "WEBP", lossless=lossless, method=6)
 
 
+def generate_monochrome() -> None:
+    sources = {
+        "closed": render_svg(BRANDING / "plektra-logo.svg", ORANGE, omit_framed_background=True),
+        "open": render_svg(BRANDING / "plektra-open-monochrome.svg", ORANGE),
+    }
+    for family, source in sources.items():
+        monochrome = fitted(source, 432, 0.61, None)
+        # The launcher tints alpha; an opaque panel would hide every cutout.
+        black = Image.new("RGBA", monochrome.size, (0, 0, 0, 0))
+        black.putalpha(monochrome.getchannel("A"))
+        save_webp(black, RES / "drawable-nodpi" / f"plektra_{family}_launcher_monochrome.webp")
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--monochrome-only", action="store_true")
+    args = parser.parse_args()
+    if args.monochrome_only:
+        generate_monochrome()
+        return
     raw_rendered = {name: render_svg(path, accent) for name, (path, accent) in VARIANTS.items()}
     rendered = {
         name: fill_framed_cutouts(source) if name.startswith("closed_") else source
@@ -108,14 +134,7 @@ def main() -> None:
             save_webp(legacy, RES / f"mipmap-{density}" / f"{resource}.webp")
             save_webp(legacy, RES / f"mipmap-{density}" / f"{resource}_round.webp")
 
-    # The monochrome assets preserve each mark's negative space through alpha.
-    for family in ("closed", "open"):
-        source = raw_rendered[f"{family}_orange"]
-        monochrome = fitted(source, 432, 0.61, None)
-        alpha = monochrome.getchannel("A")
-        black = Image.new("RGBA", monochrome.size, (0, 0, 0, 0))
-        black.putalpha(alpha)
-        save_webp(black, RES / "drawable-nodpi" / f"plektra_{family}_launcher_monochrome.webp")
+    generate_monochrome()
 
     fitted(rendered["closed_orange"], 512, 0.84, BROWN).convert("RGB").save(
         ROOT / "app/src/main/ic_launcher-playstore.png", "PNG", optimize=True

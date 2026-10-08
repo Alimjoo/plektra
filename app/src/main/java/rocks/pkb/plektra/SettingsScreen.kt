@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardReturn
 import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.SmartButton
 import androidx.compose.material.icons.filled.RoundedCorner
 import androidx.compose.material.icons.filled.Palette
@@ -65,6 +66,7 @@ enum class SettingsDestination {
     Main,
     KeyboardsDevices,
     TextInput,
+    SpeechRecognition,
     Accessibility,
     AutoCorrection,
     Customization,
@@ -208,6 +210,7 @@ fun SettingsScreen(
                     onModifiersClick = { navigateTo(SettingsDestination.Modifiers) },
                     onKeyboardsDevicesClick = { navigateTo(SettingsDestination.KeyboardsDevices) },
                     onTextInputClick = { navigateTo(SettingsDestination.TextInput) },
+                    onSpeechRecognitionClick = { navigateTo(SettingsDestination.SpeechRecognition) },
                     onAccessibilityClick = { navigateTo(SettingsDestination.Accessibility) },
                     onAutoCorrectionClick = { navigateTo(SettingsDestination.AutoCorrection) },
                     onCustomizationClick = { openCustomization(null) },
@@ -263,6 +266,9 @@ fun SettingsScreen(
                     onBack = { navigateBack() },
                     onNavModeSettingsClick = { navigateToNavMode(null) }
                 )
+            }
+            SettingsDestination.SpeechRecognition -> {
+                SpeechSettingsScreen(modifier = modifier, onBack = { navigateBack() })
             }
             SettingsDestination.Accessibility -> {
                 AccessibilitySettingsScreen(
@@ -358,6 +364,7 @@ private fun SettingsMainScreen(
     onModifiersClick: () -> Unit,
     onKeyboardsDevicesClick: () -> Unit,
     onTextInputClick: () -> Unit,
+    onSpeechRecognitionClick: () -> Unit,
     onAccessibilityClick: () -> Unit,
     onAutoCorrectionClick: () -> Unit,
     onCustomizationClick: () -> Unit,
@@ -487,6 +494,14 @@ private fun SettingsMainScreen(
                 title = stringResource(R.string.settings_category_auto_correction),
                 linkId = SettingLinkIds.MAIN_AUTO_CORRECTION,
                 onClick = onAutoCorrectionClick
+            )
+
+            SettingsCategoryRow(
+                icon = Icons.Filled.Mic,
+                title = stringResource(R.string.speech_settings_title),
+                description = stringResource(R.string.speech_settings_summary),
+                linkId = "main.speech_recognition",
+                onClick = onSpeechRecognitionClick
             )
 
             SettingsGroupDivider(stringResource(R.string.settings_group_customization))

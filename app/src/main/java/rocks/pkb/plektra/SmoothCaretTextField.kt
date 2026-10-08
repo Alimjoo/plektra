@@ -2,11 +2,14 @@ package rocks.pkb.plektra
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,6 +26,9 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -48,11 +54,27 @@ internal fun SmoothCaretTextField(
     val textColor = MaterialTheme.colorScheme.onSurface
     val borderColor = if (focused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
     val interactionSource = remember { MutableInteractionSource() }
+    val scrollState = rememberScrollState()
+    var viewportHeight by remember { mutableStateOf(0) }
+    val viewportMaxHeight = with(LocalDensity.current) {
+        MaterialTheme.typography.bodyLarge.lineHeight.toDp() * 2
+    }
 
     LaunchedEffect(value.selection, layoutResult) {
         val layout = layoutResult ?: return@LaunchedEffect
         val index = value.selection.end.coerceIn(0, value.text.length)
         cursorTarget = layout.getCursorRect(index)
+    }
+    LaunchedEffect(cursorTarget, viewportHeight, scrollState.maxValue, focused) {
+        if (!focused || viewportHeight == 0 || cursorTarget == Rect.Zero) return@LaunchedEffect
+        val visibleTop = scrollState.value
+        val visibleBottom = visibleTop + viewportHeight
+        val target = when {
+            cursorTarget.top < visibleTop -> cursorTarget.top
+            cursorTarget.bottom > visibleBottom -> cursorTarget.bottom - viewportHeight
+            else -> return@LaunchedEffect
+        }
+        scrollState.scrollTo(target.toInt().coerceIn(0, scrollState.maxValue))
     }
     LaunchedEffect(cursorTarget) {
         if (cursorTarget == Rect.Zero) return@LaunchedEffect
@@ -88,30 +110,40 @@ internal fun SmoothCaretTextField(
                 style = MaterialTheme.typography.bodyLarge
             )
         }
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { focused = it.isFocused }
-                .drawWithContent {
-                    drawContent()
-                    if (focused && value.selection.collapsed && cursorTarget != Rect.Zero) {
-                        drawRoundRect(
-                            color = caretColor,
-                            topLeft = androidx.compose.ui.geometry.Offset(caretX.value, caretTop.value),
-                            size = androidx.compose.ui.geometry.Size(2.dp.toPx(), caretBottom.value - caretTop.value),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(1.dp.toPx())
-                        )
-                    }
-                },
-            textStyle = MaterialTheme.typography.bodyLarge.copy(color = textColor),
-            keyboardOptions = keyboardOptions,
-            minLines = 1,
-            maxLines = 2,
-            interactionSource = interactionSource,
-            cursorBrush = SolidColor(androidx.compose.ui.graphics.Color.Transparent),
-            onTextLayout = { layoutResult = it }
-        )
+        // The field and caret share full-text coordinates; the outer viewport scrolls both.
+        Box(
+            Modifier.fillMaxWidth()
+                .heightIn(max = viewportMaxHeight)
+                .onSizeChanged { viewportHeight = it.height }
+                .verticalScroll(scrollState)
+        ) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { focused = it.isFocused }
+                    .drawWithContent {
+                        drawContent()
+                        if (focused && value.selection.collapsed && cursorTarget != Rect.Zero) {
+                            clipRect {
+                                drawRoundRect(
+                                    color = caretColor,
+                                    topLeft = androidx.compose.ui.geometry.Offset(caretX.value, caretTop.value),
+                                    size = androidx.compose.ui.geometry.Size(2.dp.toPx(), caretBottom.value - caretTop.value),
+                                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(1.dp.toPx())
+                                )
+                            }
+                        }
+                    },
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = textColor),
+                keyboardOptions = keyboardOptions,
+                minLines = 1,
+                maxLines = Int.MAX_VALUE,
+                interactionSource = interactionSource,
+                cursorBrush = SolidColor(androidx.compose.ui.graphics.Color.Transparent),
+                onTextLayout = { layoutResult = it }
+            )
+        }
     }
 }

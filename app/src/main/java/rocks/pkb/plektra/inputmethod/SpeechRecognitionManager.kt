@@ -30,7 +30,8 @@ class SpeechRecognitionManager(
     private val onError: ((String) -> Unit)? = null,
     private val onRecognitionStateChanged: ((Boolean) -> Unit)? = null,
     private val shouldDisableAutoCapitalize: () -> Boolean = { false },
-    private val onAudioLevelChanged: ((Float) -> Unit)? = null
+    private val onAudioLevelChanged: ((Float) -> Unit)? = null,
+    private val onProcessing: (() -> Unit)? = null
 ) {
     companion object {
         private const val TAG = "SpeechRecognitionMgr"
@@ -173,6 +174,7 @@ class SpeechRecognitionManager(
                     }
 
                     override fun onEndOfSpeech() {
+                        onProcessing?.invoke()
                         Log.d(TAG, "Speech recognition: end of speech detected")
                         // The system automatically detected silence after speech
                         // onResults() will be called next with the final recognition result
@@ -210,7 +212,9 @@ class SpeechRecognitionManager(
                                 SpeechRecognizer.ERROR_NETWORK -> context.getString(R.string.speech_recognition_error_network)
                                 else -> context.getString(R.string.speech_recognition_error_generic)
                             }
-                            Toast.makeText(context, userMessage, Toast.LENGTH_SHORT).show()
+                            if (error != SpeechRecognizer.ERROR_NO_MATCH && error != SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
+                                Toast.makeText(context, userMessage, Toast.LENGTH_SHORT).show()
+                            }
                             onError?.invoke(userMessage)
                         }
                     }
@@ -410,6 +414,9 @@ class SpeechRecognitionManager(
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
+                val silenceMs = rocks.pkb.plektra.inputmethod.speech.SpeechSettings.silenceMs(context).takeIf { it > 0 } ?: 60000L
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, silenceMs)
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, silenceMs)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                 putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
@@ -431,6 +438,17 @@ class SpeechRecognitionManager(
     /**
      * Stops voice input if active.
      */
+    fun cancelRecognition() {
+        speechRecognizer?.cancel()
+        if (isComposingPartialText) {
+            inputConnectionProvider()?.let {
+                it.setComposingText("", 1)
+                it.finishComposingText()
+            }
+            isComposingPartialText = false
+        }
+    }
+
     fun stopRecognition() {
         speechRecognizer?.stopListening()
         Log.d(TAG, "Speech recognition stopped")

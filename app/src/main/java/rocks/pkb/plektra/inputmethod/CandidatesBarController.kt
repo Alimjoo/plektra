@@ -340,6 +340,11 @@ class CandidatesBarController(
         candidatesStatusBar.setMicrophoneButtonActive(isActive)
     }
     
+    fun updateSpeechFeedback(processing: Boolean, countdown: Int?) {
+        inputStatusBar.updateSpeechFeedback(processing, countdown)
+        candidatesStatusBar.updateSpeechFeedback(processing, countdown)
+    }
+
     fun updateMicrophoneAudioLevel(rmsdB: Float) {
         inputStatusBar.updateMicrophoneAudioLevel(rmsdB)
         candidatesStatusBar.updateMicrophoneAudioLevel(rmsdB)

@@ -5,6 +5,7 @@
              SOC calibration. Restored device values remain stale until GATT validates identity. -->
         <include domain="sharedpref" path="."/>
         <exclude domain="sharedpref" path="recent_emojis_prefs.xml"/>
+        <exclude domain="sharedpref" path="speech_credentials.xml"/>
         
         <!-- Include custom keyboard layouts directory -->
         <include domain="file" path="keyboard_layouts/"/>
@@ -18,4 +19,7 @@
         <!-- Include default/user dictionary file stored in app-private files -->
         <include domain="file" path="user_defaults.json"/>
     </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="speech_credentials.xml"/>
+    </device-transfer>
 </data-extraction-rules>

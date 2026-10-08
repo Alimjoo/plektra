@@ -244,6 +244,12 @@ object SettingLinkRegistry {
     )
 
     val entries: List<SettingEntry> = listOf(
+        entry("main.speech_recognition", R.string.speech_settings_title, R.string.speech_settings_summary, destination = SettingsDestination.SpeechRecognition),
+        entry("speech.provider", R.string.speech_provider_title, destination = SettingsDestination.SpeechRecognition),
+        entry("speech.model", R.string.speech_model_title, destination = SettingsDestination.SpeechRecognition),
+        entry("speech.credentials", R.string.speech_api_key_title, destination = SettingsDestination.SpeechRecognition),
+        entry("speech.pause", R.string.speech_pause_title, destination = SettingsDestination.SpeechRecognition),
+        entry("speech.usage", R.string.speech_usage_title, destination = SettingsDestination.SpeechRecognition),
         entry(
             SettingLinkIds.MAIN_KEYBOARDS_DEVICES,
             R.string.keyboards_devices_title,
@@ -1043,6 +1049,7 @@ object SettingLinkRegistry {
         SettingsDestination.Main to R.string.settings_title,
         SettingsDestination.KeyboardsDevices to R.string.keyboards_devices_title,
         SettingsDestination.TextInput to R.string.settings_category_text_input,
+        SettingsDestination.SpeechRecognition to R.string.speech_settings_title,
         SettingsDestination.Accessibility to R.string.settings_category_accessibility,
         SettingsDestination.AutoCorrection to R.string.settings_category_auto_correction,
         SettingsDestination.Customization to R.string.settings_category_customization,

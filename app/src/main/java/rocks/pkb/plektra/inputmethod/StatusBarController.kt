@@ -227,6 +227,12 @@ class StatusBarController(
      * Updates the microphone button visual feedback based on audio level.
      * @param rmsdB The RMS audio level in decibels (typically -10 to 0)
      */
+    fun updateSpeechFeedback(processing: Boolean, countdown: Int?) {
+        variationBarView?.updateSpeechFeedback(processing, countdown)
+        hamburgerMenuView?.updateSpeechFeedback(processing, countdown)
+        fullSuggestionsBar?.updateSpeechFeedback(processing, countdown)
+    }
+
     fun updateMicrophoneAudioLevel(rmsdB: Float) {
         variationBarView?.updateMicrophoneAudioLevel(rmsdB)
         hamburgerMenuView?.updateMicrophoneAudioLevel(rmsdB)

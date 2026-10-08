@@ -24,6 +24,8 @@ class StatusBarButtonHost(
         val container: View
     )
 
+    private var speechFeedback: Pair<Boolean, Int?> = false to null
+    private var microphoneActive = false
     private val buttonStates = mutableMapOf<View, ButtonState>()
     private val recordingColors = mutableMapOf<View, Int>()
     private val outerEdges = mutableMapOf<View, StatusBarButtonPosition>()
@@ -74,6 +76,10 @@ class StatusBarButtonHost(
                 applyTheme(button, resolveThemeHeight(hosted))
             }
         }
+        if (id == StatusBarButtonId.Microphone) {
+            registry.getMicrophoneFactory().setActive(button, microphoneActive)
+            registry.getMicrophoneFactory().setSpeechFeedback(button, speechFeedback.first, speechFeedback.second)
+        }
         prepareForAttach(hosted, width, height)
         return hosted
     }
@@ -100,8 +106,17 @@ class StatusBarButtonHost(
     }
 
     fun setMicrophoneActive(isActive: Boolean) {
+        microphoneActive = isActive
+        if (!isActive) speechFeedback = false to null
         val hosted = hostedButtons[StatusBarButtonId.Microphone] ?: return
         registry.getMicrophoneFactory().setActive(hosted.button, isActive)
+    }
+
+    fun updateSpeechFeedback(processing: Boolean, countdown: Int?) {
+        if (speechFeedback == (processing to countdown)) return
+        speechFeedback = processing to countdown
+        val hosted = hostedButtons[StatusBarButtonId.Microphone] ?: return
+        registry.getMicrophoneFactory().setSpeechFeedback(hosted.button, processing, countdown)
     }
 
     fun updateMicrophoneAudioLevel(rmsdB: Float) {
