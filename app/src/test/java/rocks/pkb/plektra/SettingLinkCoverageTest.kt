@@ -120,7 +120,11 @@ class SettingLinkCoverageTest {
         }.toSet()
         assertTrue("No literal UI hooks were found", hooks.isNotEmpty())
         hooks.forEach { id ->
-            assertTrue("UI hook $id has no registered entry", SettingLinkRegistry.byId(id) != null)
+            if (!BuildConfig.ENABLE_ACCESSIBILITY_SERVICE && id == "clicks.buttons.launcher_button") {
+                assertEquals(null, SettingLinkRegistry.byId(id))
+            } else {
+                assertTrue("UI hook $id has no registered entry", SettingLinkRegistry.byId(id) != null)
+            }
         }
     }
 
