@@ -17,6 +17,7 @@ Plektra focuses on efficient text input on Android devices with physical keyboar
 - Modifier indicators in the bottom strip, Android status bar and beside suggestions
 - Touch SYM and emoji pages
 - Optional software keyboard with themes and device-specific geometry
+- Cyrillic software keys follow the active input profile; long press exposes additional multi-tap letters
 
 ## Text tools
 

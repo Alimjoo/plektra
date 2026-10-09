@@ -21,6 +21,12 @@ class KeyboardBarTestReceiver : BroadcastReceiver() {
                     lines += "${view.javaClass.simpleName}: visible=${view.visibility}, alpha=${view.alpha}, size=${view.width}x${view.height}, top=${view.top}, params=${view.layoutParams?.height}"
                 }
                 if (view.visibility != android.view.View.VISIBLE) return
+                if (view is rocks.pkb.plektra.inputmethod.aospkeyboard.AospKeyboardView && view.isShown) {
+                    val position = IntArray(2).also(view::getLocationOnScreen)
+                    view.visibleAccessibilitySnapshots().forEach { key ->
+                        lines += "SoftwareKey: id=${key.resourceName}, label=${key.label}, screen=${position[0] + key.bounds.centerX()},${position[1] + key.bounds.centerY()}"
+                    }
+                }
                 if (view is rocks.pkb.plektra.inputmethod.ImeChromeLayout) {
                     lines += "chrome=${view.width}x${view.height}, integrated=${view.contourIntegratedIndicators}, indicator=${view.indicatorView?.height}, rowTop=${rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bottomRowTop(view)}, rowRadius=${rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bottomRowRadius(view)}, software=${view.softwareKeyboardModeActive}"
                 }

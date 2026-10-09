@@ -1754,7 +1754,7 @@ class StatusBarController(
         keyboardView.spacebarLabel = buildSoftwareKeyboardSpacebarLabel(snapshot)
         keyboardView.longPressTimeoutMs = SettingsManager.getLongPressThreshold(context)
         keyboardView.longPressAlternatesProvider = { output ->
-            resolveSoftwareKeyboardLongPressAlternates(output, snapshot)
+            resolveSoftwareKeyboardLongPressAlternates(output, snapshot, keyboardView.profileMappingForText(output))
         }
         keyboardView.longPressHintProvider = { output ->
             resolveSoftwareKeyboardAltLongPressHint(output, snapshot)
@@ -1823,7 +1823,7 @@ class StatusBarController(
         }
     }
 
-    private fun resolveSoftwareKeyboardLongPressAlternates(output: String, snapshot: StatusSnapshot): List<String> {
+    private fun resolveSoftwareKeyboardLongPressAlternates(output: String, snapshot: StatusSnapshot, profileMapping: rocks.pkb.plektra.data.layout.LayoutMapping?): List<String> {
         if (output.isEmpty()) return emptyList()
         val baseChar = output.first()
         val keyCode = SoftwareKeyboardSymLabels.keyCodeForChar(
@@ -1832,7 +1832,7 @@ class StatusBarController(
         ) ?: return emptyList()
         return when (SettingsManager.getLongPressModifier(context)) {
             "alt" -> AltModifierMappingResolver.resolve(context.assets, context)[keyCode]?.let(::listOf).orEmpty()
-            "shift" -> listOf(output.uppercase()).filter { it != output }
+            "shift" -> listOf(profileMapping?.uppercase ?: output.uppercase()).filter { it != (profileMapping?.lowercase ?: output) }
             "sym", "sym_symbols", "sym_emoji" -> {
                 val map = softwareKeyboardLongPressSymMappings(SettingsManager.resolveLongPressSymPage(context))
                 map[keyCode]?.let(::listOf).orEmpty()
@@ -1843,7 +1843,8 @@ class StatusBarController(
                     context = context,
                     activeLayoutName = resolveSoftwareKeyboardLayoutName(snapshot)
                 )
-                variations[baseChar] ?: variations[baseChar.lowercaseChar()] ?: emptyList()
+                val profileChar = profileMapping?.lowercase?.firstOrNull() ?: baseChar
+                variations[profileChar] ?: variations[profileChar.lowercaseChar()] ?: emptyList()
             }
             else -> emptyList()
         }
@@ -2130,11 +2131,15 @@ class StatusBarController(
         } catch (e: Exception) {
             null
         } ?: "??"
-        val layout = when (resolveSoftwareKeyboardLayoutName(snapshot)) {
+        val layoutName = resolveSoftwareKeyboardLayoutName(snapshot)
+        val layout = when (layoutName) {
             "german_multitap_qwertz" -> "QWERTZ DE"
             "qwertz" -> "QWERTZ"
             "azerty" -> "AZERTY"
-            else -> "QWERTY"
+            "qwerty", "vietnamese_telex_qwerty" -> "QWERTY"
+            else -> LayoutFileStore.getLayoutMetadata(context, layoutName)?.name
+                ?: LayoutFileStore.getLayoutMetadataFromAssets(context.assets, layoutName)?.name
+                ?: layoutName
         }
         return "$language · $layout"
     }

@@ -15,6 +15,32 @@ import org.robolectric.annotation.Config
 class StatusBarControllerSoftwareSymTest {
 
     @Test
+    fun actualSoftwareProviderUsesCyrillicTextButKeepsPhysicalSymbolPositions() {
+        val context = org.robolectric.RuntimeEnvironment.getApplication()
+        rocks.pkb.plektra.SettingsManager.getPreferences(context).edit().clear().commit()
+        rocks.pkb.plektra.SettingsManager.setKeyboardLayout(context, "russian_standard")
+        val controller = StatusBarController(context, StatusBarController.Mode.CANDIDATES_ONLY)
+        val view = rocks.pkb.plektra.inputmethod.aospkeyboard.AospKeyboardView(context)
+        val snapshot = StatusBarController.StatusSnapshot(
+            capsLockEnabled = false, shiftPhysicallyPressed = false, shiftOneShot = false,
+            ctrlLatchActive = false, ctrlPhysicallyPressed = false, ctrlOneShot = false,
+            ctrlLatchFromNavMode = false, altLatchActive = false, altPhysicallyPressed = false,
+            altOneShot = false, symPage = 0, activeKeyboardLayoutName = "russian_standard")
+        val configure = StatusBarController::class.java.getDeclaredMethod("configureSoftwareKeyboard",
+            view.javaClass, snapshot.javaClass, android.view.inputmethod.InputConnection::class.java, Map::class.java)
+        configure.isAccessible = true
+        configure.invoke(controller, view, snapshot, null, null)
+        rocks.pkb.plektra.SettingsManager.setLongPressModifier(context, "shift")
+        assertEquals(listOf("Й"), view.longPressAlternatesProvider!!.invoke("q"))
+        rocks.pkb.plektra.SettingsManager.setLongPressModifier(context, "variations")
+        val alternatives = view.longPressAlternatesProvider!!.invoke("e")
+        assertTrue(alternatives.none { text -> text.any { it in 'a'..'z' || it in 'A'..'Z' || it == 'é' } })
+        rocks.pkb.plektra.SettingsManager.setLongPressModifier(context, "sym_symbols")
+        val symbols = rocks.pkb.plektra.data.mappings.KeyMappingLoader.loadSymKeyMappingsPage2(context.assets)
+        assertEquals(listOfNotNull(symbols[KeyEvent.KEYCODE_Q]), view.longPressAlternatesProvider!!.invoke("q"))
+    }
+
+    @Test
     fun softwareSymExtraLettersExposeOwnEmojiDefaults() {
         val rows = listOf("qwertzuiopü", "asdfghjklöä", "yxcvbnm")
         val mappings = mapOf(

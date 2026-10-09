@@ -88,6 +88,15 @@ internal object SoftwareKeyboardSymLabels {
         'm' -> KeyEvent.KEYCODE_M
         ',' -> KeyEvent.KEYCODE_COMMA
         '.' -> KeyEvent.KEYCODE_PERIOD
+        '[' -> KeyEvent.KEYCODE_LEFT_BRACKET
+        ']' -> KeyEvent.KEYCODE_RIGHT_BRACKET
+        ';' -> KeyEvent.KEYCODE_SEMICOLON
+        '\'' -> KeyEvent.KEYCODE_APOSTROPHE
+        '/' -> KeyEvent.KEYCODE_SLASH
+        '\\' -> KeyEvent.KEYCODE_BACKSLASH
+        '-' -> KeyEvent.KEYCODE_MINUS
+        '=' -> KeyEvent.KEYCODE_EQUALS
+        '`' -> KeyEvent.KEYCODE_GRAVE
         else -> null
     }
 

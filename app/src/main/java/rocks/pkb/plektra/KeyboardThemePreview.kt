@@ -214,7 +214,7 @@ private fun createVirtualKeyboardThemePreviewView(
         spacebarLabel = "space"
         longPressTimeoutMs = SettingsManager.getLongPressThreshold(context)
         longPressAlternatesProvider = { output ->
-            resolveVirtualPreviewLongPressAlternates(context, output)
+            resolveVirtualPreviewLongPressAlternates(context, output, profileMappingForText(output))
         }
         longPressHintProvider = { output ->
             resolveVirtualPreviewAltHint(context, output)
@@ -304,7 +304,7 @@ private fun updateVirtualKeyboardThemePreviewView(view: android.view.View, theme
         includeNumberRow = SettingsManager.getSoftwareKeyboardNumberRowEnabled(context)
         longPressTimeoutMs = SettingsManager.getLongPressThreshold(context)
         longPressAlternatesProvider = { output ->
-            resolveVirtualPreviewLongPressAlternates(context, output)
+            resolveVirtualPreviewLongPressAlternates(context, output, profileMappingForText(output))
         }
         longPressHintProvider = { output ->
             resolveVirtualPreviewAltHint(context, output)
@@ -706,7 +706,7 @@ private fun previewSymMappings(context: Context, page: Int, shiftActive: Boolean
     }
 }
 
-private fun resolveVirtualPreviewLongPressAlternates(context: Context, output: String): List<String> {
+private fun resolveVirtualPreviewLongPressAlternates(context: Context, output: String, profileMapping: rocks.pkb.plektra.data.layout.LayoutMapping?): List<String> {
     if (output.isEmpty()) return emptyList()
     val baseChar = output.first()
     val keyCode = SoftwareKeyboardSymLabels.keyCodeForChar(
@@ -715,7 +715,7 @@ private fun resolveVirtualPreviewLongPressAlternates(context: Context, output: S
     ) ?: return emptyList()
     return when (SettingsManager.getLongPressModifier(context)) {
         "alt" -> AltModifierMappingResolver.resolve(context.assets, context)[keyCode]?.let(::listOf).orEmpty()
-        "shift" -> listOf(output.uppercase()).filter { it != output }
+        "shift" -> listOf(profileMapping?.uppercase ?: output.uppercase()).filter { it != (profileMapping?.lowercase ?: output) }
         "sym", "sym_symbols", "sym_emoji" -> {
             val page = SettingsManager.resolveLongPressSymPage(context)
             previewSymMappings(context, page, shiftActive = false)[keyCode]?.let(::listOf).orEmpty()
@@ -726,7 +726,8 @@ private fun resolveVirtualPreviewLongPressAlternates(context: Context, output: S
                 context = context,
                 activeLayoutName = SettingsManager.getKeyboardLayout(context)
             )
-            variations[baseChar] ?: variations[baseChar.lowercaseChar()] ?: emptyList()
+            val profileChar = profileMapping?.lowercase?.firstOrNull() ?: baseChar
+            variations[profileChar] ?: variations[profileChar.lowercaseChar()] ?: emptyList()
         }
         else -> emptyList()
     }

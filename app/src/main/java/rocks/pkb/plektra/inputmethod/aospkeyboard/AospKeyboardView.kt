@@ -39,6 +39,9 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.customview.widget.ExploreByTouchHelper
 import rocks.pkb.plektra.R
 import rocks.pkb.plektra.SettingsManager
+import rocks.pkb.plektra.data.layout.JsonLayoutLoader
+import rocks.pkb.plektra.data.layout.LayoutMapping
+import rocks.pkb.plektra.data.layout.LayoutFileStore
 import rocks.pkb.plektra.inputmethod.NotificationHelper
 import java.util.Locale
 import kotlin.math.abs
@@ -155,6 +158,7 @@ class AospKeyboardView @JvmOverloads constructor(
         val layerPopupBelowKey: Boolean,
         val keyWidth: Float,
         val keyHeight: Float,
+        val columns: Int,
         val layerKeyWidth: Float,
         val layerKeyHeight: Float,
         val padding: Float,
@@ -169,13 +173,25 @@ class AospKeyboardView @JvmOverloads constructor(
     )
 
     var listener: Listener? = null
+    private var cyrillicMappings: Map<Int, LayoutMapping> = emptyMap()
+    private var profileFileRevision: Pair<Long, Long>? = null
+
     var layoutName: String = "qwerty"
         set(value) {
-            val normalized = value.trim().lowercase(Locale.ROOT).ifBlank { "qwerty" }
-            if (field == normalized) {
+            val normalized = value.trim().ifBlank { "qwerty" }
+            val profileFile = LayoutFileStore.getLayoutFile(context, normalized)
+            val revision = profileFile.lastModified() to profileFile.length()
+            if (field == normalized && profileFileRevision == revision) {
                 return
             }
             field = normalized
+            profileFileRevision = revision
+            val mappings = JsonLayoutLoader.loadLayout(context.assets, normalized, context).orEmpty()
+            cyrillicMappings = mappings.takeIf { profile ->
+                profile.values.any { mapping ->
+                    mapping.lowercase.any { Character.UnicodeScript.of(it.code) == Character.UnicodeScript.CYRILLIC }
+                }
+            }.orEmpty()
             rebuildKeys(width, height)
             invalidateKeyboard()
         }
@@ -1161,8 +1177,19 @@ class AospKeyboardView @JvmOverloads constructor(
         else -> emptyList()
     }
 
+    private fun profileMapping(spec: KeySpec): LayoutMapping? =
+        if (spec.type in listOf(KeyType.CHAR, KeyType.COMMA, KeyType.PERIOD)) profileMappingForText(spec.output) else null
+
+    internal fun profileMappingForText(text: String): LayoutMapping? =
+        cyrillicMappings[physicalKeyCodeForText(text)]
+
+    private fun characterOutput(spec: KeySpec): String {
+        profileMapping(spec)?.let { return if (shifted) it.uppercase else it.lowercase }
+        return if (shifted && spec.output == "'") "?" else if (shifted) spec.output.uppercase(Locale.ROOT) else spec.output
+    }
+
     private fun displayLabel(spec: KeySpec): String = when (spec.type) {
-        KeyType.CHAR -> if (shifted && spec.label == "'") "?" else if (shifted) spec.label.uppercase(Locale.ROOT) else spec.label
+        KeyType.CHAR, KeyType.COMMA, KeyType.PERIOD -> characterOutput(spec)
         KeyType.SPACE -> spacebarLabel
         KeyType.SYMBOLS -> symbolsLabel
         else -> spec.label
@@ -1279,8 +1306,8 @@ class AospKeyboardView @JvmOverloads constructor(
             KeyType.SYMBOLS -> context.getString(R.string.software_keyboard_accessibility_symbols)
             KeyType.CTRL -> context.getString(R.string.software_keyboard_accessibility_control)
             KeyType.ALT -> context.getString(R.string.software_keyboard_accessibility_alt)
-            KeyType.COMMA -> context.getString(R.string.software_keyboard_accessibility_comma)
-            KeyType.PERIOD -> context.getString(R.string.software_keyboard_accessibility_period)
+            KeyType.COMMA -> if (profileMapping(key.spec) != null) displayLabel(key.spec) else context.getString(R.string.software_keyboard_accessibility_comma)
+            KeyType.PERIOD -> if (profileMapping(key.spec) != null) displayLabel(key.spec) else context.getString(R.string.software_keyboard_accessibility_period)
             KeyType.SPACE -> context.getString(R.string.software_keyboard_accessibility_space)
             KeyType.ENTER -> context.getString(R.string.software_keyboard_accessibility_enter)
             KeyType.LANGUAGE -> context.getString(R.string.software_keyboard_accessibility_language_switch)
@@ -1399,13 +1426,13 @@ class AospKeyboardView @JvmOverloads constructor(
             return
         }
         when (key.spec.type) {
-            KeyType.CHAR -> {
-                val text = if (shifted && key.spec.output == "'") "?" else if (shifted) key.spec.output.uppercase(Locale.ROOT) else key.spec.output
+            KeyType.CHAR, KeyType.COMMA, KeyType.PERIOD -> {
+                val text = characterOutput(key.spec)
                 if (listener?.onKeyStroke(soundKeyCodeFor(key), text) != true) {
                     listener?.onText(text)
                 }
             }
-            KeyType.COMMA, KeyType.PERIOD, KeyType.SPACE -> {
+            KeyType.SPACE -> {
                 if (listener?.onKeyStroke(soundKeyCodeFor(key), key.spec.output) != true) {
                     listener?.onText(key.spec.output)
                 }
@@ -1515,15 +1542,21 @@ class AospKeyboardView @JvmOverloads constructor(
         val moreKeys = resolvedMoreKeys
             .map { if (shifted && it.length == 1 && it[0].isLetter()) it.uppercase(Locale.ROOT) else it }
             .map { MoreKeyChoice(label = SoftwareKeyboardActionLabels.display(it), output = it) }
-        val itemWidth = dp(42f)
-        val itemHeight = dp(52f)
-        val layerItemWidth = dp(48f)
+        val padding = dp(6f).coerceAtMost(width / 4)
+        val itemWidth = dp(42f).coerceAtMost((width - padding * 2).coerceAtLeast(1))
+        val columns = ((width - padding * 2) / itemWidth).coerceAtLeast(1).coerceAtMost(moreKeys.size.coerceAtLeast(1))
+        val popupRows = (moreKeys.size + columns - 1) / columns
         val layerItemHeight = dp(42f)
-        val padding = dp(6f)
-        val layerPopupWidth = padding * 2 + layerKeys.size * layerItemWidth
         val layerPopupHeight = padding * 2 + layerItemHeight
-        val popupWidth = if (moreKeys.isNotEmpty()) padding * 2 + moreKeys.size * itemWidth else 0
-        val popupHeight = if (moreKeys.isNotEmpty()) padding * 2 + itemHeight else 0
+        val reservedLayerHeight = if (layerKeys.isNotEmpty()) layerPopupHeight + dp(4f) else 0
+        val itemHeight = dp(52f).coerceAtMost(((rootView.height - reservedLayerHeight - padding * 2) / popupRows.coerceAtLeast(1)).coerceAtLeast(1))
+        val viewLocation = IntArray(2).also(::getLocationOnScreen)
+        val rootLocation = IntArray(2).also(rootView::getLocationOnScreen)
+        val windowTopInView = (rootLocation[1] - viewLocation[1]).toFloat()
+        val layerItemWidth = dp(48f).coerceAtMost(((width - padding * 2) / layerKeys.size.coerceAtLeast(1)).coerceAtLeast(1))
+        val layerPopupWidth = padding * 2 + layerKeys.size * layerItemWidth
+        val popupWidth = if (moreKeys.isNotEmpty()) padding * 2 + columns * itemWidth else 0
+        val popupHeight = if (moreKeys.isNotEmpty()) padding * 2 + ((moreKeys.size + columns - 1) / columns) * itemHeight else 0
         val placeLayerBelowKey = longPressLayerPopupBelowKey && layerKeys.isNotEmpty()
         val popupStackGap = if (layerKeys.isNotEmpty() && !placeLayerBelowKey) dp(4f) else 0
         val popupLeft = if (moreKeys.isNotEmpty()) {
@@ -1540,15 +1573,27 @@ class AospKeyboardView @JvmOverloads constructor(
         } else {
             0f
         }
+        val windowBottomInView = windowTopInView + rootView.height
+        var visiblePopupTop = popupTop.coerceIn(windowTopInView, (windowBottomInView - popupHeight).coerceAtLeast(windowTopInView))
         val layerPopupLeft = (key.visualRect.centerX() - layerPopupWidth / 2f)
             .coerceIn(0f, width - layerPopupWidth.toFloat())
-        val layerPopupTop = if (placeLayerBelowKey) {
+        var layerPopupTop = if (placeLayerBelowKey) {
             key.visualRect.bottom + popupVerticalOffset(themeOverride)
         } else {
             if (moreKeys.isNotEmpty()) {
-                popupTop + popupHeight + popupStackGap
+                visiblePopupTop + popupHeight + popupStackGap
             } else {
                 key.visualRect.top - layerPopupHeight - popupVerticalOffset(themeOverride)
+            }
+        }
+        if (layerKeys.isNotEmpty()) {
+            layerPopupTop = layerPopupTop.coerceIn(windowTopInView,
+                (windowBottomInView - layerPopupHeight).coerceAtLeast(windowTopInView))
+            if (moreKeys.isNotEmpty() && layerPopupTop < visiblePopupTop + popupHeight &&
+                layerPopupTop + layerPopupHeight > visiblePopupTop) {
+                visiblePopupTop = popupTop.coerceIn(windowTopInView,
+                    (windowBottomInView - popupHeight - reservedLayerHeight).coerceAtLeast(windowTopInView))
+                layerPopupTop = visiblePopupTop + popupHeight + dp(4f)
             }
         }
         val layerPopupRect = if (layerKeys.isNotEmpty()) {
@@ -1566,7 +1611,7 @@ class AospKeyboardView @JvmOverloads constructor(
             keys = moreKeys,
             layerKeys = layerKeys,
             popupRectInView = if (moreKeys.isNotEmpty()) {
-                RectF(popupLeft, popupTop, popupLeft + popupWidth, popupTop + popupHeight)
+                RectF(popupLeft, visiblePopupTop, popupLeft + popupWidth, visiblePopupTop + popupHeight)
             } else {
                 null
             },
@@ -1574,6 +1619,7 @@ class AospKeyboardView @JvmOverloads constructor(
             layerPopupBelowKey = placeLayerBelowKey,
             keyWidth = itemWidth.toFloat(),
             keyHeight = itemHeight.toFloat(),
+            columns = columns,
             layerKeyWidth = layerItemWidth.toFloat(),
             layerKeyHeight = layerItemHeight.toFloat(),
             padding = padding.toFloat(),
@@ -1652,11 +1698,13 @@ class AospKeyboardView @JvmOverloads constructor(
         if (panel.keys.isEmpty()) return -1
         val verticalSlop = dp(24f)
         if (y < rect.top - verticalSlop || y > rect.bottom + verticalSlop) return -1
-        val relativeX = (x - rect.left - panel.padding).coerceIn(0f, panel.keys.size * panel.keyWidth - 1f)
-        return (relativeX / panel.keyWidth).toInt().coerceIn(0, panel.keys.lastIndex)
+        val relativeX = (x - rect.left - panel.padding).coerceIn(0f, panel.columns * panel.keyWidth - 1f)
+        val row = ((y - rect.top - panel.padding).coerceAtLeast(0f) / panel.keyHeight).toInt()
+        return (row * panel.columns + (relativeX / panel.keyWidth).toInt()).coerceIn(0, panel.keys.lastIndex)
     }
 
     private fun selectedLayerKeyIndex(x: Float, y: Float, panel: MoreKeysPanelState): Int {
+        if (panel.popupRectInView?.contains(x, y) == true) return -1
         val rect = panel.layerPopupRectInView ?: return -1
         val verticalSlop = dp(20f)
         if (y < rect.top - verticalSlop || y > rect.bottom + verticalSlop) return -1
@@ -1732,7 +1780,28 @@ class AospKeyboardView @JvmOverloads constructor(
             ?.invoke(key.spec.output)
             ?.filter { it.isNotEmpty() }
             .orEmpty()
+        val mapping = profileMapping(key.spec)
+        if (cyrillicMappings.isNotEmpty()) {
+            val physicalCode = soundKeyCodeFor(key)
+            val visibleCodes = keys.map(::soundKeyCodeFor).toSet()
+            val overflowMappings = cyrillicMappings.filter { (code, _) ->
+                code !in visibleCodes && overflowAnchorFor(code) == physicalCode
+            }.values
+            val profileAlternates = mapping?.taps.orEmpty().map { if (shifted) it.uppercase else it.lowercase } +
+                overflowMappings.flatMap { extra ->
+                    listOf(if (shifted) extra.uppercase else extra.lowercase) +
+                        extra.taps.map { if (shifted) it.uppercase else it.lowercase }
+                }.filter { text -> text.any { Character.UnicodeScript.of(it.code) == Character.UnicodeScript.CYRILLIC } }
+            val usableAlternates = profileAlternates.filter { it.isNotEmpty() && it != characterOutput(key.spec) }
+            return (usableAlternates + providerAlternates).distinct()
+        }
         return providerAlternates.ifEmpty { key.spec.moreKeys }
+    }
+
+    private fun overflowAnchorFor(keyCode: Int): Int = when (keyCode) {
+        KeyEvent.KEYCODE_SEMICOLON, KeyEvent.KEYCODE_APOSTROPHE -> KeyEvent.KEYCODE_L
+        KeyEvent.KEYCODE_SLASH -> KeyEvent.KEYCODE_M
+        else -> KeyEvent.KEYCODE_P
     }
 
     private fun longPressLayerAlternatesFor(key: Key): List<LongPressLayerAlternative> {
@@ -1778,8 +1847,8 @@ class AospKeyboardView @JvmOverloads constructor(
                 drawDrawable(canvas, moreKeysBackground, panelRect)
             }
             panel.keys.forEachIndexed { index, choice ->
-                val left = panelRect.left + panel.padding + index * panel.keyWidth
-                val top = panelRect.top + panel.padding
+                val left = panelRect.left + panel.padding + (index % panel.columns) * panel.keyWidth
+                val top = panelRect.top + panel.padding + (index / panel.columns) * panel.keyHeight
                 val rect = RectF(left, top, left + panel.keyWidth, top + panel.keyHeight)
                 if (index == panel.selectedIndex) {
                     if (theme != null) {
@@ -1788,7 +1857,7 @@ class AospKeyboardView @JvmOverloads constructor(
                         drawDrawable(canvas, normalKeyBackground, rect)
                     }
                 }
-                textPaint.textSize = sp(24f)
+                textPaint.textSize = minOf(sp(24f), rect.height() * .5f)
                 textPaint.typeface = Typeface.DEFAULT
                 textPaint.color = theme?.let {
                     if (index == panel.selectedIndex) readableTextColor(it.keyPopupSelected) else it.textAndIcons

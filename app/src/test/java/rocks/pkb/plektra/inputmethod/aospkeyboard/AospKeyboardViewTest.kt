@@ -71,6 +71,56 @@ class AospKeyboardViewTest {
     }
 
     @Test
+    fun cyrillicProfilesRenderAndCommitTheirOwnMappingsInEverySoftwareStyle() {
+        val context = RuntimeEnvironment.getApplication()
+        val layouts = listOf("russian_standard", "russian_jcuken", "russian_translit", "ukrainian",
+            "serbian_cyrillic", "bulgarian_phonetic", "bulgarian_phonetic_traditional", "Cyrillic_Translite")
+        layouts.forEach { layout ->
+            val mappings = requireNotNull(rocks.pkb.plektra.data.layout.JsonLayoutLoader.loadLayout(context.assets, layout, context))
+            AospKeyboardView.SoftwareLayoutStyle.entries.forEach { style ->
+                val listener = RecordingListener()
+                val view = measuredKeyboard().apply { layoutName = layout; layoutStyle = style; this.listener = listener }
+                for (shift in listOf(false, true)) {
+                    view.shifted = shift
+                    for (letter in 'a'..'z') {
+                        val mapping = mappings[KeyEvent.KEYCODE_A + (letter - 'a')] ?: continue
+                        val expected = if (shift) mapping.uppercase else mapping.lowercase
+                        val key = requireNotNull(view.visibleAccessibilitySnapshots().find { it.resourceName == "plektra_key_$letter" })
+                        assertEquals("$layout/$style/$letter shift=$shift", expected, key.label)
+                        assertTrue(view.performAccessibilityClickForResourceName(key.resourceName))
+                        assertEquals(expected, listener.texts.last())
+                    }
+                }
+                view.layoutName = "qwerty"
+                assertEquals("Q", view.visibleAccessibilitySnapshots().first { it.resourceName == "plektra_key_q" }.label)
+            }
+        }
+    }
+
+    @Test
+    fun customCyrillicProfileKeepsItsCaseSensitiveNameAndMultitapAlternates() {
+        val context = RuntimeEnvironment.getApplication()
+        val name = "Русский Custom Profile"
+        val mapping = rocks.pkb.plektra.data.layout.LayoutMapping("й", "Й", true,
+            listOf(rocks.pkb.plektra.data.layout.TapMapping("й", "Й"), rocks.pkb.plektra.data.layout.TapMapping("ё", "Ё")))
+        assertTrue(rocks.pkb.plektra.data.layout.LayoutFileStore.saveLayout(context, name, mapOf(KeyEvent.KEYCODE_Q to mapping)))
+        val view = measuredKeyboard().apply { layoutName = name }
+        assertEquals("й", view.visibleAccessibilitySnapshots().first { it.resourceName == "plektra_key_q" }.label)
+        assertEquals("ё", displayHint(view, keyForLabel(view, "q")))
+        view.shifted = true
+        assertEquals("Й", view.visibleAccessibilitySnapshots().first { it.resourceName == "plektra_key_q" }.label)
+        assertEquals("Ё", displayHint(view, keyForLabel(view, "q")))
+        view.symPageActive = true
+        view.symPageLabels = mapOf(KeyEvent.KEYCODE_Q to "@")
+        assertEquals("@", symPageLabel(view, keyForLabel(view, "q")))
+        assertTrue(rocks.pkb.plektra.data.layout.LayoutFileStore.saveLayout(context, name,
+            mapOf(KeyEvent.KEYCODE_Q to rocks.pkb.plektra.data.layout.LayoutMapping("жж", "ЖЖ"))))
+        view.layoutName = name
+        view.symPageActive = false
+        assertEquals("ЖЖ", view.visibleAccessibilitySnapshots().first { it.resourceName == "plektra_key_q" }.label)
+    }
+
+    @Test
     fun keyTouchUsesConfiguredCustomTapDuration() {
         val context = RuntimeEnvironment.getApplication() as android.app.Application
         SettingsManager.setTapHapticUseSystem(context, false)
@@ -527,6 +577,125 @@ class AospKeyboardViewTest {
         view.dispatchTouchEvent(motion(MotionEvent.ACTION_UP, ex, ey, 150L))
 
         assertEquals(listOf("k", "é"), listener.texts)
+    }
+
+    @Test
+    fun fullSoftwareStylesUseCustomCyrillicPunctuationPositions() {
+        val context = RuntimeEnvironment.getApplication()
+        val name = "Cyrillic punctuation"
+        val mapping = rocks.pkb.plektra.data.layout.LayoutMapping("х", "Х")
+        assertTrue(rocks.pkb.plektra.data.layout.LayoutFileStore.saveLayout(context, name, mapOf(
+            KeyEvent.KEYCODE_Q to rocks.pkb.plektra.data.layout.LayoutMapping("й", "Й"),
+            KeyEvent.KEYCODE_P to rocks.pkb.plektra.data.layout.LayoutMapping("п", "П"),
+            KeyEvent.KEYCODE_COMMA to mapping, KeyEvent.KEYCODE_PERIOD to mapping,
+            KeyEvent.KEYCODE_LEFT_BRACKET to mapping, KeyEvent.KEYCODE_APOSTROPHE to mapping,
+            KeyEvent.KEYCODE_SEMICOLON to mapping, KeyEvent.KEYCODE_SLASH to mapping)))
+        for (style in AospKeyboardView.SoftwareLayoutStyle.entries) {
+            val listener = RecordingListener()
+            val view = measuredKeyboard().apply { layoutName = name; layoutStyle = style; this.listener = listener }
+            if (style == AospKeyboardView.SoftwareLayoutStyle.COMPACT) {
+                assertEquals("х", displayHint(view, keyForLabel(view, "p")))
+            }
+            for (base in (if (style in listOf(AospKeyboardView.SoftwareLayoutStyle.FULL_ANSI, AospKeyboardView.SoftwareLayoutStyle.FULL_ISO)) listOf("[", "'", ";", "/") else emptyList()) + listOf(",", ".")) {
+                val key = keyForLabel(view, base)
+                val method = AospKeyboardView::class.java.getDeclaredMethod("displayLabel", field<Any>(key, "spec").javaClass)
+                method.isAccessible = true
+                assertEquals("х", method.invoke(view, field<Any>(key, "spec")))
+                val (x, y) = centerOfLabel(view, base)
+                view.dispatchTouchEvent(motion(MotionEvent.ACTION_DOWN, x, y, 0L))
+                view.dispatchTouchEvent(motion(MotionEvent.ACTION_UP, x, y, 20L))
+                assertEquals("х", listener.texts.last())
+            }
+        }
+    }
+
+    @Test
+    fun bulgarianSoftwareProfileExposesItsCompleteAlphabetAndPopupCommitsExtraLetter() {
+        val context = RuntimeEnvironment.getApplication()
+        val mappings = requireNotNull(rocks.pkb.plektra.data.layout.JsonLayoutLoader.loadLayout(context.assets, "bulgarian_phonetic", context))
+        val available = mappings.values.flatMap { listOf(it.lowercase) + it.taps.map { tap -> tap.lowercase } }.joinToString("").toSet()
+        assertTrue("Missing Bulgarian letters", available.containsAll("абвгдежзийклмнопрстуфхцчшщъьюя".toSet()))
+        val listener = RecordingListener()
+        val view = measuredKeyboard().apply { layoutName = "bulgarian_phonetic"; longPressTimeoutMs = 50L; this.listener = listener }
+        val (x, y) = centerOfLabel(view, "z")
+        view.dispatchTouchEvent(motion(MotionEvent.ACTION_DOWN, x, y, 0L))
+        Shadows.shadowOf(Looper.getMainLooper()).idleFor(60, TimeUnit.MILLISECONDS)
+        val panel = field<Any>(view, "moreKeysPanelState")
+        val rect = field<RectF>(panel, "popupRectInView")
+        view.dispatchTouchEvent(motion(MotionEvent.ACTION_MOVE, rect.centerX(), rect.centerY(), 65L))
+        view.dispatchTouchEvent(motion(MotionEvent.ACTION_UP, rect.centerX(), rect.centerY(), 70L))
+        assertEquals(listOf("ж"), listener.texts)
+    }
+
+    @Test
+    fun everyBundledCyrillicMultitapLetterCanBeSelectedFromItsPopupWithAndWithoutShift() {
+        val context = RuntimeEnvironment.getApplication()
+        for (layout in listOf("russian_standard", "russian_jcuken", "russian_translit", "ukrainian",
+            "serbian_cyrillic", "bulgarian_phonetic", "bulgarian_phonetic_traditional", "Cyrillic_Translite")) {
+            val mappings = requireNotNull(rocks.pkb.plektra.data.layout.JsonLayoutLoader.loadLayout(context.assets, layout, context))
+            for (shift in listOf(false, true)) {
+                for ((code, mapping) in mappings.filterKeys { it in KeyEvent.KEYCODE_A..KeyEvent.KEYCODE_Z }) {
+                    for (tap in mapping.taps.drop(1)) {
+                        val expected = if (shift) tap.uppercase else tap.lowercase
+                        val listener = RecordingListener()
+                        val view = measuredKeyboard().apply { layoutName = layout; shifted = shift; longPressTimeoutMs = 50L; this.listener = listener }
+                        val (x, y) = centerOfLabel(view, ('a' + code - KeyEvent.KEYCODE_A).toString())
+                        view.dispatchTouchEvent(motion(MotionEvent.ACTION_DOWN, x, y, 0L))
+                        Shadows.shadowOf(Looper.getMainLooper()).idleFor(60, TimeUnit.MILLISECONDS)
+                        val panel = field<Any>(view, "moreKeysPanelState")
+                        val choices = field<List<Any>>(panel, "keys")
+                        val index = choices.indexOfFirst { field<String>(it, "output") == expected }
+                        assertTrue("$layout missing popup output $expected", index >= 0)
+                        val rect = field<RectF>(panel, "popupRectInView")
+                        val px = rect.left + field<Float>(panel, "padding") + (index + .5f) * field<Float>(panel, "keyWidth")
+                        view.dispatchTouchEvent(motion(MotionEvent.ACTION_MOVE, px, rect.centerY(), 65L))
+                        view.dispatchTouchEvent(motion(MotionEvent.ACTION_UP, px, rect.centerY(), 70L))
+                        assertEquals("$layout/$expected", expected, listener.texts.last())
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun narrowKeyboardWrapsManyCyrillicAlternatesAndCanSelectLastRow() {
+        val context = RuntimeEnvironment.getApplication()
+        val letters = "абвгдежзийклмнопрстуфхцчшщъьюя"
+        val mapping = rocks.pkb.plektra.data.layout.LayoutMapping("я", "Я", true,
+            letters.map { rocks.pkb.plektra.data.layout.TapMapping(it.toString(), it.uppercase()) })
+        assertTrue(rocks.pkb.plektra.data.layout.LayoutFileStore.saveLayout(context, "Many Cyrillic taps", mapOf(KeyEvent.KEYCODE_Q to mapping)))
+        val listener = RecordingListener()
+        val view = measuredKeyboard().apply {
+            layoutName = "Many Cyrillic taps"; longPressTimeoutMs = 50L; this.listener = listener
+            longPressLayerAlternatesProvider = { listOf("@", "#", "€").map { AospKeyboardView.LongPressLayerAlternative(it, it) } }
+        }
+        view.layout(0, 0, 240, 240)
+        val (x, y) = centerOfLabel(view, "q")
+        view.dispatchTouchEvent(motion(MotionEvent.ACTION_DOWN, x, y, 0L))
+        Shadows.shadowOf(Looper.getMainLooper()).idleFor(60, TimeUnit.MILLISECONDS)
+        val panel = field<Any>(view, "moreKeysPanelState")
+        val rect = field<RectF>(panel, "popupRectInView")
+        assertTrue(rect.width() <= view.width)
+        assertTrue("Popup must remain inside its IME window", rect.top >= 0f)
+        assertTrue(rect.bottom <= view.rootView.height)
+        val layerRect = field<RectF>(panel, "layerPopupRectInView")
+        assertTrue(layerRect.top >= 0f && layerRect.bottom <= view.rootView.height)
+        assertFalse("Character cells must not be covered by modifier layer", RectF.intersects(rect, layerRect))
+        val choices = field<List<Any>>(panel, "keys")
+        val columns = field<Int>(panel, "columns")
+        assertTrue(choices.lastIndex >= columns)
+        for (index in listOf(0, choices.size / 2, choices.lastIndex, choices.lastIndex)) {
+            if (listener.texts.isNotEmpty()) {
+                view.dispatchTouchEvent(motion(MotionEvent.ACTION_DOWN, x, y, 0L))
+                Shadows.shadowOf(Looper.getMainLooper()).idleFor(60, TimeUnit.MILLISECONDS)
+            }
+            val px = rect.left + field<Float>(panel, "padding") + (index % columns + .5f) * field<Float>(panel, "keyWidth")
+            val py = if (listener.texts.size == 3) rect.bottom - field<Float>(panel, "padding") - 2f else rect.top + field<Float>(panel, "padding") + (index / columns + .5f) * field<Float>(panel, "keyHeight")
+            view.dispatchTouchEvent(motion(MotionEvent.ACTION_MOVE, px, py, 65L))
+            view.dispatchTouchEvent(motion(MotionEvent.ACTION_UP, px, py, 70L))
+            assertEquals(field<String>(choices[index], "output"), listener.texts.last())
+        }
+        assertEquals("ю", listener.texts.last())
     }
 
     private fun measuredKeyboard(): AospKeyboardView {

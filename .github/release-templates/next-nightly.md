@@ -7,6 +7,7 @@ Changes since `26.10-nightly.08.211000Z`:
 - **Bold suggestions:** enable bold word suggestions under Keyboard bar → Contents. The setting applies to Normal and Slim mode, with physical and software keyboards.
 - **Languages:** German, English and Italian dictionaries remain bundled. Download additional dictionaries from Installed dictionaries. Imported user words remain available without a base dictionary. Installing, importing or removing a language package refreshes the active keyboard.
 - **Backups:** private and modified dictionary packages travel with the backup. Known repository packages are recorded by ID and checksum. Restore reports missing packages so you can download them. Saved input profiles and language selections remain intact.
+- **Cyrillic software keyboard:** follows the active input profile, including Russian, Ukrainian, Serbian, Bulgarian and custom layouts. Additional letters on multi-tap keys are available by long press.
 - **Keyboard controls:** add the Android keyboard picker to the bar and configure the system caption controls. Software navigation keys use readable arrow labels.
 - **Display changes:** keyboard geometry updates across fold and hardware/software transitions. Titan 2 uses its flat modifier strip, while Titan 2 Elite retains its display contour.
 - **Appearance:** Coral and Cobalt themes, plus a smaller open monochrome icon that keeps the lower keys visible inside round launcher masks.
