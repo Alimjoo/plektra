@@ -10,6 +10,11 @@ import java.util.Properties
 import groovy.json.JsonOutput
 import org.gradle.api.GradleException
 
+abstract class GenerateReleaseSbom : DefaultTask() {
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+}
+
 // Config di firma letta da release/keystore.properties (non tracciato) o da env vars
 val keystorePropertiesFileCandidates = listOf(
     rootProject.file("release/keystore.properties"),
@@ -146,20 +151,7 @@ android {
                 keyPassword = keyPass
             }
         }
-        create("playUpload") {
-            val storePath = signingProp("playUploadStoreFile", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PATH")
-            val storePass = signingProp("playUploadStorePassword", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PASSWORD")
-            val alias = signingProp("playUploadKeyAlias", "PLEKTRA_PLAY_UPLOAD_KEY_ALIAS")
-            val keyPass = signingProp("playUploadKeyPassword", "PLEKTRA_PLAY_UPLOAD_KEY_PASSWORD")
 
-            if (hasSigningConfig(storePath, storePass, alias, keyPass)) {
-                val resolvedStoreFile = resolveSigningStoreFile(storePath!!)
-                storeFile = resolvedStoreFile
-                storePassword = storePass
-                keyAlias = alias
-                keyPassword = keyPass
-            }
-        }
     }
 
     flavorDimensions += "channel"
@@ -234,13 +226,6 @@ android {
             buildConfigField("String", "DISTRIBUTION_CHANNEL", "\"play\"")
             buildConfigField("boolean", "IS_FDROID_BUILD", "false")
             buildConfigField("boolean", "ENABLE_GITHUB_UPDATE_CHECKS", "false")
-            val storePath = signingProp("playUploadStoreFile", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PATH")
-            val storePass = signingProp("playUploadStorePassword", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PASSWORD")
-            val alias = signingProp("playUploadKeyAlias", "PLEKTRA_PLAY_UPLOAD_KEY_ALIAS")
-            val keyPass = signingProp("playUploadKeyPassword", "PLEKTRA_PLAY_UPLOAD_KEY_PASSWORD")
-            if (hasSigningConfig(storePath, storePass, alias, keyPass)) {
-                signingConfig = signingConfigs.getByName("playUpload")
-            }
         }
         create("playNightly") {
             dimension = "channel"
@@ -261,13 +246,6 @@ android {
             buildConfigField("String", "DISTRIBUTION_CHANNEL", "\"play\"")
             buildConfigField("boolean", "IS_FDROID_BUILD", "false")
             buildConfigField("boolean", "ENABLE_GITHUB_UPDATE_CHECKS", "false")
-            val storePath = signingProp("playUploadStoreFile", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PATH")
-            val storePass = signingProp("playUploadStorePassword", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PASSWORD")
-            val alias = signingProp("playUploadKeyAlias", "PLEKTRA_PLAY_UPLOAD_KEY_ALIAS")
-            val keyPass = signingProp("playUploadKeyPassword", "PLEKTRA_PLAY_UPLOAD_KEY_PASSWORD")
-            if (hasSigningConfig(storePath, storePass, alias, keyPass)) {
-                signingConfig = signingConfigs.getByName("playUpload")
-            }
         }
     }
 
@@ -342,17 +320,15 @@ android {
             name.equals("prePlayNightlyReleaseBuild", ignoreCase = true)
         ) {
             doFirst {
-                if (!shouldValidatePlaySigning(gradle.startParameter.taskNames)) return@doFirst
-                val storePath = signingProp("playUploadStoreFile", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PATH")
-                val storePass = signingProp("playUploadStorePassword", "PLEKTRA_PLAY_UPLOAD_KEYSTORE_PASSWORD")
-                val alias = signingProp("playUploadKeyAlias", "PLEKTRA_PLAY_UPLOAD_KEY_ALIAS")
-                val keyPass = signingProp("playUploadKeyPassword", "PLEKTRA_PLAY_UPLOAD_KEY_PASSWORD")
-                if (!hasSigningConfig(storePath, storePass, alias, keyPass)) {
-                    throw GradleException(
-                        "Missing Google Play upload-key configuration. Define the playUpload* properties " +
-                            "in ignored keystore.properties or the PLEKTRA_PLAY_UPLOAD_* environment variables."
-                    )
+                if (isUnsignedReleaseBuild) {
+                    logger.lifecycle("Building an unsigned Play bundle for separate PIV signing.")
+                    return@doFirst
                 }
+                if (!shouldValidatePlaySigning(gradle.startParameter.taskNames)) return@doFirst
+                throw GradleException(
+                    "Play bundles use separate hardware-backed upload keys. " +
+                        "Build with scripts/build-play-bundle-unsigned.sh, then sign with scripts/sign-play-bundle-piv.py."
+                )
             }
         }
     }
@@ -383,14 +359,14 @@ android {
     }
 }
 
-// Release APKs carry their runtime dependencies and bundled third-party assets.
-listOf("stable", "nightly", "nightlyNoAccessibility").forEach { flavor ->
-    val nightlyFlavor = flavor.startsWith("nightly", ignoreCase = true)
+// Release packages carry their runtime dependencies and bundled third-party assets.
+listOf("stable", "nightly", "nightlyNoAccessibility", "playStable", "playNightly").forEach { flavor ->
+    val nightlyFlavor = flavor.startsWith("nightly", ignoreCase = true) || flavor == "playNightly"
     val flavorTitle = flavor.replaceFirstChar { it.uppercase() }
     val sbomAssets = layout.buildDirectory.dir("generated/sbom/${flavor}Release/assets")
-    android.sourceSets.maybeCreate("${flavor}Release").assets.srcDir(sbomAssets)
     val runtimeClasspath = provider { configurations.getByName("${flavor}ReleaseRuntimeClasspath") }
-    val generateReleaseSbom = tasks.register("generate${flavorTitle}ReleaseSbom") {
+    tasks.register<GenerateReleaseSbom>("generate${flavorTitle}ReleaseSbom") {
+        outputDirectory.set(sbomAssets)
         inputs.files(runtimeClasspath)
         val releaseVersionName = (android.defaultConfig.versionName ?: "unknown") +
             if (nightlyFlavor) providers.gradleProperty("PLEKTRA_NIGHTLY_VERSION_SUFFIX").orElse("-nightly").get() else ""
@@ -399,7 +375,6 @@ listOf("stable", "nightly", "nightlyNoAccessibility").forEach { flavor ->
         } else android.defaultConfig.versionCode ?: 0
         inputs.property("versionName", releaseVersionName)
         inputs.property("versionCode", releaseVersionCode)
-        outputs.dir(sbomAssets)
         doLast {
             val versionName = releaseVersionName
             val appRef = "pkg:generic/plektra${if (nightlyFlavor) "-nightly" else ""}@$versionName"
@@ -456,15 +431,20 @@ listOf("stable", "nightly", "nightlyNoAccessibility").forEach { flavor ->
                     "dependsOn" to components.map { it["bom-ref"] }
                 ))
             )
-            sbomAssets.get().file("plektra-sbom.cdx.json").asFile.apply {
+            outputDirectory.get().file("plektra-sbom.cdx.json").asFile.apply {
                 parentFile.mkdirs()
                 writeText(JsonOutput.prettyPrint(JsonOutput.toJson(bom)) + "\n")
             }
         }
     }
-    tasks.matching { it.name == "merge${flavorTitle}ReleaseAssets" }.configureEach {
-        dependsOn(generateReleaseSbom)
-    }
+}
+
+androidComponents.onVariants(androidComponents.selector().withBuildType("release")) { variant ->
+    val title = variant.name.replaceFirstChar { it.uppercase() }
+    variant.sources.assets?.addGeneratedSourceDirectory(
+        tasks.named<GenerateReleaseSbom>("generate${title}Sbom"),
+        GenerateReleaseSbom::outputDirectory
+    )
 }
 
 dependencies {
