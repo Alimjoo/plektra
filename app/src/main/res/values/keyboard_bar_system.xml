@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="keyboard_bar_system_controls">System keyboard bar</string>
+    <string name="keyboard_bar_system_controls_description">Open Android settings for the keyboard switch and hide buttons.</string>
+    <string name="status_bar_button_keyboard_picker">Switch keyboard</string>
+    <string name="status_bar_button_keyboard_picker_description">Choose another Android keyboard</string>
+</resources>

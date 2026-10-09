@@ -51,7 +51,7 @@ fun PlektraTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colorScheme.copy(background = colorScheme.surface),
         typography = Typography,
         content = content
     )

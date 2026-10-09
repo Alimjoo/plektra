@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="keyboard_bar_system_controls">System-Tastaturleiste</string>
+    <string name="keyboard_bar_system_controls_description">Android-Einstellungen für Tastaturwechsel und Ausblendpfeil öffnen.</string>
+    <string name="status_bar_button_keyboard_picker">Tastatur wechseln</string>
+    <string name="status_bar_button_keyboard_picker_description">Andere Android-Tastatur auswählen</string>
+</resources>

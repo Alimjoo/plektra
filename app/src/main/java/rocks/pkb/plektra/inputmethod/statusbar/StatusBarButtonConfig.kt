@@ -15,6 +15,7 @@ sealed class StatusBarButtonId(val key: String) {
     object MinimalUi : StatusBarButtonId("minimal_ui")
     object SoftwareKeyboardMode : StatusBarButtonId("software_keyboard_mode")
     object Settings : StatusBarButtonId("settings")
+    object KeyboardPicker : StatusBarButtonId("keyboard_picker")
     object Symbols : StatusBarButtonId("symbols")
     object Undo : StatusBarButtonId("undo")
     object Redo : StatusBarButtonId("redo")

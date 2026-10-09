@@ -241,6 +241,7 @@ object SettingsManager {
     const val STATUS_BAR_BUTTON_MINIMAL_UI = "minimal_ui"
     const val STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE = "software_keyboard_mode"
     const val STATUS_BAR_BUTTON_SETTINGS = "settings"
+    const val STATUS_BAR_BUTTON_KEYBOARD_PICKER = "keyboard_picker"
     const val STATUS_BAR_BUTTON_SYMBOLS = "symbols"
     const val STATUS_BAR_BUTTON_UNDO = "undo"
     const val STATUS_BAR_BUTTON_REDO = "redo"
@@ -6169,6 +6170,7 @@ object SettingsManager {
             STATUS_BAR_BUTTON_MINIMAL_UI,
             STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE,
             STATUS_BAR_BUTTON_SETTINGS,
+            STATUS_BAR_BUTTON_KEYBOARD_PICKER,
             STATUS_BAR_BUTTON_SYMBOLS,
             STATUS_BAR_BUTTON_UNDO,
             STATUS_BAR_BUTTON_REDO

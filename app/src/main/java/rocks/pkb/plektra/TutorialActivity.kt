@@ -66,9 +66,6 @@ import rocks.pkb.plektra.inputmethod.TypingSoundPlayer
 import rocks.pkb.plektra.data.variation.VariationRepository
 import java.util.Locale
 
-private const val ACTION_UNIHERTZ_GESTURE_NAVIGATION_SETTINGS = "com.android.settings.GESTURE_NAVIGATION_SETTINGS"
-private const val SETTINGS_FRAGMENT_ARGS_KEY = ":settings:fragment_args_key"
-private const val UNIHERTZ_HIDE_IME_CAPTION_BAR_KEY = "agui_hide_ime_caption_bar"
 private const val T2E_ROUNDED_CORNERS_SETTINGS_URL =
     "plektra://setting/status_bar.rounded_corners"
 
@@ -1051,12 +1048,7 @@ private fun openImeCaptionBarSettings(context: Context) {
     }
 }
 
-private fun buildImeCaptionBarSettingsIntent(): Intent {
-    return Intent(ACTION_UNIHERTZ_GESTURE_NAVIGATION_SETTINGS).apply {
-        addCategory(Intent.CATEGORY_DEFAULT)
-        putExtra(SETTINGS_FRAGMENT_ARGS_KEY, UNIHERTZ_HIDE_IME_CAPTION_BAR_KEY)
-    }
-}
+private fun buildImeCaptionBarSettingsIntent(): Intent = ImeCaptionBarSettings.unihertzIntent()
 
 private val TutorialIconSurfaceSize = 82.dp
 private val TutorialIconSize = 38.dp

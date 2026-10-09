@@ -9,6 +9,7 @@ import rocks.pkb.plektra.inputmethod.statusbar.button.HamburgerButtonFactory
 import rocks.pkb.plektra.inputmethod.statusbar.button.LanguageButtonFactory
 import rocks.pkb.plektra.inputmethod.statusbar.button.MinimalUiButtonFactory
 import rocks.pkb.plektra.inputmethod.statusbar.button.MicrophoneButtonFactory
+import rocks.pkb.plektra.inputmethod.statusbar.button.KeyboardPickerButtonFactory
 import rocks.pkb.plektra.inputmethod.statusbar.button.SettingsButtonFactory
 import rocks.pkb.plektra.inputmethod.statusbar.button.SoftwareKeyboardModeButtonFactory
 import rocks.pkb.plektra.inputmethod.statusbar.button.SymbolsButtonFactory
@@ -60,6 +61,7 @@ class StatusBarButtonRegistry {
         factories[StatusBarButtonId.MinimalUi] = minimalUiFactory
         factories[StatusBarButtonId.SoftwareKeyboardMode] = softwareKeyboardModeFactory
         factories[StatusBarButtonId.Settings] = settingsFactory
+        factories[StatusBarButtonId.KeyboardPicker] = KeyboardPickerButtonFactory()
         factories[StatusBarButtonId.Symbols] = symbolsFactory
         factories[StatusBarButtonId.Undo] = undoFactory
         factories[StatusBarButtonId.Redo] = redoFactory
@@ -84,7 +86,7 @@ class StatusBarButtonRegistry {
      * @return true if the factory was removed, false if it wasn't registered or is built-in
      */
     fun unregister(id: StatusBarButtonId): Boolean {
-        if (id in listOf(StatusBarButtonId.Clipboard, StatusBarButtonId.Microphone, StatusBarButtonId.Language, StatusBarButtonId.Emoji, StatusBarButtonId.Hamburger, StatusBarButtonId.MinimalUi, StatusBarButtonId.SoftwareKeyboardMode, StatusBarButtonId.Settings, StatusBarButtonId.Symbols, StatusBarButtonId.Undo, StatusBarButtonId.Redo)) {
+        if (id in listOf(StatusBarButtonId.Clipboard, StatusBarButtonId.Microphone, StatusBarButtonId.Language, StatusBarButtonId.Emoji, StatusBarButtonId.Hamburger, StatusBarButtonId.MinimalUi, StatusBarButtonId.SoftwareKeyboardMode, StatusBarButtonId.Settings, StatusBarButtonId.KeyboardPicker, StatusBarButtonId.Symbols, StatusBarButtonId.Undo, StatusBarButtonId.Redo)) {
             return false // Cannot unregister built-in buttons
         }
         return factories.remove(id) != null
@@ -211,6 +213,7 @@ class StatusBarButtonRegistry {
             SettingsManager.STATUS_BAR_BUTTON_MINIMAL_UI -> StatusBarButtonId.MinimalUi
             SettingsManager.STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE -> StatusBarButtonId.SoftwareKeyboardMode
             SettingsManager.STATUS_BAR_BUTTON_SETTINGS -> StatusBarButtonId.Settings
+            SettingsManager.STATUS_BAR_BUTTON_KEYBOARD_PICKER -> StatusBarButtonId.KeyboardPicker
             SettingsManager.STATUS_BAR_BUTTON_SYMBOLS -> StatusBarButtonId.Symbols
             SettingsManager.STATUS_BAR_BUTTON_UNDO -> StatusBarButtonId.Undo
             SettingsManager.STATUS_BAR_BUTTON_REDO -> StatusBarButtonId.Redo

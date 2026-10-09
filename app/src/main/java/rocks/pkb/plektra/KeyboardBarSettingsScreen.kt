@@ -231,6 +231,10 @@ internal fun KeyboardBarSettingsScreen(
                 stringResource(R.string.keyboard_bar_variations_summary), "keyboard_bar.variations") {
                 openSettingsChild(context, "customization", "KeyboardBarVariations")
             }
+            KeyboardBarNavigationRow(Icons.Filled.Tune, stringResource(R.string.keyboard_bar_system_controls),
+                stringResource(R.string.keyboard_bar_system_controls_description), "keyboard_bar.system_controls") {
+                ImeCaptionBarSettings.open(context)
+            }
             SettingsSectionDivider(stringResource(R.string.keyboard_bar_visibility_section))
             KeyboardBarCheckRow(stringResource(R.string.keyboard_bar_show_on_launcher), showOnLauncher,
                 "status_bar.show_on_launcher", stringResource(R.string.keyboard_bar_show_on_launcher_description)) {

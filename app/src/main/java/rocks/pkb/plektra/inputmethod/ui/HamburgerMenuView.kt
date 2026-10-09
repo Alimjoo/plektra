@@ -35,6 +35,7 @@ class HamburgerMenuView(
         StatusBarButtonId.Language,
         StatusBarButtonId.MinimalUi,
         StatusBarButtonId.SoftwareKeyboardMode,
+        StatusBarButtonId.KeyboardPicker,
         StatusBarButtonId.Settings
     )
 

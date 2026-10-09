@@ -322,8 +322,8 @@ class EmojiPickerView(
         }
         tabScrollView.addView(tabRow)
         keyboardSwitcherButton = ImageView(context).apply {
-            setImageResource(R.drawable.ic_close_24)
-            contentDescription = context.getString(R.string.close)
+            setImageResource(R.drawable.ic_keyboard_24)
+            contentDescription = context.getString(R.string.emoji_picker_return_to_keyboard)
             background = createTabBackground(false)
             scaleType = ImageView.ScaleType.CENTER_INSIDE
             val pad = dpToPx(4f)
@@ -395,7 +395,7 @@ class EmojiPickerView(
             (category as? ImageView)?.scaleType = ImageView.ScaleType.CENTER_INSIDE
         }
         fun sizeControls(width: Int) {
-            listOf(searchToggleButton, closeButton).forEach { button ->
+            listOf(searchToggleButton, keyboardSwitcherButton, closeButton).forEach { button ->
                 button.layoutParams = (button.layoutParams as LinearLayout.LayoutParams).apply {
                     this.width = width / 10
                     this.height = height

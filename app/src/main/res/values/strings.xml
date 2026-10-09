@@ -146,6 +146,7 @@
     <string name="software_keyboard_accessibility_space">Space</string>
     <string name="software_keyboard_accessibility_enter">Enter</string>
     <string name="software_keyboard_accessibility_language_switch">Switch language</string>
+    <string name="emoji_picker_return_to_keyboard">Return to keyboard</string>
     <string name="software_keyboard_accessibility_unknown_key">Keyboard key</string>
     <string name="software_keyboard_accessibility_selected">Selected</string>
     <string name="software_keyboard_accessibility_pressed">Pressed</string>

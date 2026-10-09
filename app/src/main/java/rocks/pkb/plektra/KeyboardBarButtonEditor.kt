@@ -250,6 +250,7 @@ private fun getButtonDescription(buttonId: String): String {
         SettingsManager.STATUS_BAR_BUTTON_MINIMAL_UI -> stringResource(R.string.status_bar_button_minimal_ui_description)
         SettingsManager.STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE -> stringResource(R.string.status_bar_button_software_keyboard_mode_description)
         SettingsManager.STATUS_BAR_BUTTON_SETTINGS -> stringResource(R.string.status_bar_button_settings_description)
+        SettingsManager.STATUS_BAR_BUTTON_KEYBOARD_PICKER -> stringResource(R.string.status_bar_button_keyboard_picker_description)
         SettingsManager.STATUS_BAR_BUTTON_SYMBOLS -> stringResource(R.string.status_bar_button_symbols_description)
         SettingsManager.STATUS_BAR_BUTTON_UNDO -> stringResource(R.string.status_bar_button_undo_description)
         SettingsManager.STATUS_BAR_BUTTON_REDO -> stringResource(R.string.status_bar_button_redo_description)
@@ -271,6 +272,7 @@ private fun getButtonIconRes(buttonId: String): Int {
         SettingsManager.STATUS_BAR_BUTTON_MINIMAL_UI -> R.drawable.ic_minimal_ui_24
         SettingsManager.STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE -> R.drawable.expansion_panels_24
         SettingsManager.STATUS_BAR_BUTTON_SETTINGS -> R.drawable.ic_settings_24
+        SettingsManager.STATUS_BAR_BUTTON_KEYBOARD_PICKER -> R.drawable.ic_keyboard_24
         SettingsManager.STATUS_BAR_BUTTON_SYMBOLS -> R.drawable.ic_emoji_symbols_24
         SettingsManager.STATUS_BAR_BUTTON_UNDO -> R.drawable.ic_undo_24
         SettingsManager.STATUS_BAR_BUTTON_REDO -> R.drawable.ic_redo_24
@@ -288,6 +290,7 @@ internal fun stringResourceForButton(context: android.content.Context, buttonId:
         SettingsManager.STATUS_BAR_BUTTON_MINIMAL_UI -> context.getString(R.string.status_bar_button_minimal_ui)
         SettingsManager.STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE -> context.getString(R.string.status_bar_button_software_keyboard_mode)
         SettingsManager.STATUS_BAR_BUTTON_SETTINGS -> context.getString(R.string.status_bar_button_settings)
+        SettingsManager.STATUS_BAR_BUTTON_KEYBOARD_PICKER -> context.getString(R.string.status_bar_button_keyboard_picker)
         SettingsManager.STATUS_BAR_BUTTON_SYMBOLS -> context.getString(R.string.status_bar_button_symbols)
         SettingsManager.STATUS_BAR_BUTTON_UNDO -> context.getString(R.string.status_bar_button_undo)
         SettingsManager.STATUS_BAR_BUTTON_REDO -> context.getString(R.string.status_bar_button_redo)

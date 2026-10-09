@@ -2,6 +2,9 @@ package rocks.pkb.plektra
 
 /** Addressable customization controls; dynamic data rows remain inside their aggregate editors. */
 internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
+    SettingEntry(id = "keyboard_bar.system_controls", titleRes = R.string.keyboard_bar_system_controls,
+        route = SettingRoute(destination = SettingsDestination.Customization,
+            customizationDestination = "status_bar_buttons")),
     SettingEntry(id = "keyboard_bar.geometry", titleRes = R.string.keyboard_bar_geometry,
         route = SettingRoute(destination = SettingsDestination.Customization,
             customizationDestination = "display_geometry")),
