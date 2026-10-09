@@ -157,9 +157,12 @@ class AndroidDictionaryRepository(
                 }
 
                 if (!loadedSerialized) {
-                    Log.e(tag, "Failed to load serialized dictionary for locale=${baseLocale.language}")
-                    synchronized(this) { loadStarted = false }
-                    return
+                    Log.i(tag, "No usable base dictionary for ${baseLocale.language}; loading user words only")
+                    prefixCache.clear()
+                    normalizedIndex.clear()
+                    symSpell = null
+                    symSpellBuilt = false
+                    topCommonEntriesCache = null
                 }
 
                 val loadTime = System.currentTimeMillis() - startTime

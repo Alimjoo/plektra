@@ -2556,7 +2556,11 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         // Register broadcast receiver for user dictionary updates
         userDictionaryReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == AppBroadcastActions.USER_DICTIONARY_UPDATED) {
+                if (intent?.action == rocks.pkb.plektra.dictionaries.DictionaryRepositoryManager.ACTION_DICTIONARIES_CHANGED) {
+                    if (::suggestionController.isInitialized) suggestionController.reloadDictionaries()
+                    invalidateRenderedStatusSnapshot()
+                    updateStatusBarText()
+                } else if (intent?.action == AppBroadcastActions.USER_DICTIONARY_UPDATED) {
                     Log.d(TAG, "User dictionary updated, refreshing...")
                     if (::suggestionController.isInitialized) {
                         suggestionController.refreshUserDictionary()
@@ -2565,7 +2569,9 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             }
         }
         
-        val userDictFilter = IntentFilter(AppBroadcastActions.USER_DICTIONARY_UPDATED)
+        val userDictFilter = IntentFilter(AppBroadcastActions.USER_DICTIONARY_UPDATED).apply {
+            addAction(rocks.pkb.plektra.dictionaries.DictionaryRepositoryManager.ACTION_DICTIONARIES_CHANGED)
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(userDictionaryReceiver, userDictFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
         } else {

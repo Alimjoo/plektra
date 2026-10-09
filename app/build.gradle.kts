@@ -348,12 +348,6 @@ android {
         compose = true
         buildConfig = true
     }
-    packaging {
-        resources {
-            // Exclude legacy JSON base dictionaries; keep serialized .dict and user_defaults.json
-            excludes += "assets/common/dictionaries/*_base.json"
-        }
-    }
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }

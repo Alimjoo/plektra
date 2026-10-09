@@ -53,6 +53,17 @@ sealed class DownloadResult {
 }
 
 object DictionaryRepositoryManager {
+    const val ACTION_DICTIONARIES_CHANGED = "rocks.pkb.plektra.ACTION_DICTIONARIES_CHANGED"
+
+    fun notifyDictionariesChanged(context: Context) {
+        context.sendBroadcast(android.content.Intent(ACTION_DICTIONARIES_CHANGED).setPackage(context.packageName))
+    }
+
+    fun offlineCatalog(context: Context): DictionaryManifest =
+        context.assets.open("common/dictionary_catalog.json").bufferedReader().use {
+            Json { ignoreUnknownKeys = true }.decodeFromString<DictionaryManifest>(it.readText())
+        }
+
     
     /**
      * Fetches the dictionary manifest from the online repository.
@@ -164,6 +175,7 @@ object DictionaryRepositoryManager {
                 tempFile.delete()
             }
             
+            notifyDictionariesChanged(context)
             Log.i(TAG, "Successfully downloaded and installed ${item.filename}")
             DownloadResult.Success(destFile.name)
         } catch (e: SerializationException) {
@@ -194,7 +206,7 @@ object DictionaryRepositoryManager {
      * Validates that the stream contains a valid dictionary format.
      */
     @OptIn(ExperimentalSerializationApi::class)
-    private fun validateDictionaryStream(input: InputStream) {
+    internal fun validateDictionaryStream(input: InputStream) {
         val bytes = input.readBytes()
         val isJson = bytes.isNotEmpty() && bytes[0] == '{'.code.toByte()
         if (isJson) {

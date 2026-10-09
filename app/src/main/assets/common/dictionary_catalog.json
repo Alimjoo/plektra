@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-08T21:19:56.109045Z",
+  "releaseTag": "v1",
+  "items": [
+    {
+      "id": "cs_base",
+      "filename": "cs_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/cs_base.dict",
+      "bytes": 9926592,
+      "sha256": "4e0da3b3dbf84a0ba223383b934332c173f219efc47a4b85ad8d512ea5d10c31",
+      "updatedAt": "2026-10-08T21:19:49.869490Z",
+      "name": "Czech (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "cs-CZ"
+    },
+    {
+      "id": "da_base",
+      "filename": "da_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/da_base.dict",
+      "bytes": 13381053,
+      "sha256": "a7410ff1007b0888279ae6766461f7b616be81f34c3bf0329a9623ac56e8fac7",
+      "updatedAt": "2026-10-08T21:19:50.213741Z",
+      "name": "Danish (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "da-DK"
+    },
+    {
+      "id": "de_base",
+      "filename": "de_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/de_base.dict",
+      "bytes": 14819232,
+      "sha256": "8c1463df544915197822d41ff2ec3ca498d9ac43c25dddfe81d6a16540166307",
+      "updatedAt": "2026-10-08T21:19:50.584710Z",
+      "name": "German (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "de-DE"
+    },
+    {
+      "id": "el_base",
+      "filename": "el_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/el_base.dict",
+      "bytes": 21237827,
+      "sha256": "4d6e9ff0ec917595f740ec1c0ea62064e6c831c5c8b316629ed71620c386847b",
+      "updatedAt": "2026-10-08T21:19:50.935295Z",
+      "name": "Greek (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "el-GR"
+    },
+    {
+      "id": "en_base",
+      "filename": "en_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/en_base.dict",
+      "bytes": 13198738,
+      "sha256": "4e0244f753652a890431017a4bf03fc612852cb9cd8933db31a6d25b0c7adea5",
+      "updatedAt": "2026-10-08T21:19:51.297424Z",
+      "name": "English (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "en-US"
+    },
+    {
+      "id": "es_base",
+      "filename": "es_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/es_base.dict",
+      "bytes": 14191031,
+      "sha256": "68014d12958797072d6fe92c97698104e9fda5fe61394c28479787a1a8ebd1a8",
+      "updatedAt": "2026-10-08T21:19:51.645156Z",
+      "name": "Spanish (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "es-ES"
+    },
+    {
+      "id": "fr_base",
+      "filename": "fr_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/fr_base.dict",
+      "bytes": 13919878,
+      "sha256": "f8104119b6dbe2bca8a3989d74d582141f0d2c656d979e6c455640a6732ede64",
+      "updatedAt": "2026-10-08T21:19:51.972519Z",
+      "name": "French (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "fr-FR"
+    },
+    {
+      "id": "gd_base",
+      "filename": "gd_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/gd_base.dict",
+      "bytes": 2409298,
+      "sha256": "aa1d161b3c4ffd0ae82e90b22144cca8d6da5fb93ee71f2fad92f749b33adefe",
+      "updatedAt": "2026-10-08T21:19:52.305212Z",
+      "name": "Scottish Gaelic",
+      "shortDescription": "",
+      "languageTag": "gd"
+    },
+    {
+      "id": "hu_base",
+      "filename": "hu_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/hu_base.dict",
+      "bytes": 10258517,
+      "sha256": "ff477908b4f595076d03d6f7f607803580e9579da679bbf03cd32b022b0f3f3b",
+      "updatedAt": "2026-10-08T21:19:52.625901Z",
+      "name": "Hungarian (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "hu-HU"
+    },
+    {
+      "id": "it_base",
+      "filename": "it_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/it_base.dict",
+      "bytes": 13938536,
+      "sha256": "7776eb2365b0485ead13f31e172b23fcb9b95b6319202a8dba8b130f82ba7cca",
+      "updatedAt": "2026-10-08T21:19:52.941388Z",
+      "name": "Italian (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "it-IT"
+    },
+    {
+      "id": "nl_base",
+      "filename": "nl_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/nl_base.dict",
+      "bytes": 13476178,
+      "sha256": "d74335dc519c194472d588cc2d22c7fb83df71e600dfc45c2ec8bc79fc494aee",
+      "updatedAt": "2026-10-08T21:19:53.269874Z",
+      "name": "Dutch (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "nl-NL"
+    },
+    {
+      "id": "no_base",
+      "filename": "no_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/no_base.dict",
+      "bytes": 13102923,
+      "sha256": "94fb17d828253c94e29d23dacff8a142b743deab7e0a465dfb41b50923cf8620",
+      "updatedAt": "2026-10-08T21:19:53.586922Z",
+      "name": "Norwegian (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "no-NO"
+    },
+    {
+      "id": "pl_base",
+      "filename": "pl_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/pl_base.dict",
+      "bytes": 14150750,
+      "sha256": "333f5ad033fd2d11771aa8b2d1455baf79e19d40d4cad4f5d1f396831b04be52",
+      "updatedAt": "2026-10-08T21:19:53.909677Z",
+      "name": "Polish (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "pl-PL"
+    },
+    {
+      "id": "pt_base",
+      "filename": "pt_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/pt_base.dict",
+      "bytes": 13819649,
+      "sha256": "704e35eae7bcdcc3a8d9f2f9fa564f6e302fed435b722dfc5dcefe93cf15e5c4",
+      "updatedAt": "2026-10-08T21:19:54.254113Z",
+      "name": "Portuguese (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "pt-PT"
+    },
+    {
+      "id": "ru_base",
+      "filename": "ru_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/ru_base.dict",
+      "bytes": 21054932,
+      "sha256": "64c5a10a0d4e0e67d64a75425e4e0aa1fe5edc8484102a30fe0376e97cb2b5dd",
+      "updatedAt": "2026-10-08T21:19:54.629613Z",
+      "name": "Russian (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "ru-RU"
+    },
+    {
+      "id": "sv_base",
+      "filename": "sv_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/sv_base.dict",
+      "bytes": 13482111,
+      "sha256": "9c4d69aaf3a0e5b454175dcd008b30298472acf28348b71b2bd1c32ebdd46dc8",
+      "updatedAt": "2026-10-08T21:19:54.936836Z",
+      "name": "Swedish (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "sv-SE"
+    },
+    {
+      "id": "tr_base",
+      "filename": "tr_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/tr_base.dict",
+      "bytes": 13837862,
+      "sha256": "cc477a8ea921ada27fd1c284e510ef9c2e69251d88ec83749aa85b198c399914",
+      "updatedAt": "2026-10-08T21:19:55.307961Z",
+      "name": "Turkish (Basic)",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "tr-TR"
+    },
+    {
+      "id": "uk_base",
+      "filename": "uk_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/uk_base.dict",
+      "bytes": 14517270,
+      "sha256": "9a836fa9a69e725df403f3738ca7b0120285abe41402019fd0c0a433d621146b",
+      "updatedAt": "2026-10-08T21:19:55.646969Z",
+      "name": "Ukrainian",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "uk-UA"
+    },
+    {
+      "id": "vi_base",
+      "filename": "vi_base.dict",
+      "url": "https://github.com/pkb-rocks/plektra-dict/releases/download/v1/vi_base.dict",
+      "bytes": 33150247,
+      "sha256": "d984e553877d6e204272445cc68b76b64efc88efeef6f367e1986c50b38a1799",
+      "updatedAt": "2026-10-08T21:19:56.109002Z",
+      "name": "Vietnamese",
+      "shortDescription": "Common words • lightweight",
+      "languageTag": "vi-VN"
+    }
+  ]
+}

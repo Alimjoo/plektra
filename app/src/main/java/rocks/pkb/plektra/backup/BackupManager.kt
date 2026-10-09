@@ -93,7 +93,8 @@ data class PreferencesRestoreSummary(
 
 data class FileRestoreSummary(
     val restoredFiles: List<String>,
-    val skippedFiles: List<String>
+    val skippedFiles: List<String>,
+    val missingDictionaries: List<String> = emptyList()
 )
 
 object PreferencesBackupHelper {
@@ -158,6 +159,11 @@ object PreferencesBackupHelper {
             }
             entries.put(key, prefValue.toJson())
         }
+        if (prefName == "notes") {
+            NotesBackupValidation.validate(prefs.all.mapNotNull { (key, value) ->
+                PreferenceValue.fromAny(value)?.let { key to it }
+            }.toMap())
+        }
         json.put("entries", entries)
         return json
     }
@@ -169,7 +175,7 @@ object PreferencesBackupHelper {
         val result = mutableMapOf<String, Map<String, PreferenceValue>>()
         prefsDir.listFiles { file -> file.extension == "json" }?.forEach { file ->
             val targetName = PreferenceSchemas.restorePreferenceFileName(file.nameWithoutExtension)
-            if (targetName != "plektra_prefs") return@forEach
+            if (!BackupPreferenceContract.shouldExportPreferenceFile(targetName)) return@forEach
             try {
                 val content = file.readText()
                 val json = JSONObject(content)
@@ -204,6 +210,7 @@ object PreferencesBackupHelper {
                     }
                     entries[key] = prefValue
                 }
+                if (targetName == "notes") NotesBackupValidation.validate(entries)
                 result[file.nameWithoutExtension] = entries
             } catch (e: Exception) {
                 throw IOException("Invalid preferences backup: ${file.name}", e)
@@ -236,10 +243,11 @@ object PreferencesBackupHelper {
         val skipped = mutableListOf<String>()
 
         PreferenceSchemas.normalizeForRestore(backedUpPrefs).forEach { (prefName, entries) ->
-            if (prefName != "plektra_prefs") {
+            if (!BackupPreferenceContract.shouldExportPreferenceFile(prefName)) {
                 skipped.addAll(entries.keys.map { "$prefName:$it" })
                 return@forEach
             }
+            if (prefName == "notes") NotesBackupValidation.validate(entries)
             val prefs = context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
             val editor = prefs.edit()
 
@@ -330,14 +338,17 @@ object FileBackupHelper {
         "ctrl_key_mappings.json",
         "variations.json",
         "user_defaults.json",
-        "locale_layout_mapping.json"
+        "locale_layout_mapping.json",
+        DictionaryPackageBackup.MANIFEST
     )
     private val allowedDirectories = setOf(
-        "keyboard_layouts"
+        "keyboard_layouts",
+        DictionaryPackageBackup.DIRECTORY
     )
 
     internal fun validateRestoreFiles(filesDir: File): Int {
         validateTypingSoundPack(filesDir)
+        DictionaryPackageBackup.validate(filesDir)
         var count = 0
         filesDir.walkTopDown().filter { it.isFile }.forEach { file ->
             val relative = file.toRelativeString(filesDir).replace("\\", "/")
@@ -378,7 +389,9 @@ object FileBackupHelper {
             .filter { it.isFile }
             .forEach { file ->
                 val relative = file.toRelativeString(base).replace("\\", "/")
-                if (!shouldBackupPath(relative, includeTypingSoundPack)) {
+                if (relative.startsWith("${DictionaryPackageBackup.DIRECTORY}/") ||
+                    relative == DictionaryPackageBackup.MANIFEST ||
+                    !shouldBackupPath(relative, includeTypingSoundPack)) {
                     return@forEach
                 }
                 val target = File(destinationDir, relative)
@@ -386,7 +399,8 @@ object FileBackupHelper {
                 file.copyTo(target, overwrite = true)
                 components.add("files/$relative")
             }
-        return components
+        components.addAll(DictionaryPackageBackup.snapshot(context, destinationDir).map { "files/$it" })
+        return components.distinct()
     }
 
     fun restoreFiles(context: Context, extractedFilesDir: File): FileRestoreSummary {
@@ -399,6 +413,7 @@ object FileBackupHelper {
             return FileRestoreSummary(restoredFiles = restored, skippedFiles = skipped)
         }
         validateTypingSoundPack(extractedFilesDir)
+        DictionaryPackageBackup.validate(extractedFilesDir)
 
         val targetRoot = context.filesDir
         val backups = mutableListOf<Pair<File, File>>()
@@ -408,7 +423,7 @@ object FileBackupHelper {
                 .filter { it.isFile }
                 .forEach { source ->
                     val relative = source.toRelativeString(extractedFilesDir).replace("\\", "/")
-                    if (isTypingSoundPackPath(relative)) {
+                    if (relative == DictionaryPackageBackup.MANIFEST || isTypingSoundPackPath(relative)) {
                         return@forEach
                     }
                     if (!shouldBackupPath(relative, includeTypingSoundPack = true)) {
@@ -459,7 +474,8 @@ object FileBackupHelper {
             }
         }
 
-        return FileRestoreSummary(restoredFiles = restored, skippedFiles = skipped)
+        return FileRestoreSummary(restoredFiles = restored, skippedFiles = skipped,
+            missingDictionaries = DictionaryPackageBackup.missing(context, extractedFilesDir))
     }
 
     internal fun replaceTypingSoundPack(

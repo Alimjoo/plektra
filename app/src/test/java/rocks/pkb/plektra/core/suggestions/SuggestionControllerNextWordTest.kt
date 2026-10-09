@@ -66,6 +66,24 @@ class SuggestionControllerNextWordTest {
     }
 
     @Test
+    fun dictionaryReloadAtWordBoundaryKeepsNextWordPredictions() {
+        val controller = newController()
+        typeWord(controller, "ich")
+        pressSpace(controller)
+        typeWord(controller, "bin")
+        pressSpace(controller)
+        typeWord(controller, "ich")
+        pressSpace(controller)
+        assertEquals(SuggestionKind.NEXT_WORD, snapshots.last().first().kind)
+
+        controller.reloadDictionaries()
+        assertTrue(snapshots.last().isEmpty())
+        val restored = waitForSuggestionCandidates("bin", "bar")
+        assertEquals(listOf("bin", "bar"), restored.map { it.candidate })
+        assertEquals(SuggestionKind.NEXT_WORD, restored.first().kind)
+    }
+
+    @Test
     fun semicolonKeepsContextForLearning() {
         val controller = newController()
 

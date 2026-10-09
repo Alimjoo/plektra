@@ -184,7 +184,9 @@ fun AdvancedSettingsScreen(
             val result = RestoreManager.restore(context, uri, importMode)
             val message = when (result) {
                 is rocks.pkb.plektra.backup.RestoreResult.Success ->
-                    context.getString(R.string.restore_completed)
+                    if (result.fileSummary.missingDictionaries.isEmpty()) context.getString(R.string.restore_completed)
+                    else context.getString(R.string.restore_missing_dictionary_packs,
+                        result.fileSummary.missingDictionaries.joinToString(", "))
                 is rocks.pkb.plektra.backup.RestoreResult.Failure ->
                     context.getString(R.string.restore_failed, result.reason)
             }

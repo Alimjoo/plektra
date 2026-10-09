@@ -118,7 +118,7 @@ fun InstalledDictionariesScreen(
 ) {
     val context = LocalContext.current
     var installedDictionaries by remember { mutableStateOf(loadSerializedDictionaries(context)) }
-    var onlineManifest by remember { mutableStateOf<DictionaryManifest?>(null) }
+    var onlineManifest by remember { mutableStateOf<DictionaryManifest?>(DictionaryRepositoryManager.offlineCatalog(context)) }
     var isLoadingManifest by remember { mutableStateOf(false) }
     var manifestError by remember { mutableStateOf<String?>(null) }
     var downloadingItems by remember { mutableStateOf<Set<String>>(emptySet()) }
@@ -159,6 +159,7 @@ fun InstalledDictionariesScreen(
                 val result = importDictionaryFromSaf(context, uri)
                 val message = when (result) {
                     is ImportResult.Success -> {
+                        DictionaryRepositoryManager.notifyDictionariesChanged(context)
                         installedDictionaries = loadSerializedDictionaries(context)
                         context.getString(
                             R.string.installed_dictionaries_import_success,
@@ -232,6 +233,7 @@ fun InstalledDictionariesScreen(
             val result = deleteDictionaryFile(context, dictionary)
             val message = when (result) {
                 is UninstallResult.Success -> {
+                    DictionaryRepositoryManager.notifyDictionariesChanged(context)
                     installedDictionaries = loadSerializedDictionaries(context)
                     context.getString(R.string.installed_dictionaries_uninstall_success, dictionary.displayName)
                 }

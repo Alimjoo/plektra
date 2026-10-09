@@ -11,12 +11,11 @@ import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 object ZipHelper {
-    // A rich migration backup currently uses only a handful of small entries. These limits still
-    // leave ample room for the separately bounded 16 MiB typing-sound pack and future user data.
+    // Private dictionary packs are embedded, while known repository packs remain references.
     internal val DEFAULT_ARCHIVE_LIMITS = ArchiveLimits(
         maxEntries = 1_024,
-        maxEntryBytes = 32L * 1024L * 1024L,
-        maxTotalBytes = 64L * 1024L * 1024L
+        maxEntryBytes = 64L * 1024L * 1024L,
+        maxTotalBytes = 512L * 1024L * 1024L
     )
 
     internal data class ArchiveLimits(

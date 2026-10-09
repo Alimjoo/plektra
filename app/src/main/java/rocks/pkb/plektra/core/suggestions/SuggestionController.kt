@@ -112,14 +112,18 @@ class SuggestionController(
     /**
      * Updates the locale and reloads the dictionary for the new language.
      */
-    fun updateLocale(newLocale: Locale) {
-        if (newLocale == currentLocale) return
+    fun reloadDictionaries() = updateLocale(currentLocale, forceReload = true)
+
+    fun updateLocale(newLocale: Locale, forceReload: Boolean = false) {
+        if (newLocale == currentLocale && !forceReload) return
+        val preserveInputContext = forceReload && newLocale == currentLocale
+        if (forceReload) dictionaryRepositoryCache.clear()
         
         // Cancel previous load job if still running to prevent conflicts
         currentLoadJob?.cancel()
         currentLoadJob = null
         cancelPendingWordSuggestions()
-        pendingInitialContextConnection = null
+        if (!preserveInputContext) pendingInitialContextConnection = null
         pendingPrimaryRefreshAfterLoad = false
         pendingExtraRefreshAfterLoad = false
         
@@ -131,28 +135,16 @@ class SuggestionController(
         autoReplaceController = createAutoReplaceController()
         extraSuggestionEngines.clear()
         
-        // Recreate tracker to use new engine (tracker captures suggestionEngine in closure)
-        tracker = CurrentWordTracker(
-            onWordChanged = { word ->
-                updateSuggestionsForWord(word)
-            },
-            onWordReset = {
-                cancelPendingWordSuggestions()
-                latestSuggestions.set(emptyList())
-                pendingAddUserWord = null
-                suggestionsListener?.invoke(emptyList())
-            },
-            autoSpacePunctuationProvider = { settingsProvider().autoSpacePunctuation }
-        )
-        
-        // Reload dictionary in background and refresh the current word when ready.
-        schedulePrimaryDictionaryLoad(refreshAfterLoad = true)
-        
-        // Reset tracker and clear suggestions
-        previousCompletedWord = null
-        sentenceStartPending = true
-        tracker.reset()
+        if (!preserveInputContext) {
+            previousCompletedWord = null
+            sentenceStartPending = true
+            tracker.reset()
+        }
+        pendingAddUserWord = null
+        latestSuggestions.set(emptyList())
         suggestionsListener?.invoke(emptyList())
+        // Keep the active word and pending cursor context when only dictionary files changed.
+        schedulePrimaryDictionaryLoad(refreshAfterLoad = true)
     }
 
     /**
@@ -936,10 +928,13 @@ class SuggestionController(
         }
 
         val word = tracker.currentWord
+        val previous = previousCompletedWord
         if (word.isNotBlank()) {
             updateSuggestionsForWord(word)
-        } else if (previousCompletedWord == null) {
+        } else if (previous == null) {
             publishSentenceStartPredictionsOrStarter()
+        } else {
+            publishNextWordPredictions(previous)
         }
     }
 

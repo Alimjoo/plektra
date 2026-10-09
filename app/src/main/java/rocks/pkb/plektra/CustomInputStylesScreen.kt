@@ -630,6 +630,11 @@ private fun CustomInputStyleItem(
     onDelete: () -> Unit,
     onHideSystemLocale: () -> Unit
 ) {
+    val context = LocalContext.current
+    val revision = rememberDictionaryRevision()
+    val missing = remember(style, revision) {
+        (listOf(style.locale) + style.additionalSuggestionLocales).filterNot { hasDictionaryForLocale(context, it) }
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -665,6 +670,11 @@ private fun CustomInputStyleItem(
                             )
                         }
                     }
+                }
+                if (missing.isNotEmpty()) {
+                    Text(stringResource(R.string.dictionary_pack_missing, missing.joinToString(", ")),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error)
                 }
                 Text(
                     text = "${style.locale} - ${style.layout}",
@@ -732,8 +742,9 @@ private fun AddCustomInputStyleDialog(
         mutableStateOf(initialSuggestionLocales.map { normalizeLocaleTag(it) }.distinct())
     }
 
-    // Check if selected locale has dictionary
-    val hasDictionary = remember(selectedLocale) {
+    val dictionariesRevision = rememberDictionaryRevision()
+    // Recheck after returning from a dictionary download.
+    val hasDictionary = remember(selectedLocale, dictionariesRevision) {
         selectedLocale?.let { hasDictionaryForLocale(context, it) } ?: false
     }
 
@@ -749,7 +760,7 @@ private fun AddCustomInputStyleDialog(
     }
 
     // Get available locales based on dictionary availability (no filtering of system locales)
-    val availableLocales = remember {
+    val availableLocales = remember(dictionariesRevision) {
         getLocalesWithDictionary(context).sorted()
     }
 
@@ -888,12 +899,18 @@ private fun AddCustomInputStyleDialog(
                                 modifier = Modifier.size(20.dp)
                             )
                             Text(
-                                text = stringResource(R.string.custom_input_styles_no_dictionary_warning),
+                                text = stringResource(R.string.dictionary_pack_missing_suggestions),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
                         }
                     }
+                }
+
+                if (selectedLocale != null && !hasDictionary) {
+                    TextButton(onClick = {
+                        context.startActivity(Intent(context, InstalledDictionariesActivity::class.java))
+                    }) { Text(stringResource(R.string.dictionary_download_manage)) }
                 }
 
                 // Layout display (clickable to open layout settings)
@@ -1053,6 +1070,7 @@ private fun SuggestionDictionariesSelector(
     selectedLocales: List<String>,
     onSelectedLocalesChanged: (List<String>) -> Unit
 ) {
+    val context = LocalContext.current
     val primaryLanguage = normalizeLocaleTag(primaryLocale).substringBefore('-')
     val candidates = availableLocales
         .map { normalizeLocaleTag(it) }
@@ -1102,7 +1120,8 @@ private fun SuggestionDictionariesSelector(
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = locale,
+                        text = if (hasDictionaryForLocale(context, locale)) locale else
+                            stringResource(R.string.dictionary_pack_missing, locale),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1444,6 +1463,7 @@ private fun normalizeLocaleTag(locale: String): String {
  */
 private fun getLocalesWithDictionary(context: Context): List<String> {
     val localesWithDict = mutableSetOf<String>()
+    localesWithDict.addAll(rocks.pkb.plektra.dictionaries.DictionaryRepositoryManager.offlineCatalog(context).items.map { it.languageTag })
 
     try {
         val assets = context.assets
@@ -1513,7 +1533,7 @@ private fun isValidLocaleCode(localeCode: String): Boolean {
 private fun hasDictionaryForLocale(context: Context, locale: String): Boolean {
     try {
         val assets = context.assets
-        val langCode = locale.split("_")[0].lowercase()
+        val langCode = locale.replace("_", "-").substringBefore("-").lowercase()
 
         // Check serialized dictionaries from assets
         try {
@@ -1601,4 +1621,18 @@ private fun updateLocaleLayoutMapping(context: Context, locale: String, layout: 
     } catch (e: Exception) {
         android.util.Log.e("CustomInputStyles", "Error updating locale-layout mapping", e)
     }
+}
+
+@Composable
+private fun rememberDictionaryRevision(): Int {
+    val owner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    var revision by remember { mutableIntStateOf(0) }
+    DisposableEffect(owner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) revision++
+        }
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
+    return revision
 }

@@ -116,6 +116,9 @@ object RestoreManager {
                 )
                 val postRestoreActions = collectTriggeredPostRestoreActions(prefsSummary, fileSummary)
                 notifyPostRestoreEffects(context, postRestoreActions)
+                if (fileSummary.restoredFiles.any { it.startsWith("dictionaries_serialized/") }) {
+                    rocks.pkb.plektra.dictionaries.DictionaryRepositoryManager.notifyDictionariesChanged(context)
+                }
 
                 RestoreResult.Success(
                     metadata = metadata,
@@ -158,14 +161,19 @@ object RestoreManager {
     }
 
     private class RestoreSnapshot(private val context: Context, private val directory: File) {
-        private val prefs = SettingsManager.getPreferences(context)
-        private val preferences = prefs.all.mapValues { (_, value) -> PreferenceValue.fromAny(value)!! }
+        private val preferenceFiles = listOf("plektra_prefs", "notes").associateWith { name ->
+            context.getSharedPreferences(name, Context.MODE_PRIVATE).all.mapValues { (_, value) -> PreferenceValue.fromAny(value)!! }
+        }
         private val roots = FileBackupHelper.managedRestoreRoots()
 
         init {
             directory.mkdirs()
             val entries = org.json.JSONObject()
-            preferences.forEach { (key, value) -> entries.put(key, value.toJson()) }
+            preferenceFiles.forEach { (name, preferences) ->
+                val values = org.json.JSONObject()
+                preferences.forEach { (key, value) -> values.put(key, value.toJson()) }
+                entries.put(name, values)
+            }
             File(directory, "preferences.json").writeText(entries.toString())
             roots.forEach { name ->
                 val source = File(context.filesDir, name)
@@ -180,19 +188,21 @@ object RestoreManager {
                 val original = File(directory, name)
                 if (original.exists()) copy(original, target)
             }
-            val editor = prefs.edit().clear()
-            preferences.forEach { (key, value) ->
-                when (value.type) {
-                    PreferenceValueType.BOOLEAN -> editor.putBoolean(key, value.value as Boolean)
-                    PreferenceValueType.INT -> editor.putInt(key, value.value as Int)
-                    PreferenceValueType.LONG -> editor.putLong(key, value.value as Long)
-                    PreferenceValueType.FLOAT -> editor.putFloat(key, value.value as Float)
-                    PreferenceValueType.STRING -> editor.putString(key, value.value as String)
-                    PreferenceValueType.STRING_SET -> editor.putStringSet(key,
-                        (value.value as Set<*>).map { it as String }.toSet())
+            preferenceFiles.forEach { (name, preferences) ->
+                val editor = context.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear()
+                preferences.forEach { (key, value) ->
+                    when (value.type) {
+                        PreferenceValueType.BOOLEAN -> editor.putBoolean(key, value.value as Boolean)
+                        PreferenceValueType.INT -> editor.putInt(key, value.value as Int)
+                        PreferenceValueType.LONG -> editor.putLong(key, value.value as Long)
+                        PreferenceValueType.FLOAT -> editor.putFloat(key, value.value as Float)
+                        PreferenceValueType.STRING -> editor.putString(key, value.value as String)
+                        PreferenceValueType.STRING_SET -> editor.putStringSet(key,
+                            (value.value as Set<*>).map { it as String }.toSet())
+                    }
                 }
+                check(editor.commit()) { "Unable to roll back restored preferences" }
             }
-            check(editor.commit()) { "Unable to roll back restored preferences" }
         }
 
         private fun copy(source: File, target: File) {

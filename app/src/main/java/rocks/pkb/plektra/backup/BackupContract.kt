@@ -428,7 +428,16 @@ internal object BackupPreferenceContract {
     )
 
     private val schemasByName = mapOf(
-        plektraPrefsSchema.prefName to plektraPrefsSchema
+        plektraPrefsSchema.prefName to plektraPrefsSchema,
+        "notes" to PreferenceFileSchema("notes", mapOf(
+            "collection" to PreferenceValueType.STRING,
+            "active_note" to PreferenceValueType.STRING,
+            "heading" to PreferenceValueType.STRING,
+            "body" to PreferenceValueType.STRING,
+            "cursor" to PreferenceValueType.INT,
+            "focus" to PreferenceValueType.INT,
+            "view_mode" to PreferenceValueType.INT
+        ))
     )
 
     private val excludedPreferenceFiles = setOf(
