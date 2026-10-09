@@ -21,6 +21,7 @@ import android.widget.TextView
 import rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
+import rocks.pkb.plektra.SettingsManager
 import rocks.pkb.plektra.R
 import rocks.pkb.plektra.SettingsActivity
 import rocks.pkb.plektra.inputmethod.NotificationHelper
@@ -38,8 +39,6 @@ import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonRegistry
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarCallbacks
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonPosition
 import rocks.pkb.plektra.inputmethod.statusbar.StatusBarButtonStyles
-import android.view.inputmethod.InputMethodManager
-import rocks.pkb.plektra.inputmethod.subtype.AdditionalSubtypeUtils.languageCode
 
 /**
  * Renders up to three suggestions with configurable menu buttons on the left/right edges.
@@ -65,6 +64,7 @@ class FullSuggestionsBar(
     private var hamburgerMenuView: HamburgerMenuView? = null
     private var lastMinimalUiActive: Boolean? = null
     private var lastSlots: List<String?> = emptyList()
+    private var lastSuggestionsBold: Boolean? = null
     private var assets: AssetManager? = null
     private var imeServiceClass: Class<*>? = null
     private var showMinimalUiButtons: Boolean = false
@@ -87,7 +87,6 @@ class FullSuggestionsBar(
     private var actionSlots: List<String?> = emptyList()
     private var currentInputConnection: android.view.inputmethod.InputConnection? = null
     var onCursorMovedListener: (() -> Unit)? = null
-    var requireDictionaryForSuggestions: Boolean = true
     var themeOverride: KeyboardThemeColors? = null
         set(value) {
             if (field == value) {
@@ -346,21 +345,6 @@ class FullSuggestionsBar(
         lastSlots = emptyList()
     }
 
-    /**
-     * Checks if a dictionary file exists for the current IME subtype.
-     * Returns true if a dictionary is found (serialized format).
-     */
-    private fun hasDictionaryForCurrentSubtype(): Boolean {
-        return try {
-            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-            val currentSubtype = imm?.currentInputMethodSubtype
-            val langCode = currentSubtype?.languageCode() ?: return false
-            rocks.pkb.plektra.core.suggestions.AndroidDictionaryRepository.hasDictionaryForLocale(context, langCode)
-        } catch (e: Exception) {
-            false
-        }
-    }
-
     fun update(
         suggestions: List<String>,
         shouldShow: Boolean,
@@ -381,8 +365,12 @@ class FullSuggestionsBar(
         val frame = frameContainer ?: return
         
         // Hide suggestions when unavailable, but keep Slim buttons visible.
-        val hasDictionary = !requireDictionaryForSuggestions || hasDictionaryForCurrentSubtype()
-        val canShowSuggestions = contentEnabled && shouldShow && hasDictionary &&
+        val suggestionsBold = SettingsManager.getSuggestionsBold(context)
+        if (lastSuggestionsBold != suggestionsBold) {
+            lastSuggestionsBold = suggestionsBold
+            lastSlots = emptyList()
+        }
+        val canShowSuggestions = contentEnabled && shouldShow &&
             (suggestions.isNotEmpty() || !addWordCandidate.isNullOrBlank())
         if (!canShowSuggestions && !hasMenuButtons) {
             cancelPendingSuggestionsAccessibilityEnable()
@@ -699,7 +687,8 @@ class FullSuggestionsBar(
                 includeFontPadding = false
                 minHeight = 0
                 setTextColor(themeOverride?.textAndIcons ?: Color.WHITE)
-                setTypeface(null, android.graphics.Typeface.NORMAL)
+                setTypeface(null, if (SettingsManager.getSuggestionsBold(context))
+                    android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
                 maxLines = 1
                 ellipsize = TextUtils.TruncateAt.END
                 setPadding(padH, padV, padH, padV)

@@ -75,6 +75,7 @@ object SettingsManager {
     private const val KEY_AUTO_CORRECT_ENABLED = "auto_correct_enabled"
     private const val KEY_AUTO_CORRECT_ENABLED_LANGUAGES = "auto_correct_enabled_languages"
     private const val KEY_SUGGESTIONS_ENABLED = "suggestions_enabled"
+    private const val KEY_SUGGESTIONS_BOLD = "suggestions_bold"
     private const val KEY_SNIPPETS_ENABLED = "snippets_enabled"
     private const val KEY_SNIPPETS_PREFIX = "snippets_prefix"
     private const val KEY_SNIPPETS = "snippets_v1"
@@ -3024,6 +3025,13 @@ object SettingsManager {
         getPreferences(context).edit()
             .putBoolean(KEY_SUGGESTIONS_ENABLED, enabled)
             .apply()
+    }
+
+    fun getSuggestionsBold(context: Context): Boolean =
+        getPreferences(context).getBoolean(KEY_SUGGESTIONS_BOLD, false)
+
+    fun setSuggestionsBold(context: Context, enabled: Boolean) {
+        getPreferences(context).edit().putBoolean(KEY_SUGGESTIONS_BOLD, enabled).apply()
     }
 
     /**

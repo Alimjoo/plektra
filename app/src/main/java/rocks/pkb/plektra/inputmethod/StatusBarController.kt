@@ -3109,7 +3109,6 @@ class StatusBarController(
             liveAnnouncementsEnabled = isAccessibilityLiveAnnouncementsEnabled(),
             suggestionsAnnouncementDelayMs = suggestionsAnnouncementDelayMs
         )
-        fullSuggestionsBar?.requireDictionaryForSuggestions = !expansionActive && sharedVariations.isEmpty() && !isFullSoftwareKeyboardMode
         fullSuggestionsBar?.update(
             rowContent,
             showFullBar,

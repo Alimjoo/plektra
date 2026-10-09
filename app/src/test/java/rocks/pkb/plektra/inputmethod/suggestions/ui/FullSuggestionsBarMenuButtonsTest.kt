@@ -50,7 +50,6 @@ class FullSuggestionsBarMenuButtonsTest {
     @Test fun suggestionsKeepSlimButtonsWhenContentIsEnabled() {
         val bar = FullSuggestionsBar(context)
         val frame = bar.ensureView()
-        bar.requireDictionaryForSuggestions = false
         bar.setMinimalUiActive(true)
         bar.setContentEnabled(suggestions = true, menuButtons = true)
         update(bar, listOf("Alpha", "Beta", "Gamma"))
@@ -79,7 +78,6 @@ class FullSuggestionsBarMenuButtonsTest {
             orientation = android.widget.LinearLayout.VERTICAL
             addView(frame)
         }
-        bar.requireDictionaryForSuggestions = false
         bar.setMinimalUiActive(true)
         bar.setContentEnabled(suggestions = true, menuButtons = true)
         update(bar, listOf("Alpha", "Beta", "Gamma"))

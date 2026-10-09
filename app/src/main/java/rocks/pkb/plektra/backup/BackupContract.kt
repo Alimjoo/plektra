@@ -274,6 +274,7 @@ internal object BackupPreferenceContract {
             "sym_mappings_custom" to PreferenceValueType.STRING,
             "sym_mappings_page2_custom" to PreferenceValueType.STRING,
             "user_dictionary_entries" to PreferenceValueType.STRING,
+            "suggestions_bold" to PreferenceValueType.BOOLEAN,
             "auto_correct_enabled" to PreferenceValueType.BOOLEAN,
             "auto_correct_enabled_languages" to PreferenceValueType.STRING,
             "suggestions_enabled" to PreferenceValueType.BOOLEAN,

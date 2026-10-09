@@ -63,6 +63,7 @@ internal fun KeyboardBarSettingsScreen(
     var leftSlots by remember { mutableStateOf(SettingsManager.getStatusBarSlotsLeft(context)) }
     var rightSlots by remember { mutableStateOf(SettingsManager.getStatusBarSlotsRight(context)) }
     var suggestionsEnabled by remember { mutableStateOf(SettingsManager.getSuggestionsEnabled(context)) }
+    var suggestionsBold by remember { mutableStateOf(SettingsManager.getSuggestionsBold(context)) }
     var showOnLauncher by remember { mutableStateOf(SettingsManager.getShowKeyboardBarOnLauncher(context)) }
     var indicators by remember { mutableStateOf(SettingsManager.getModifierIndicators(context)) }
     var variationsVisible by remember {
@@ -205,6 +206,11 @@ internal fun KeyboardBarSettingsScreen(
                 SettingLinkIds.AUTO_CORRECTION_SUGGESTIONS) {
                 if (editingSlim) saveSlim(slimProfile.copy(suggestions = it))
                 else { suggestionsEnabled = it; SettingsManager.setSuggestionsEnabled(context, it) }
+            }
+            KeyboardBarCheckRow(stringResource(R.string.suggestions_bold_title), suggestionsBold,
+                "keyboard_bar.suggestions_bold", stringResource(R.string.suggestions_bold_summary)) {
+                suggestionsBold = it
+                SettingsManager.setSuggestionsBold(context, it)
             }
             KeyboardBarCheckRow(stringResource(R.string.keyboard_bar_actions), displayedActions,
                 "status_bar.variations_visible") {

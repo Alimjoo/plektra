@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="suggestions_bold_title">Fette Wortvorschläge</string>
+    <string name="suggestions_bold_summary">Wortvorschläge in Normal- und Slim-Modus fett anzeigen.</string>
+</resources>

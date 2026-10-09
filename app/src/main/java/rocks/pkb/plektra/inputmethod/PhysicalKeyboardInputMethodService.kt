@@ -2449,7 +2449,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                     updateStatusBarText()
                 }
             } else if (SettingsManager.isModifierIndicatorPreferenceKey(key) ||
-                key == "suggestions_enabled" || key == "status_bar_variations_visible" ||
+                key == "suggestions_enabled" || key == "suggestions_bold" || key == "status_bar_variations_visible" ||
                 key?.startsWith("slim_status_bar_slots_") == true ||
                 key?.startsWith("keyboard_bar_") == true) {
                 Handler(Looper.getMainLooper()).post {

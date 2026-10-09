@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="suggestions_bold_title">Bold word suggestions</string>
+    <string name="suggestions_bold_summary">Use bold text for word suggestions in both Normal and Slim mode.</string>
+</resources>

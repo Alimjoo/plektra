@@ -195,7 +195,6 @@ private fun createVirtualKeyboardThemePreviewView(
 
     val suggestionsBar = FullSuggestionsBar(context).apply {
         themeOverride = colors
-        requireDictionaryForSuggestions = false
     }
     root.addView(suggestionsBar.ensureView())
     suggestionsBar.showPreview(listOf("Werk", "Team", "Park"))
@@ -291,7 +290,6 @@ private fun updateVirtualKeyboardThemePreviewView(view: android.view.View, theme
     )
     (root.getTag(R.id.keyboard_theme_preview_suggestions_bar) as? FullSuggestionsBar)?.apply {
         themeOverride = colors
-        requireDictionaryForSuggestions = false
         showPreview(listOf("Werk", "Team", "Park"))
     }
     (root.getTag(R.id.keyboard_theme_preview_variation_bar) as? VariationBarView)?.apply {
