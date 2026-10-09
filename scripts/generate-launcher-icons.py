@@ -93,16 +93,12 @@ def save_webp(image: Image.Image, path: Path, *, lossless: bool = True) -> None:
 
 
 def generate_monochrome() -> None:
-    sources = {
-        "closed": render_svg(BRANDING / "plektra-logo.svg", ORANGE, omit_framed_background=True),
-        "open": render_svg(BRANDING / "plektra-open-monochrome.svg", ORANGE),
-    }
-    for family, source in sources.items():
-        monochrome = fitted(source, 432, 0.61, None)
-        # The launcher tints alpha; an opaque panel would hide every cutout.
-        black = Image.new("RGBA", monochrome.size, (0, 0, 0, 0))
-        black.putalpha(monochrome.getchannel("A"))
-        save_webp(black, RES / "drawable-nodpi" / f"plektra_{family}_launcher_monochrome.webp")
+    source = render_svg(BRANDING / "plektra-open-monochrome.svg", ORANGE)
+    monochrome = fitted(source, 432, 0.47, None)
+    # Android tints the alpha mask; keep the detached plectrum in every alias.
+    black = Image.new("RGBA", monochrome.size, (0, 0, 0, 0))
+    black.putalpha(monochrome.getchannel("A"))
+    save_webp(black, RES / "drawable-nodpi" / "plektra_open_launcher_monochrome.webp")
 
 
 def main() -> None:
@@ -122,17 +118,19 @@ def main() -> None:
         resource = RESOURCE_NAMES[name]
         foreground = FOREGROUND_NAMES[name]
 
-        # Normalize by visible bounds. Both forms then occupy the same optical
-        # area even though the open SVG has substantially more empty canvas.
-        # The adaptive mark stays within Android's 66/108 safe zone.
-        save_webp(fitted(source, 432, 0.61, None), RES / "drawable-nodpi" / f"{foreground}.webp")
+        # Leave room for the detached plectrum and bottom keys under round masks.
+        adaptive_fraction = 0.61 if name.startswith("closed_") else 0.47
+        save_webp(fitted(source, 432, adaptive_fraction, None), RES / "drawable-nodpi" / f"{foreground}.webp")
         background = BROWN if name.startswith("closed_") else BACKGROUND
         save_webp(fitted(source, 192, 0.84, background).convert("RGB"), RES / "drawable-nodpi" / f"{name}_launcher_preview.webp")
 
         for density, size in DENSITIES.items():
             legacy = fitted(source, size, 0.84, background).convert("RGB")
             save_webp(legacy, RES / f"mipmap-{density}" / f"{resource}.webp")
-            save_webp(legacy, RES / f"mipmap-{density}" / f"{resource}_round.webp")
+            # Fit the complete mark inside a circular launcher mask.
+            round_fraction = 0.66 if name.startswith("closed_") else 0.60
+            round_icon = fitted(source, size, round_fraction, background).convert("RGB")
+            save_webp(round_icon, RES / f"mipmap-{density}" / f"{resource}_round.webp")
 
     generate_monochrome()
 
