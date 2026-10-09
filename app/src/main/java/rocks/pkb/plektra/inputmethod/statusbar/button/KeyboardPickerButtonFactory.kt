@@ -18,21 +18,21 @@ class KeyboardPickerButtonFactory : StatusBarButtonFactory {
 
     override fun create(context: Context, size: Int, callbacks: StatusBarCallbacks): ButtonCreationResult {
         val button = createButton(context, size)
-        
+
         // Use the IME context so Android associates the picker with this display.
         button.setOnClickListener {
             button.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
             (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager)
                 ?.showInputMethodPicker()
         }
-        
+
         return ButtonCreationResult(view = button)
     }
-    
+
     override fun update(view: View, state: ButtonState) {
         // No state to update for settings button
     }
-    
+
     private fun createButton(context: Context, size: Int): ImageView {
         return ImageView(context).apply {
             setImageResource(R.drawable.ic_keyboard_24)

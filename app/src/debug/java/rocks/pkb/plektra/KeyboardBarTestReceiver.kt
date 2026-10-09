@@ -24,6 +24,10 @@ class KeyboardBarTestReceiver : BroadcastReceiver() {
                 if (view is rocks.pkb.plektra.inputmethod.ImeChromeLayout) {
                     lines += "chrome=${view.width}x${view.height}, integrated=${view.contourIntegratedIndicators}, indicator=${view.indicatorView?.height}, rowTop=${rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bottomRowTop(view)}, rowRadius=${rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.bottomRowRadius(view)}, software=${view.softwareKeyboardModeActive}"
                 }
+                if (view is android.widget.ImageView && view.isClickable && view.isShown) {
+                    val position = IntArray(2).also(view::getLocationOnScreen)
+                    lines += "MenuControl: screen=${position[0]},${position[1]}, size=${view.width}x${view.height}, clickable=${view.isClickable}"
+                }
                 val background = view.background
                 if (background is rocks.pkb.plektra.inputmethod.statusbar.CurvedCornerButtonDrawable) {
                     val position = IntArray(2).also(view::getLocationInWindow)
