@@ -1,0 +1,11 @@
+{
+  "name": "plektra-showcase",
+  "private": true,
+  "scripts": {
+    "render": "node sources/render.cjs",
+    "verify": "node sources/verify.cjs"
+  },
+  "dependencies": {
+    "sharp": "^0.35.5"
+  }
+}

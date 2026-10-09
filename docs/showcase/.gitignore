@@ -1,0 +1,9 @@
+node_modules/
+composed/
+crops/
+previews/
+assets.json
+exports/**/*.svg
+exports/*/portrait/
+*.pdf
+*.zip

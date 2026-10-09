@@ -1,0 +1,521 @@
+[
+  {
+    "id": "01-devices",
+    "title": [
+      "Make every",
+      "key yours."
+    ],
+    "body": [
+      "Physical keyboards and touch input.",
+      "One set of tools, on your terms."
+    ],
+    "layout": "devices",
+    "items": [
+      [
+        "titan-2",
+        "r6-full",
+        "Titan 2"
+      ],
+      [
+        "titan-2-elite",
+        "r6-full",
+        "Titan 2 Elite"
+      ],
+      [
+        "pixel-7a",
+        "r6-full",
+        "Pixel 7a"
+      ]
+    ]
+  },
+  {
+    "id": "02-keyboard-bar",
+    "title": [
+      "Your keyboard bar.",
+      "Your choice."
+    ],
+    "body": [
+      "Suggestions, variations and menu buttons.",
+      "Keep the controls you actually use."
+    ],
+    "layout": "frame-crop",
+    "items": [
+      [
+        "titan-2-elite",
+        "r6-config-full",
+        "Titan 2 Elite"
+      ]
+    ]
+  },
+  {
+    "id": "03-bar-configurations",
+    "title": [
+      "As much as",
+      "you need."
+    ],
+    "body": [
+      "A full bar, suggestions with controls, or LEDs.",
+      "Keep only what you need."
+    ],
+    "layout": "bar-configs",
+    "items": [
+      [
+        "titan-2-elite",
+        "r6-config-full",
+        "Full bar"
+      ],
+      [
+        "titan-2-elite",
+        "r5-config-suggestions",
+        "Suggestions + menu"
+      ],
+      [
+        "titan-2-elite",
+        "r5-config-leds",
+        "LED strip"
+      ],
+      [
+        "titan-2-elite",
+        "r5-config-hidden",
+        "Hidden"
+      ]
+    ]
+  },
+  {
+    "id": "04-slim-profile",
+    "title": [
+      "A lighter setup.",
+      "One switch away."
+    ],
+    "body": [
+      "Configure Normal and Slim separately.",
+      "Your minimal setup is yours to define."
+    ],
+    "layout": "compare",
+    "items": [
+      [
+        "titan-2-elite",
+        "r6-config-full",
+        "Normal"
+      ],
+      [
+        "titan-2-elite",
+        "r5-slim",
+        "Slim"
+      ]
+    ]
+  },
+  {
+    "id": "05-shared-row",
+    "title": [
+      "Keep your",
+      "controls close."
+    ],
+    "body": [
+      "Choose a shared row or a stacked bar.",
+      "Arrange suggestions and actions."
+    ],
+    "layout": "compare",
+    "items": [
+      [
+        "titan-2-elite",
+        "r6-full",
+        "Stacked"
+      ],
+      [
+        "titan-2-elite",
+        "r5-shared",
+        "Shared row"
+      ]
+    ]
+  },
+  {
+    "id": "06-suggestions",
+    "title": [
+      "Finish the word.",
+      "Keep typing."
+    ],
+    "body": [
+      "English word suggestions as you type.",
+      "Choose a completion without retyping."
+    ],
+    "layout": "frame-crop",
+    "items": [
+      [
+        "titan-2-elite",
+        "r6-full",
+        "English suggestions"
+      ]
+    ]
+  },
+  {
+    "id": "07-variations",
+    "title": [
+      "More characters.",
+      "Within reach."
+    ],
+    "body": [
+      "Discover variations for the key you type.",
+      "Accents and symbols stay close."
+    ],
+    "layout": "frame-crop",
+    "items": [
+      [
+        "titan-2-elite",
+        "r5-variations",
+        "Character variations"
+      ]
+    ]
+  },
+  {
+    "id": "08-snippet-selection",
+    "title": [
+      "A few keys.",
+      "Useful details."
+    ],
+    "body": [
+      "Your address, email or a date.",
+      "Saved text, inserted from a short prefix."
+    ],
+    "layout": "snippets",
+    "items": [
+      [
+        "titan-2-elite",
+        "r2-expanded-address",
+        ".address \u2014 Postal address"
+      ],
+      [
+        "titan-2-elite",
+        "r2-expanded-email",
+        ".email \u2014 Email address"
+      ],
+      [
+        "titan-2-elite",
+        "r2-expanded-date",
+        ".date \u2014 ISO date"
+      ]
+    ]
+  },
+  {
+    "id": "09-snippet-result",
+    "title": [
+      "Write it once.",
+      "Use it again."
+    ],
+    "body": [
+      "Expand a shortcut into reusable text.",
+      "Email addresses without retyping."
+    ],
+    "layout": "pair",
+    "items": [
+      [
+        "titan-2-elite",
+        "r2-snippet-email",
+        "Find your saved email"
+      ],
+      [
+        "titan-2-elite",
+        "r2-expanded-email",
+        "Insert it with Tab"
+      ]
+    ]
+  },
+  {
+    "id": "10-symbols",
+    "title": [
+      "Symbols without",
+      "the detour."
+    ],
+    "body": [
+      "Open SYM pages for extra characters.",
+      "Physical key labels show the mapping."
+    ],
+    "layout": "frame-crop",
+    "items": [
+      [
+        "titan-2-elite",
+        "symbols",
+        "SYM page"
+      ]
+    ]
+  },
+  {
+    "id": "11-emoji",
+    "title": [
+      "Say it with",
+      "an emoji."
+    ],
+    "body": [
+      "Browse emoji from your keyboard.",
+      "Keep the conversation in view."
+    ],
+    "layout": "frame-crop",
+    "items": [
+      [
+        "pixel-7a",
+        "r5-emoji",
+        "Emoji picker"
+      ]
+    ]
+  },
+  {
+    "id": "12-clipboard",
+    "title": [
+      "Your clipboard.",
+      "At hand."
+    ],
+    "body": [
+      "Keep useful copied text within reach.",
+      "Pick an entry and carry on writing."
+    ],
+    "layout": "frame-crop",
+    "items": [
+      [
+        "pixel-7a",
+        "clipboard-probe",
+        "Clipboard history"
+      ]
+    ]
+  },
+  {
+    "id": "13-selection",
+    "title": [
+      "Keep your hands",
+      "on the keys."
+    ],
+    "body": [
+      "Select and edit text with keyboard controls.",
+      "Make room for shortcuts in your workflow."
+    ],
+    "layout": "frame-crop",
+    "items": [
+      [
+        "titan-2-elite",
+        "selected-text-final",
+        "Keyboard text selection"
+      ]
+    ]
+  },
+  {
+    "id": "14-modifiers",
+    "title": [
+      "Know which",
+      "keys are active."
+    ],
+    "body": [
+      "See active and locked modifiers.",
+      "Choose where the indicators appear."
+    ],
+    "layout": "compare",
+    "items": [
+      [
+        "titan-2-elite",
+        "modifier-final-1",
+        "Active"
+      ],
+      [
+        "titan-2-elite",
+        "modifier-locked",
+        "Locked"
+      ]
+    ]
+  },
+  {
+    "id": "15-hardware-themes",
+    "title": [
+      "Make it feel",
+      "like yours."
+    ],
+    "body": [
+      "Different themes, the same useful tools.",
+      "Choose a look that fits your day."
+    ],
+    "layout": "gallery",
+    "items": [
+      [
+        "titan-2-elite",
+        "r6-full",
+        "Plektra Dark"
+      ],
+      [
+        "titan-2-elite",
+        "r5-theme-plektra-light",
+        "Plektra Light"
+      ],
+      [
+        "titan-2-elite",
+        "r5-theme-nord",
+        "Nord"
+      ],
+      [
+        "titan-2-elite",
+        "r5-theme-coral",
+        "Coral"
+      ],
+      [
+        "titan-2-elite",
+        "r5-theme-cobalt",
+        "Cobalt"
+      ],
+      [
+        "titan-2-elite",
+        "r5-theme-volcanic-dusk",
+        "Volcanic Dusk"
+      ],
+      [
+        "titan-2-elite",
+        "r5-theme-epaper",
+        "ePaper"
+      ],
+      [
+        "titan-2-elite",
+        "r5-theme-high-contrast",
+        "High Contrast"
+      ],
+      [
+        "titan-2-elite",
+        "r5-theme-transparent-dark",
+        "Transparent Dark"
+      ]
+    ]
+  },
+  {
+    "id": "16-software-keyboard",
+    "title": [
+      "The same tools.",
+      "At your fingertips."
+    ],
+    "body": [
+      "Use Plektra without a physical keyboard.",
+      "Suggestions, symbols and snippets included."
+    ],
+    "layout": "devices",
+    "items": [
+      [
+        "pixel-7a",
+        "r6-full",
+        "Cloud Tap"
+      ],
+      [
+        "pixel-7a",
+        "r5-theme-volcanic-dusk",
+        "Volcanic Dusk"
+      ]
+    ]
+  },
+  {
+    "id": "17-layouts",
+    "title": [
+      "A layout that",
+      "fits you."
+    ],
+    "body": [
+      "QWERTY, AZERTY or QWERTZ with umlauts.",
+      "Choose the keys you need."
+    ],
+    "layout": "gallery",
+    "items": [
+      [
+        "pixel-7a",
+        "r2-qwerty",
+        "QWERTY"
+      ],
+      [
+        "pixel-7a",
+        "r2-azerty",
+        "AZERTY"
+      ],
+      [
+        "pixel-7a",
+        "r2-qwertz-umlauts",
+        "QWERTZ \u2014 \u00fc \u00f6 \u00e4"
+      ]
+    ]
+  },
+  {
+    "id": "18-high-contrast",
+    "title": [
+      "Make the keys",
+      "stand out."
+    ],
+    "body": [
+      "Choose a high-contrast keyboard theme.",
+      "Clear outlines and distinct indicators."
+    ],
+    "layout": "devices",
+    "items": [
+      [
+        "titan-2-elite",
+        "r5-theme-high-contrast",
+        "Titan 2 Elite"
+      ],
+      [
+        "pixel-7a",
+        "r5-theme-high-contrast",
+        "Pixel 7a"
+      ]
+    ]
+  },
+  {
+    "id": "19-key-popup",
+    "title": [
+      "A long press.",
+      "More possibilities."
+    ],
+    "body": [
+      "Discover alternate characters on a key.",
+      "Choose the character you need."
+    ],
+    "layout": "frame-crop",
+    "items": [
+      [
+        "pixel-7a",
+        "key-popup-final",
+        "Alternate characters"
+      ]
+    ]
+  },
+  {
+    "id": "20-key-arrangement",
+    "title": [
+      "Straight columns.",
+      "Or a familiar stagger."
+    ],
+    "body": [
+      "Choose your software key arrangement.",
+      "The same controls, your preferred geometry."
+    ],
+    "layout": "compare-layouts",
+    "items": [
+      [
+        "pixel-7a",
+        "r2-ortholinear",
+        "Ortholinear"
+      ],
+      [
+        "pixel-7a",
+        "r2-staggered",
+        "Staggered"
+      ]
+    ]
+  },
+  {
+    "id": "21-ctrl-navigation",
+    "title": [
+      "More control.",
+      "Right on the keys."
+    ],
+    "body": [
+      "Ctrl reveals navigation and editing actions.",
+      "Move, select, copy and paste from the keyboard."
+    ],
+    "layout": "frame-crop",
+    "items": [
+      [
+        "pixel-7a",
+        "r2-nav-locked",
+        "Ctrl navigation"
+      ]
+    ]
+  }
+]

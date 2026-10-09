@@ -1,0 +1,86 @@
+{
+  "id": "titan-2-elite",
+  "width": 1550,
+  "height": 2390,
+  "screen": {
+    "bounds": {
+      "x": 100,
+      "y": 90,
+      "width": 1350,
+      "height": 1500
+    },
+    "corners": [
+      [
+        100,
+        90
+      ],
+      [
+        1450,
+        90
+      ],
+      [
+        1450,
+        1590
+      ],
+      [
+        100,
+        1590
+      ]
+    ],
+    "corner_order": "top-left, top-right, bottom-right, bottom-left; points follow visible extent before rounding",
+    "mask": "titan-2-elite-screen-mask.png",
+    "removed_pixels": 1976405,
+    "camera": [
+      196,
+      193,
+      52
+    ],
+    "radius": 142,
+    "lower_radius": 138,
+    "bottom_contour": "Quadratic lower contour fitted to the complete native LED strokes"
+  },
+  "outer_mask": "titan-2-elite-outer-mask.png",
+  "perspective_correction": true,
+  "screen_measurement": "Connected pale display pixels, luminance >100; masked to actual outline, camera excluded. Four corners are manual display boundary measurements for screenshot mapping.",
+  "rectification": {
+    "source_corners": [
+      [
+        90,
+        97
+      ],
+      [
+        1448,
+        85
+      ],
+      [
+        1437,
+        1588
+      ],
+      [
+        116,
+        1596
+      ]
+    ],
+    "destination_corners": [
+      [
+        100,
+        90
+      ],
+      [
+        1450,
+        90
+      ],
+      [
+        1450,
+        1590
+      ],
+      [
+        100,
+        1590
+      ]
+    ],
+    "method": "Whole-device projective transform; same transform for screen opening. Alpha closing radius 3 px removes threshold pinholes."
+  },
+  "tonal_adjustment": "Smooth local keyboard exposure gain, increasing toward the underexposed right edge; no glyph reconstruction.",
+  "processing": "Full source photograph rectification, explicit complete silhouette, bezel-only clone retouch and black lower display seam; no luminance-based erosion."
+}

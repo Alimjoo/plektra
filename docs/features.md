@@ -11,8 +11,9 @@ Plektra focuses on efficient text input on Android devices with physical keyboar
 
 ## Input surfaces
 
-- Full status bar with suggestions and variation keys
-- **Slim mode** for a compact single-row interface
+- Configurable keyboard bar with suggestions, variation keys and menu buttons
+- **Normal and Slim profiles** with independently configured visible content
+- Modifier indicators in the bottom strip, Android status bar and beside suggestions
 - Touch SYM and emoji pages
 - Optional software keyboard with themes and device-specific geometry
 
@@ -26,3 +27,11 @@ Plektra focuses on efficient text input on Android devices with physical keyboar
 ## Data
 
 Plektra stores its input data locally. Backups can include settings, layouts, mappings, themes, dictionaries, snippets, and other user-created data. Pastiera backup ZIPs can be imported in Advanced settings. Legacy preference names are translated, and settings absent from the backup remain unchanged.
+
+## Accessibility
+
+- Configurable TalkBack announcements for keyboard bar changes
+- Adjustable suggestion reading delays
+- Bounce Keys for accidental repeated physical-key presses
+
+See the [visual feature presentation](showcase/README.md).

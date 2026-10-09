@@ -1,0 +1,272 @@
+{
+  "captured_on": "2026-10-08",
+  "physical_devices": {
+    "titan-2-elite": {
+      "version": "26.10-nightly.08.155139Z",
+      "package": "rocks.pkb.plektra.nightly"
+    },
+    "titan-2": {
+      "version": "26.10-nightly.08.155151Z",
+      "package": "rocks.pkb.plektra.nightly"
+    },
+    "pixel-7a": {
+      "version": "26.10-nightly.08.155029Z",
+      "package": "rocks.pkb.plektra.nightly"
+    }
+  },
+  "capture_host": "Debug-only native Notes editor with synthetic example text; keyboard and panels are actual Plektra IME output.",
+  "status_bar": "Android System UI demo clock and battery, restored after capture.",
+  "presentation_channels": {
+    "stable": {
+      "accent": "#FC7A0F",
+      "logo": "plektra-open-color.svg",
+      "background": "#F4F1E9"
+    },
+    "nightly": {
+      "accent": "#2F80ED",
+      "logo": "plektra-nightly-open-color.svg",
+      "background": "#CFDDE7"
+    }
+  },
+  "channel_source": "Both presentation palettes use the recorded Nightly debug UI. Branding changes; screenshot colors and contents are preserved.",
+  "frames": "frames/",
+  "screenshots": [
+    {
+      "file": "raw/pixel-7a/clipboard-probe.png",
+      "sha256": "b50b23b7a37509e53f0e9b10c426c0e1978e8e058f2156520137e6e46d5774e5",
+      "device": "pixel-7a",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/pixel-7a/key-popup-final.png",
+      "sha256": "0533bbe2d86a6795c0778f63e901a10dc5185711308313fc77788a9a59748f02",
+      "device": "pixel-7a",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/pixel-7a/r2-azerty.png",
+      "sha256": "8c087b0195c5fccbcce9118320f73203bf0d07bf152f561975d69c39b41bf762",
+      "device": "pixel-7a",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/pixel-7a/r2-nav-locked.png",
+      "sha256": "4b68474987e97af46020382c8ae9a3c44414f6cd1760f4249546717b4e2d75a0",
+      "device": "pixel-7a",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/pixel-7a/r2-ortholinear.png",
+      "sha256": "7768d730bc2f2652d6b9482a1743228d8c6219cceabf93a3af5cd5c41776db9b",
+      "device": "pixel-7a",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/pixel-7a/r2-qwerty.png",
+      "sha256": "4c1e8a630c29cc87092dcbd0fb6ed2f511e15d79200dacba89932968258b3688",
+      "device": "pixel-7a",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/pixel-7a/r2-qwertz-umlauts.png",
+      "sha256": "af688f42d54cd5fc6978bb959dfae26776f345bfca1154eabb7bc2b14891f868",
+      "device": "pixel-7a",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/pixel-7a/r2-staggered.png",
+      "sha256": "9f3ab9975e5ae0860ab2cb47b155be92015637f504a01d320b6e5a8c05cfa2de",
+      "device": "pixel-7a",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/pixel-7a/r5-emoji.png",
+      "sha256": "5ac77eb7f5d2070cc06b6e0c6c47559d8ec6f2b4f36a3fc050d85f61b0fded24",
+      "device": "pixel-7a",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/pixel-7a/r5-theme-high-contrast.png",
+      "sha256": "f97ef9d0217797fe397d78f75e0e182e1efb5523d9d9fce4abffe3ff2b8ae0db",
+      "device": "pixel-7a",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/pixel-7a/r5-theme-volcanic-dusk.png",
+      "sha256": "f6f44afbd0e41c4f45867f21d8d55741ef25ce63bd5305e435b263ce645e41f6",
+      "device": "pixel-7a",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/pixel-7a/r6-full.png",
+      "sha256": "7768d730bc2f2652d6b9482a1743228d8c6219cceabf93a3af5cd5c41776db9b",
+      "device": "pixel-7a",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2/r6-full.png",
+      "sha256": "ddec8018c93b9d236f05f12e451ea15d8871db3213683df9ebd47731cbaea997",
+      "device": "titan-2",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/modifier-final-1.png",
+      "sha256": "a0b72319e095d4c137f1500519d5a8398d040a3c5df3cbd69fca19424a62c8e2",
+      "device": "titan-2-elite",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/titan-2-elite/modifier-locked.png",
+      "sha256": "6b5fdab57f5bb138941ae35e7c1c0abbcd4706851f6a5c9d69497ae0e4a01429",
+      "device": "titan-2-elite",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/titan-2-elite/r2-expanded-address.png",
+      "sha256": "0083252046ffbc71df75db6b116c904a8ed4e04cadb0c9d76739e5cdbb67401f",
+      "device": "titan-2-elite",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/titan-2-elite/r2-expanded-date.png",
+      "sha256": "44be302405d21e7abad07cc500cb055181e2194229890bbd87d303d938b8b9ca",
+      "device": "titan-2-elite",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/titan-2-elite/r2-expanded-email.png",
+      "sha256": "8053224d179b2686045eb1d9cec8e8af79be3a86d28fe7b0f89b5df31acfcd69",
+      "device": "titan-2-elite",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/titan-2-elite/r2-snippet-email.png",
+      "sha256": "dfcf96fc04148b0a7c898004042401387a50a9ab503b90499a87b1f13a6dc8ef",
+      "device": "titan-2-elite",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-config-hidden.png",
+      "sha256": "db369f22535d7603ed779d3562e72b2a12f7f9ae41387dfd31d92993668810e5",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-config-leds.png",
+      "sha256": "8c32c68080a74d5098a9222565e54f79d319cadb274f155b62718b891629c72b",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-config-suggestions.png",
+      "sha256": "e87ced72a46384d239555e7e6f05ddba91f37c1162648855ee562f1c5067476c",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-shared.png",
+      "sha256": "e4ec56746bb0d9e4ec7e3d365f5abec4433ba2656b2b3a496ce528b99cd876af",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-slim.png",
+      "sha256": "8c32c68080a74d5098a9222565e54f79d319cadb274f155b62718b891629c72b",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-theme-cobalt.png",
+      "sha256": "3a15a35502a33ee787eceae2852571ed9c505dcf456f7c1b0382f7b677e76b9a",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-theme-coral.png",
+      "sha256": "09b357ea9027220adbae894e32a1f6d0f2b4c07d491305e5aa5b7434f642e27a",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-theme-epaper.png",
+      "sha256": "b6060df9a09ccca4cac83df9d6ea16653a2c9df0ad877d59887ef31f700f27f4",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-theme-high-contrast.png",
+      "sha256": "69d9e9e2c3f68848e2631884db264aee98e0c421d67454a75d60eeacefa28536",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-theme-nord.png",
+      "sha256": "a0e3d3aa6c26107a083d026f464a3821f27008242cb6bbfdc1f7d3305d706809",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-theme-plektra-light.png",
+      "sha256": "fee62ebbfe100e0342f50b4c04d0936c63d1cc847f067c6ca9c65ddc3d6d588c",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-theme-transparent-dark.png",
+      "sha256": "1d71cd6425dcaabcc0fa571bc5ea9bd791495afd4c776be05e42fe5db28016b9",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-theme-volcanic-dusk.png",
+      "sha256": "28c94161ebef78ee14eaf8626f7194f16db114bd9b514334c374c0a30a84868c",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r5-variations.png",
+      "sha256": "59fc90cc0fdce08a98c5b373d4ae2a9758f3548dcf241707daf992c01ceb2e01",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r6-config-full.png",
+      "sha256": "1777679c64cfd4fec7909c1438e0712cbf8d97fd4c086c57e7d7fc1026fa0430",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/r6-full.png",
+      "sha256": "6311dc6c9144d5869984dcb3c09b3787e5e828bb3b66a7a11b6a16934705662f",
+      "device": "titan-2-elite",
+      "cohort": "polished"
+    },
+    {
+      "file": "raw/titan-2-elite/selected-text-final.png",
+      "sha256": "c67f9dc7d5e7e8e50fbb7d461395ef3f9c603852b41769253b34ac2fcf846253",
+      "device": "titan-2-elite",
+      "cohort": "previous edition"
+    },
+    {
+      "file": "raw/titan-2-elite/symbols.png",
+      "sha256": "df253fffef66a14721a0659a5e2fc53eac48cfa6e1d5fc64d0af31115100c926",
+      "device": "titan-2-elite",
+      "cohort": "previous edition"
+    }
+  ],
+  "github_icon_source": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/github.svg",
+  "transforms": "Screen perspective mapping through photographed display masks, framing, cropping and scaling; no UI reconstruction or generative hardware.",
+  "feature_cards": 21,
+  "processing": {
+    "frames": "Whole source photo perspective correction; complete outer alpha, local bezel scuff retouch, black T2E lower display transition. Native keys preserved; exposure correction on T2E retained.",
+    "cutouts": "Transparent scene subtraction removes only paired native background pixels within one RGB level. No blanket LED clipping; uniform opaque corner background removal preserves foreground RGB.",
+    "layout_crops": "Complete letter rows, including the bottom Shift/Backspace row.",
+    "date_snippet": "Static saved date 2026-10-08.",
+    "built_in_themes": [
+      "Coral",
+      "Cobalt"
+    ],
+    "editor": "Native spellchecker disabled on capture EditText; IME input flags and actual word suggestions retained.",
+    "suggestions": "Shared row with existing menu buttons; no renderer redesign."
+  }
+}

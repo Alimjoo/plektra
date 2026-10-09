@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+const fs=require('fs'),path=require('path'),assert=require('assert');
+const sharp=require('sharp');
+const root=path.resolve(__dirname,'..');
+const {createHash}=require('node:crypto');
+(async()=>{
+ const expected=JSON.parse(fs.readFileSync(path.join(root,'checksums.json')));
+ for(const [file,hash] of Object.entries(expected)){
+  assert.equal(createHash('sha256').update(fs.readFileSync(path.join(root,file))).digest('hex'),hash,'Changed canonical file: '+file);
+ }
+ const assets=JSON.parse(fs.readFileSync(path.join(root,'assets.json'))),checks=[];
+ for(const channel of ['stable','nightly'])for(const format of ['landscape','portrait']){
+  const dir=path.join(root,'exports',channel,format),files=fs.readdirSync(dir).filter(n=>n.endsWith('.png'));assert.equal(files.length,21);
+  for(const file of files){const p=path.join(dir,file),m=await sharp(p).metadata();assert.equal(m.width,format==='landscape'?1920:1080);assert.equal(m.height,format==='landscape'?1080:1920);const rgb=await sharp(p).extract({left:0,top:0,width:1,height:1}).removeAlpha().raw().toBuffer();assert.deepEqual([...rgb],channel==='nightly'?[207,221,231]:[244,241,233]);}
+ }
+ for(const name of ['r6-config-full','r5-config-suggestions','r5-config-leds','r5-slim']){
+  const cropFile=assets.find(p=>p.includes('/titan-2-elite-'+name+'-bar-')),
+   crop=await sharp(path.join(root,cropFile)).ensureAlpha().raw().toBuffer({resolveWithObject:true}),
+   raw=await sharp(path.join(root,'raw/titan-2-elite',name+'.png')).extract({left:0,top:1200-crop.info.height,width:1076,height:crop.info.height}).ensureAlpha().raw().toBuffer(),
+   reference=await sharp(path.join(root,'raw/titan-2-elite/r5-config-hidden.png')).extract({left:0,top:1200-crop.info.height,width:1076,height:crop.info.height}).ensureAlpha().raw().toBuffer();
+  let foreground=0,hidden=0;
+  for(let i=0;i<raw.length;i+=4){const difference=Math.max(...[0,1,2].map(c=>Math.abs(raw[i+c]-reference[i+c])));if(difference>1){assert.equal(crop.data[i+3],255);[0,1,2].forEach(c=>assert.equal(crop.data[i+c],raw[i+c]));foreground++;}else if(crop.data[i+3]===0)hidden++;}
+  assert(hidden>0&&foreground>0);checks.push({capture:name,foreground_pixels_retained:foreground,background_pixels_transparent:hidden});
+ }
+ const mask=await sharp(path.join(root,'frames/titan-2-elite-screen-mask.png')).ensureAlpha().raw().toBuffer();
+ for(const [name,colors] of [['r6-full',[[48,48,48]]],['r5-config-leds',[[48,48,48],[100,150,255]]]]){
+  const raw=await sharp(path.join(root,'raw/titan-2-elite',name+'.png')).ensureAlpha().raw().toBuffer();let led=0,clipped=0;
+  for(let y=1070;y<1200;y++)for(let x=0;x<1076;x++)if(x<155||x>920){const i=(y*1076+x)*4;if(colors.some(rgb=>rgb.every((c,j)=>raw[i+j]===c))){led++;const u=Math.round(100+x*1350/1075),v=Math.round(90+y*1500/1199);if(mask[(v*1550+u)*4+3]<240)clipped++;}}
+  assert(led>100);assert.equal(clipped,0);checks.push({capture:name,native_LED_pixels_inside_photographic_opening:led,clipped});
+ }
+ fs.writeFileSync(path.join(root,'validation.json'),JSON.stringify({cards:84,dimensions_and_channel_backgrounds:true,protected_pixels:checks},null,2)+'\n');console.log(JSON.stringify(checks));
+})().catch(e=>{console.error(e);process.exit(1)});

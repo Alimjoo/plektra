@@ -1,0 +1,86 @@
+{
+  "id": "pixel-7a",
+  "width": 1060,
+  "height": 2130,
+  "screen": {
+    "bounds": {
+      "x": 95,
+      "y": 80,
+      "width": 880,
+      "height": 1930
+    },
+    "corners": [
+      [
+        95,
+        80
+      ],
+      [
+        975,
+        80
+      ],
+      [
+        975,
+        2010
+      ],
+      [
+        95,
+        2010
+      ]
+    ],
+    "corner_order": "top-left, top-right, bottom-right, bottom-left; points follow visible extent before rounding",
+    "mask": "pixel-7a-screen-mask.png",
+    "removed_pixels": 1663510,
+    "camera": [
+      536,
+      135,
+      27
+    ],
+    "radius": 40,
+    "lower_radius": 40,
+    "bottom_contour": "Circular corners"
+  },
+  "outer_mask": "pixel-7a-outer-mask.png",
+  "perspective_correction": true,
+  "screen_measurement": "Connected pale display pixels, luminance >100; masked to actual outline, camera excluded. Four corners are manual display boundary measurements for screenshot mapping.",
+  "rectification": {
+    "source_corners": [
+      [
+        91,
+        84
+      ],
+      [
+        961,
+        76
+      ],
+      [
+        979,
+        2004
+      ],
+      [
+        109,
+        2020
+      ]
+    ],
+    "destination_corners": [
+      [
+        95,
+        80
+      ],
+      [
+        975,
+        80
+      ],
+      [
+        975,
+        2010
+      ],
+      [
+        95,
+        2010
+      ]
+    ],
+    "method": "Whole-device projective transform; same transform for screen opening. Alpha closing radius 3 px removes threshold pinholes."
+  },
+  "tonal_adjustment": "none",
+  "processing": "Full source photograph rectification, explicit complete silhouette, bezel-only clone retouch and black lower display seam; no luminance-based erosion."
+}

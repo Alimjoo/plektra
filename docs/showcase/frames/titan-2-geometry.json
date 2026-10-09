@@ -1,0 +1,82 @@
+{
+  "id": "titan-2",
+  "width": 1420,
+  "height": 2170,
+  "screen": {
+    "bounds": {
+      "x": 90,
+      "y": 250,
+      "width": 1210,
+      "height": 1210
+    },
+    "corners": [
+      [
+        90,
+        250
+      ],
+      [
+        1300,
+        250
+      ],
+      [
+        1300,
+        1460
+      ],
+      [
+        90,
+        1460
+      ]
+    ],
+    "corner_order": "top-left, top-right, bottom-right, bottom-left; points follow visible extent before rounding",
+    "mask": "titan-2-screen-mask.png",
+    "removed_pixels": 1439518,
+    "camera": null,
+    "radius": 14,
+    "lower_radius": 14,
+    "bottom_contour": "Circular corners"
+  },
+  "outer_mask": "titan-2-outer-mask.png",
+  "perspective_correction": true,
+  "screen_measurement": "Connected pale display pixels, luminance >100; masked to actual outline, camera excluded. Four corners are manual display boundary measurements for screenshot mapping.",
+  "rectification": {
+    "source_corners": [
+      [
+        85,
+        254
+      ],
+      [
+        1288,
+        245
+      ],
+      [
+        1299,
+        1453
+      ],
+      [
+        101,
+        1462
+      ]
+    ],
+    "destination_corners": [
+      [
+        90,
+        250
+      ],
+      [
+        1300,
+        250
+      ],
+      [
+        1300,
+        1460
+      ],
+      [
+        90,
+        1460
+      ]
+    ],
+    "method": "Whole-device projective transform; same transform for screen opening. Alpha closing radius 3 px removes threshold pinholes."
+  },
+  "tonal_adjustment": "none",
+  "processing": "Full source photograph rectification, explicit complete silhouette, bezel-only clone retouch and black lower display seam; no luminance-based erosion."
+}

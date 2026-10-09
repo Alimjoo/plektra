@@ -8,11 +8,13 @@ Plektra is an Android input method for phones with physical keyboards. It is fre
 
 - Configurable physical keyboard layouts, modifiers, SYM pages, and navigation shortcuts
 - Suggestions, dictionaries, snippets, emoji, clipboard history, and voice input
-- A compact **Slim mode** and a full status bar
+- Configurable **Normal and Slim profiles** for the keyboard bar, with independent suggestions, variations and modifier indicators
 - Device-specific layouts and display geometry for keyboard phones
 - Local backup and restore for settings and user data
 
-See [Features](docs/features.md) for details.
+Explore the [21-image showcase](docs/showcase/README.md), with Stable and Nightly galleries. See [Features](docs/features.md) for details.
+
+![Plektra keyboard bar](docs/showcase/exports/stable/landscape/02-keyboard-bar.png)
 
 ## Install
 
