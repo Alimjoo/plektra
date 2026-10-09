@@ -43,6 +43,8 @@ class KeyboardVisibilityController(
     private var candidatesStarted = false
     private var windowShown = false
     private var waitingForBackendHide = false
+    private var hardwareConnectionRecovery = false
+    private var hardwareConnectionTicket = 0
 
     fun usesCandidatesView(): Boolean =
         SettingsManager.getExperimentalCandidatesViewEnabled(context) &&
@@ -178,6 +180,15 @@ class KeyboardVisibilityController(
             postToUi { if (ticket == generation) ensureImeSurfaceVisible() }
             return
         }
+        if (!shown && hardwareConnectionRecovery && canShow()) {
+            hardwareConnectionRecovery = false
+            dismissed = false
+            cancelPendingSurfaceTransition()
+            trace("recover_hardware_connection_hide")
+            val ticket = hardwareConnectionTicket
+            postToUi { if (ticket == hardwareConnectionTicket) ensureImeSurfaceVisible() }
+            return
+        }
         if (!shown && !changingSurface) {
             dismissed = true
             cancelPendingSurfaceTransition()
@@ -210,6 +221,8 @@ class KeyboardVisibilityController(
     }
 
     fun onInputUnbound() {
+        hardwareConnectionRecovery = false
+        hardwareConnectionTicket++
         cancelPendingSurfaceTransition()
         windowShown = false
         candidatesStarted = false
@@ -219,7 +232,27 @@ class KeyboardVisibilityController(
 
     fun onInputStarted(restarting: Boolean) {
         cancelPendingSurfaceTransition()
-        if (!restarting) dismissed = false
+        if (!restarting) {
+            dismissed = false
+            hardwareConnectionRecovery = false
+            hardwareConnectionTicket++
+        }
+    }
+
+    fun onHardwareKeyboardConnected() {
+        if (!canShow() || (!windowShown && !isInputViewShown())) return
+        hardwareConnectionRecovery = true
+        val ticket = ++hardwareConnectionTicket
+        // Some devices request HIDE_HW_KEYBOARD_CONNECTED independently of the IME's mode.
+        postToUi {
+            if (ticket == hardwareConnectionTicket && hardwareConnectionRecovery && canShow()) {
+                requestShowInputView()
+                trace("preserve_hardware_connection_input")
+            }
+        }
+        postToUiDelayed(750L) {
+            if (ticket == hardwareConnectionTicket) hardwareConnectionRecovery = false
+        }
     }
 
     fun onExplicitShowRequested() = ensureImeSurfaceVisible()
@@ -228,6 +261,11 @@ class KeyboardVisibilityController(
     fun onKeyboardSurfaceChanged(ensureInputViewShown: Boolean, requireActiveTextField: Boolean = false) {
         cancelPendingSurfaceTransition()
         if (requireActiveTextField && !hasActiveTextField()) return
+        if (windowShown && !usesCandidatesView() && renderedSurface() == RenderedSurface.FULL_INPUT_VIEW) {
+            refreshStatusBar()
+            trace("resize_existing_input_view")
+            return
+        }
         if (windowShown) {
             // hideWindow() only hides the local window. The framework's hideSoftInput path
             // also resets mShowInputRequested and finishes the preceding input/candidates view.

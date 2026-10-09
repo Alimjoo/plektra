@@ -130,6 +130,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     private lateinit var prefs: SharedPreferences
     private var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
     private var lastSystemLocalesSignature: String = ""
+    private var lastImeConfiguration: Configuration? = null
 
     private lateinit var alternateCharacterManager: AlternateCharacterManager
     
@@ -343,6 +344,9 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             val clicksConnected = InputDevice.getDevice(deviceId)
                 ?.takeIf(DeviceSpecific::isClicksPowerKeyboard)
                 ?.let { connectedClicksInputDeviceIds.add(deviceId) } == true
+            if (clicksConnected && ::keyboardVisibilityController.isInitialized) {
+                keyboardVisibilityController.onHardwareKeyboardConnected()
+            }
             scheduleInputDeviceModeRefresh(clicksConnectionChanged = clicksConnected)
         }
 
@@ -377,6 +381,9 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                 connectedClicksInputDeviceIds += deviceId
             } else {
                 connectedClicksInputDeviceIds -= deviceId
+            }
+            if (!wasClicksKeyboard && isClicksKeyboard && ::keyboardVisibilityController.isInitialized) {
+                keyboardVisibilityController.onHardwareKeyboardConnected()
             }
             scheduleInputDeviceModeRefresh(
                 clicksConnectionChanged = wasClicksKeyboard != isClicksKeyboard
@@ -1778,6 +1785,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         smoothCaretOverlayController = SmoothCaretOverlayController(this)
         ClicksAccessibilityKeyBridge.register(this)
         lastSystemLocalesSignature = resources.configuration.locales.toLanguageTags()
+        lastImeConfiguration = Configuration(resources.configuration)
         prefs = getSharedPreferences("plektra_prefs", Context.MODE_PRIVATE)
         clearAltOnSpaceEnabled = SettingsManager.getClearAltOnSpace(this)
         physicalKeyboardProfileOverride = SettingsManager.getPhysicalKeyboardProfileOverride(this)
@@ -4248,8 +4256,17 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
     
     override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
+        val diff = lastImeConfiguration?.diff(newConfig) ?: -1
+        lastImeConfiguration = Configuration(newConfig)
+        // Keep the attached view during hardware changes even on frameworks that reset it
+        // despite the input-method's declared configChanges.
+        if (diff != 0 && !ImeConfigurationPolicy.isHardwareOnlyChange(diff)) super.onConfigurationChanged(newConfig)
+        if (BuildConfig.DEBUG) Log.d(TAG, "IME configuration diff=0x${diff.toString(16)} preserveHardwareView=${ImeConfigurationPolicy.isHardwareOnlyChange(diff)}")
         if (::textExpansionController.isInitialized) textExpansionController.clear()
+        invalidateRenderedStatusSnapshot()
+        if (::candidatesBarController.isInitialized) {
+            uiHandler.post { updateStatusBarText() }
+        }
 
         val systemLocalesSignature = newConfig.locales.toLanguageTags()
         if (systemLocalesSignature == lastSystemLocalesSignature) {

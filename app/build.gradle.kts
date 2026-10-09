@@ -450,6 +450,7 @@ androidComponents.onVariants(androidComponents.selector().withBuildType("release
 dependencies {
 
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.window:window:1.5.1")
     implementation("io.noties.markwon:core:4.6.2")
     implementation("io.noties.markwon:ext-tables:4.6.2")
     implementation("io.noties.markwon:ext-tasklist:4.6.2")

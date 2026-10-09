@@ -255,6 +255,63 @@ class KeyboardVisibilityControllerTest {
     }
 
     @Test
+    fun hardwareConnectionHideRecoversWithoutWaitingForAKey() {
+        val h = Harness()
+        h.rendered = RenderedSurface.FULL_INPUT_VIEW
+        h.inputShown = true
+        h.controller.onImeWindowVisibilityChanged(true)
+        h.controller.onHardwareKeyboardConnected()
+        h.runNextUiAction()
+        assertEquals(1, h.showRequests)
+        h.rendered = RenderedSurface.HIDDEN
+        h.inputShown = false
+        h.controller.onImeWindowVisibilityChanged(false)
+        h.runNextUiAction()
+        h.runNextUiAction()
+        assertEquals(2, h.showRequests)
+        assertEquals(1, h.inputAttachments)
+        assertFalse(h.controller.isCandidatesSurfaceExplicitlyDismissedForTests())
+    }
+
+    @Test
+    fun hardwareConnectionDoesNotOpenPreviouslyHiddenKeyboard() {
+        val h = Harness()
+        h.controller.onHardwareKeyboardConnected()
+        assertTrue(h.actions.isEmpty())
+        assertEquals(0, h.showRequests)
+    }
+
+    @Test
+    fun unbindingCancelsHardwareConnectionRecovery() {
+        val h = Harness()
+        h.rendered = RenderedSurface.FULL_INPUT_VIEW
+        h.inputShown = true
+        h.controller.onImeWindowVisibilityChanged(true)
+        h.controller.onHardwareKeyboardConnected()
+        h.controller.onInputUnbound()
+        h.controller.onImeWindowVisibilityChanged(false)
+        h.drain()
+        assertEquals(0, h.showRequests)
+    }
+
+    @Test
+    fun visibleVirtualHardwareSwitchResizesWithoutHideShowOrReattachment() {
+        val h = Harness()
+        h.rendered = RenderedSurface.FULL_INPUT_VIEW
+        h.inputShown = true
+        h.controller.onImeWindowVisibilityChanged(true)
+        repeat(8) { index ->
+            SettingsManager.setSoftwareKeyboardModeRuntimeOverride(context,
+                if (index % 2 == 0) SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL
+                else SettingsManager.SoftwareKeyboardMode.FORCE_HARDWARE)
+            h.controller.onKeyboardSurfaceChanged(index % 2 == 0)
+        }
+        assertEquals(0, h.hideRequests + h.showRequests + h.windowHides + h.inputAttachments)
+        assertEquals(8, h.refreshes)
+        assertTrue(h.actions.isEmpty())
+    }
+
+    @Test
     fun visibleBackendSwitchWaitsForFrameworkHideBeforePresentingTarget() {
         val h = Harness()
         h.rendered = RenderedSurface.FULL_INPUT_VIEW

@@ -1,6 +1,7 @@
 package rocks.pkb.plektra.inputmethod
 
 import android.content.Context
+import android.animation.ValueAnimator
 import android.graphics.Color
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -11,7 +12,15 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
+import android.view.WindowManager
 import android.widget.LinearLayout
+import androidx.window.layout.FoldingFeature
+import androidx.window.layout.WindowInfoTracker
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import rocks.pkb.plektra.R
 import rocks.pkb.plektra.inputmethod.ui.LedStatusView
 
@@ -25,6 +34,11 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
     var bottomFillColors: Pair<Int, Int> = Color.BLACK to Color.BLACK
     private val cornerFillPaint = Paint()
     private var clipRevision = -1L
+    private var foldScope: CoroutineScope? = null
+    private var foldingFeatures: List<FoldingFeature> = emptyList()
+    private var modeTransitionStartHeight: Int? = null
+    private var animatedHeight: Int? = null
+    private var heightAnimator: ValueAnimator? = null
     private val calibrationPreviewListener: () -> Unit = {
         geometry.refreshSettings(forceCalibration = true)
         applyBottomCornerClip()
@@ -35,6 +49,20 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         rocks.pkb.plektra.T2eCornerCalibration.addPreviewListener(calibrationPreviewListener)
+        foldScope = CoroutineScope(Dispatchers.Main.immediate + Job()).also { scope ->
+            scope.launch {
+                try {
+                    WindowInfoTracker.getOrCreate(context).windowLayoutInfo(context).collect { info ->
+                        foldingFeatures = info.displayFeatures.filterIsInstance<FoldingFeature>()
+                        android.util.Log.d("PlektraFold", "features=$foldingFeatures")
+                        requestLayout()
+                    }
+                } catch (error: Exception) {
+                    if (error is kotlinx.coroutines.CancellationException) throw error
+                    android.util.Log.w("PlektraFold", "Folding information unavailable", error)
+                }
+            }
+        }
     }
 
     override fun draw(canvas: Canvas) {
@@ -175,6 +203,12 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
+        if (softwareKeyboardModeActive && animatedHeight != null) {
+            val contentBottom = (0 until childCount).map { getChildAt(it) }
+                .filter { it.visibility != View.GONE }.maxOfOrNull { it.bottom } ?: height
+            val offset = height - paddingBottom - contentBottom
+            for (index in 0 until childCount) getChildAt(index).offsetTopAndBottom(offset)
+        }
         updateLedConstraintTop()
         rocks.pkb.plektra.inputmethod.statusbar.KeyboardBarRowGeometry.updateRows(this)
         val row = nestedRow as? ViewGroup
@@ -293,7 +327,12 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
     var softwareKeyboardModeActive: Boolean = false
         set(value) {
             if (field == value) return
+            heightAnimator?.cancel()
+            heightAnimator = null
+            animatedHeight = null
+            modeTransitionStartHeight = height.takeIf { isShown && it > 0 }
             field = value
+            gravity = if (value) android.view.Gravity.TOP else android.view.Gravity.BOTTOM
             geometry.hardwareTopRounding = !value
             applyBottomCornerClip()
             requestLayout()
@@ -301,6 +340,7 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
 
     init {
         setChildrenDrawingOrderEnabled(true)
+        gravity = android.view.Gravity.BOTTOM
     }
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
@@ -363,6 +403,13 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
     }
 
     override fun onDetachedFromWindow() {
+        heightAnimator?.cancel()
+        heightAnimator = null
+        animatedHeight = null
+        modeTransitionStartHeight = null
+        foldScope?.cancel()
+        foldScope = null
+        foldingFeatures = emptyList()
         rocks.pkb.plektra.T2eCornerCalibration.removePreviewListener(calibrationPreviewListener)
         screenAwakeController.release()
         super.onDetachedFromWindow()
@@ -373,6 +420,8 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
         val surface = surfaceView
         if (!softwareKeyboardModeActive || surface == null || surface.visibility == View.GONE) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+            val target = measuredHeight
+            setMeasuredDimension(measuredWidth, animatedModeHeight(target))
             return
         }
 
@@ -396,8 +445,54 @@ internal class ImeChromeLayout(context: Context) : LinearLayout(context) {
 
         val measuredWidth = resolveSize(maxWidth + paddingLeft + paddingRight, widthMeasureSpec)
         val desiredHeight = paddingTop + paddingBottom + totalChildHeight
-        val measuredHeight = desiredHeight
+        val heightLimit = foldHeightLimitPx()?.let { foldLimit ->
+            if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.UNSPECIFIED) foldLimit
+            else minOf(foldLimit, MeasureSpec.getSize(heightMeasureSpec))
+        }
+        val targetHeight = minOf(desiredHeight, heightLimit ?: desiredHeight)
+        val measuredHeight = animatedModeHeight(targetHeight).let { minOf(it, heightLimit ?: it) }
+        // Measure keys at their final size; animate the viewport instead of squeezing rows.
+        if (desiredHeight > targetHeight) {
+            val reducedSurfaceHeight = (surface.measuredHeight - (desiredHeight - targetHeight)).coerceAtLeast(0)
+            surface.measure(
+                MeasureSpec.makeMeasureSpec(surface.measuredWidth, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(reducedSurfaceHeight, MeasureSpec.EXACTLY)
+            )
+        }
         setMeasuredDimension(measuredWidth, measuredHeight)
+    }
+
+    private fun animatedModeHeight(target: Int): Int {
+        modeTransitionStartHeight?.let { start ->
+            modeTransitionStartHeight = null
+            if (start != target && android.animation.ValueAnimator.areAnimatorsEnabled()) {
+                animatedHeight = start
+                heightAnimator = ValueAnimator.ofInt(start, target).apply {
+                    duration = 180L
+                    addUpdateListener {
+                        animatedHeight = it.animatedValue as Int
+                        if (it.animatedFraction == 1f) animatedHeight = null
+                        requestLayout()
+                    }
+                    start()
+                }
+            } else animatedHeight = null
+        }
+        return animatedHeight ?: target
+    }
+
+    private fun foldHeightLimitPx(): Int? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+        val unfoldedInnerDisplay = resources.configuration.smallestScreenWidthDp >= 600 &&
+            context.packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_SENSOR_HINGE_ANGLE)
+        if (foldingFeatures.isEmpty() && !unfoldedInnerDisplay) return null
+        val bounds = context.getSystemService(WindowManager::class.java).maximumWindowMetrics.bounds
+        val windowLocation = IntArray(2)
+        rootView.getLocationOnScreen(windowLocation)
+        val horizontalFoldBottom = foldingFeatures
+            .filter { it.orientation == FoldingFeature.Orientation.HORIZONTAL }
+            .maxOfOrNull { it.bounds.bottom + windowLocation[1] - bounds.top }
+        return FoldKeyboardHeightPolicy.limit(bounds.height(), horizontalFoldBottom)
     }
 
     override fun getChildDrawingOrder(childCount: Int, drawingPosition: Int): Int {
