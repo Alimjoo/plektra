@@ -13,6 +13,9 @@
     <item name="notes_heading" type="id" />
     <item name="notes_body" type="id" />
     <item name="notes_preview_body" type="id" />
+    <item name="notes_markdown_toggle" type="id" />
+    <item name="notes_undo_button" type="id" />
+    <item name="notes_redo_button" type="id" />
     <item name="notes_both_toggle" type="id" />
     <item name="notes_preview_toggle" type="id" />
     <string name="notes_markdown">Markdown</string>

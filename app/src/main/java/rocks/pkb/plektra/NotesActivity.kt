@@ -7,6 +7,10 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.StateListDrawable
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
@@ -50,13 +54,19 @@ open class NotesActivity : Activity() {
     private lateinit var formatBar: HorizontalScrollView
     private lateinit var panes: LinearLayout
     private lateinit var paneDivider: View
-    private val modeTabs = mutableListOf<TextView>()
+    private val modeTabs = mutableListOf<Pair<ViewMode, TextView>>()
+    private val actionIcons = mutableMapOf<TextView, Drawable>()
+    private lateinit var undoButton: TextView
+    private lateinit var redoButton: TextView
+    private var editingSelectionStart = 0
+    private var editingSelectionEnd = 0
     private var viewMode = ViewMode.MARKDOWN
     private var inkColor = Color.BLACK
     private var accentColor = Color.rgb(0, 119, 122)
     private var dividerColor = Color.LTGRAY
     private enum class ViewMode { MARKDOWN, BOTH, PREVIEW }
     private var restoreHeadingFocus = false
+    private var horizontalGutter = 24
     private val markwon by lazy {
         Markwon.builder(this).usePlugin(TablePlugin.create(this))
             .usePlugin(TaskListPlugin.create(inkColor, dividerColor, Color.WHITE))
@@ -82,7 +92,7 @@ open class NotesActivity : Activity() {
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
-            view.setPadding(dp(24) + bars.left, dp(12) + bars.top, dp(24) + bars.right, dp(8) + maxOf(bars.bottom, ime.bottom))
+            view.setPadding(dp(horizontalGutter) + bars.left, dp(12) + bars.top, dp(horizontalGutter) + bars.right, dp(8) + maxOf(bars.bottom, ime.bottom))
             insets
         }
         val navigation = LinearLayout(this).apply { gravity = Gravity.CENTER_VERTICAL }
@@ -110,23 +120,65 @@ open class NotesActivity : Activity() {
             textSize = 12f
             setPadding(dp(12), 0, dp(12), 0)
         })
+        root.addView(navigation)
+        val tabs = LinearLayout(this).apply {
+            background = GradientDrawable().apply {
+                cornerRadius = dp(4).toFloat()
+                setStroke(dp(1), dividerColor)
+            }
+            clipToOutline = true
+        }
+        val pencil = iconAction(R.drawable.ic_notes_edit, R.string.notes_markdown) {
+            setViewMode(ViewMode.MARKDOWN, showInput = true)
+        }.apply { id = R.id.notes_markdown_toggle }
+        modeTabs += ViewMode.MARKDOWN to pencil
+        navigation.addView(pencil)
+        navigation.addView(View(this).apply { setBackgroundColor(dividerColor) },
+            LinearLayout.LayoutParams(dp(1), dp(24)).apply {
+                gravity = Gravity.CENTER_VERTICAL
+                leftMargin = dp(4)
+                rightMargin = dp(4)
+            })
+        val modes = listOf(
+            Triple(ViewMode.BOTH, R.drawable.ic_notes_split, R.string.notes_both),
+            Triple(ViewMode.PREVIEW, R.drawable.ic_notes_preview, R.string.notes_preview),
+        )
+        modes.forEachIndexed { index, (mode, icon, label) ->
+            if (index > 0) tabs.addView(View(this).apply { setBackgroundColor(dividerColor) },
+                LinearLayout.LayoutParams(dp(1), dp(48)))
+            val tab = iconAction(icon, label) { setViewMode(mode, showInput = true) }
+            tab.id = when (mode) {
+                ViewMode.MARKDOWN -> R.id.notes_markdown_toggle
+                ViewMode.BOTH -> R.id.notes_both_toggle
+                ViewMode.PREVIEW -> R.id.notes_preview_toggle
+            }
+            modeTabs += mode to tab
+            tabs.addView(tab)
+        }
+        navigation.addView(tabs, LinearLayout.LayoutParams(-2, dp(48)))
         navigation.addView(iconAction(R.drawable.ic_notes_add, R.string.notes_new) { switchNote(notes.create(), focusHeading = true) })
         navigation.addView(iconAction(R.drawable.ic_notes_more, R.string.notes_title) { showNotes() })
-        root.addView(navigation)
-        val tabs = LinearLayout(this)
-        listOf(R.string.notes_markdown, R.string.notes_both, R.string.notes_preview).forEachIndexed { index, label ->
-            val tab = action(getString(label), getString(label), ink) { setViewMode(ViewMode.entries[index], showInput = true) }
-            val icon = listOf(R.drawable.ic_notes_document, R.drawable.ic_notes_split, R.drawable.ic_notes_preview)[index]
-            tab.text = android.text.SpannableString("  ${getString(label)}").apply {
-                tintedIcon(icon)?.let { setSpan(android.text.style.ImageSpan(it, android.text.style.ImageSpan.ALIGN_CENTER), 0, 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE) }
+        var titleOnSeparateLine = false
+        root.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            val leftInset = root.paddingLeft - dp(horizontalGutter)
+            val rightInset = root.paddingRight - dp(horizontalGutter)
+            val narrow = root.width - leftInset - rightInset < dp(400)
+            val gutter = if (narrow) 8 else 24
+            if (horizontalGutter != gutter) {
+                horizontalGutter = gutter
+                root.setPadding(dp(gutter) + leftInset, root.paddingTop, dp(gutter) + rightInset, root.paddingBottom)
             }
-            if (index == 2) tab.id = R.id.notes_preview_toggle
-            if (index == 1) tab.id = R.id.notes_both_toggle
-            modeTabs += tab
-            tabs.addView(tab, LinearLayout.LayoutParams(0, dp(44), 1f))
+            if (narrow != titleOnSeparateLine) {
+                val headingHadFocus = heading.hasFocus()
+                (heading.parent as ViewGroup).removeView(heading)
+                if (narrow) root.addView(heading, 0, LinearLayout.LayoutParams(-1, dp(56)))
+                else navigation.addView(heading, 1, LinearLayout.LayoutParams(0, dp(56), 1f))
+                titleOnSeparateLine = narrow
+                if (headingHadFocus || (viewMode != ViewMode.PREVIEW && restoreHeadingFocus && currentFocus == null)) {
+                    heading.requestFocus()
+                }
+            }
         }
-        root.addView(tabs)
-        root.addView(View(this).apply { setBackgroundColor(dividerColor) }, LinearLayout.LayoutParams(-1, dp(1)))
         editor = object : EditText(this) {
             override fun isSuggestionsEnabled() = false
             private val gutterPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
@@ -184,12 +236,14 @@ open class NotesActivity : Activity() {
         previewScroll = ScrollView(this).apply { addView(preview); visibility = View.GONE }
 
         val formats = LinearLayout(this)
-        fun format(symbol: String, label: Int, before: String, after: String = "") {
-            formats.addView(action(symbol, getString(label), ink) { insertMarkup(before, after) })
+        fun format(icon: Int, label: Int, before: String, after: String = "") {
+            formats.addView(iconAction(icon, label) { insertMarkup(before, after) })
         }
-        formats.addView(iconAction(R.drawable.ic_undo_24, R.string.notes_undo) { restoreHistory(undo, redo) })
-        formats.addView(iconAction(R.drawable.ic_redo_24, R.string.notes_redo) { restoreHistory(redo, undo) })
-        val headingButton = action("H ▾", getString(R.string.notes_format_heading), ink) {}
+        undoButton = iconAction(R.drawable.ic_undo_24, R.string.notes_undo) { restoreHistory(undo, redo) }.apply { id = R.id.notes_undo_button }
+        redoButton = iconAction(R.drawable.ic_redo_24, R.string.notes_redo) { restoreHistory(redo, undo) }.apply { id = R.id.notes_redo_button }
+        formats.addView(undoButton)
+        formats.addView(redoButton)
+        val headingButton = iconAction(R.drawable.ic_notes_heading, R.string.notes_format_heading) {}
         headingButton.setOnClickListener {
             PopupMenu(this, headingButton).apply {
                 (1..3).forEach { menu.add(0, it, it, "H$it") }
@@ -198,21 +252,23 @@ open class NotesActivity : Activity() {
             }
         }
         formats.addView(headingButton)
-        format("B", R.string.notes_format_bold, "**", "**")
-        (formats.getChildAt(formats.childCount - 1) as TextView).typeface = Typeface.DEFAULT_BOLD
-        format("I", R.string.notes_format_italic, "*", "*")
-        (formats.getChildAt(formats.childCount - 1) as TextView).setTypeface(Typeface.DEFAULT, Typeface.ITALIC)
-        format("S", R.string.notes_strike, "~~", "~~")
-        (formats.getChildAt(formats.childCount - 1) as TextView).paintFlags = android.graphics.Paint.STRIKE_THRU_TEXT_FLAG or android.graphics.Paint.ANTI_ALIAS_FLAG
+        format(R.drawable.ic_notes_bold, R.string.notes_format_bold, "**", "**")
+        format(R.drawable.ic_notes_italic, R.string.notes_format_italic, "*", "*")
+        format(R.drawable.ic_notes_strike, R.string.notes_strike, "~~", "~~")
         formats.addView(iconAction(R.drawable.ic_notes_list, R.string.notes_format_list) { toggleList(MarkdownListEditing.Kind.BULLET) })
-        formats.addView(action("1. ≡", getString(R.string.notes_numbered), ink) { toggleList(MarkdownListEditing.Kind.NUMBERED) })
+        formats.addView(iconAction(R.drawable.ic_notes_numbered, R.string.notes_numbered) { toggleList(MarkdownListEditing.Kind.NUMBERED) })
         formats.addView(iconAction(R.drawable.ic_notes_checklist, R.string.notes_checklist) { toggleList(MarkdownListEditing.Kind.CHECKBOX) })
         formats.addView(iconAction(R.drawable.ic_notes_quote, R.string.notes_quote) { prefixLines("> ") })
         formats.addView(iconAction(R.drawable.ic_notes_link, R.string.notes_format_link) { insertMarkup("[", "](https://)") })
         formats.addView(iconAction(R.drawable.ic_notes_code, R.string.notes_format_code) { insertMarkup("`", "`") })
-        format("{ }", R.string.notes_code_block, "\n```\n", "\n```\n")
+        format(R.drawable.ic_notes_code_block, R.string.notes_code_block, "\n```\n", "\n```\n")
         formats.addView(iconAction(R.drawable.ic_notes_table, R.string.notes_table) { insertMarkup("\n| Column | Column |\n| --- | --- |\n| ", " |  |\n") })
-        formatBar = HorizontalScrollView(this).apply { addView(formats); isHorizontalScrollBarEnabled = false }
+        formatBar = HorizontalScrollView(this).apply {
+            addView(formats)
+            isHorizontalScrollBarEnabled = true
+            isScrollbarFadingEnabled = false
+        }
+        updateHistoryButtons()
         root.addView(formatBar)
         panes = LinearLayout(this).apply {
             orientation = if (resources.configuration.screenWidthDp >= 600) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
@@ -249,6 +305,7 @@ open class NotesActivity : Activity() {
                 redo.clear()
             }
             lastBody = current
+            updateHistoryButtons()
             saveNote()
             if (viewMode != ViewMode.MARKDOWN) markwon.setMarkdown(preview, editor.text.toString())
         }
@@ -257,14 +314,21 @@ open class NotesActivity : Activity() {
         val target = if (restoreHeadingFocus) heading else editor
         target.requestFocus()
         val selection = selectedNote.cursor.coerceIn(0, target.length())
-        target.setSelection(selection)
+        val selectionStart = state?.getInt("editing_selection_start", selection) ?: selection
+        val selectionEnd = state?.getInt("editing_selection_end", selectionStart) ?: selectionStart
+        editingSelectionStart = selectionStart.coerceIn(0, target.length())
+        editingSelectionEnd = selectionEnd.coerceIn(0, target.length())
+        target.setSelection(editingSelectionStart, editingSelectionEnd)
         val mode = state?.getInt("view_mode") ?: notePrefs.getInt("view_mode", 0)
         setViewMode(ViewMode.entries.getOrElse(mode) { ViewMode.MARKDOWN }, showInput = false)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt("focus", if (heading.hasFocus()) R.id.notes_heading else R.id.notes_body)
+        outState.putInt("focus", if (heading.hasFocus() || (viewMode == ViewMode.PREVIEW && restoreHeadingFocus)) R.id.notes_heading else R.id.notes_body)
         outState.putInt("view_mode", viewMode.ordinal)
+        val target = if (heading.hasFocus()) heading else editor
+        outState.putInt("editing_selection_start", if (viewMode == ViewMode.PREVIEW && !heading.hasFocus()) editingSelectionStart else target.selectionStart)
+        outState.putInt("editing_selection_end", if (viewMode == ViewMode.PREVIEW && !heading.hasFocus()) editingSelectionEnd else target.selectionEnd)
         saveNote()
         super.onSaveInstanceState(outState)
     }
@@ -299,14 +363,21 @@ open class NotesActivity : Activity() {
     }
 
     private fun setViewMode(mode: ViewMode, showInput: Boolean) {
-        if (mode == ViewMode.PREVIEW) {
+        if (showInput && (viewMode != ViewMode.PREVIEW || heading.hasFocus())) {
             restoreHeadingFocus = heading.hasFocus()
+            val target = if (restoreHeadingFocus) heading else editor
+            editingSelectionStart = target.selectionStart.coerceAtLeast(0)
+            editingSelectionEnd = target.selectionEnd.coerceAtLeast(0)
+        }
+        if (mode == ViewMode.PREVIEW) {
             (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(editor.windowToken, 0)
             root.isFocusableInTouchMode = true
+            root.descendantFocusability = ViewGroup.FOCUS_BEFORE_DESCENDANTS
             root.requestFocus()
         } else {
             root.isFocusableInTouchMode = false
             root.isFocusable = false
+            root.descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
         }
         viewMode = mode
         val editing = mode != ViewMode.PREVIEW
@@ -318,23 +389,18 @@ open class NotesActivity : Activity() {
         editor.layoutParams = LinearLayout.LayoutParams(if (horizontal) 0 else -1, if (horizontal) -1 else 0, 1f)
         previewScroll.layoutParams = LinearLayout.LayoutParams(if (horizontal) 0 else -1, if (horizontal) -1 else 0, 1f)
         paneDivider.layoutParams = LinearLayout.LayoutParams(if (horizontal) dp(1) else -1, if (horizontal) -1 else dp(1))
-        modeTabs.forEachIndexed { index, tab ->
-            val selected = index == mode.ordinal
+        modeTabs.forEach { (tabMode, tab) ->
+            val selected = tabMode == mode
             tab.isSelected = selected
-            tab.typeface = if (selected) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
-            tab.setTextColor(if (selected) accentColor else inkColor)
-            (tab.text as? android.text.Spanned)?.getSpans(0, tab.length(), android.text.style.ImageSpan::class.java)
-                ?.forEach { it.drawable.setTint(if (selected) accentColor else inkColor) }
-            tab.background = if (selected) LayerDrawable(arrayOf(GradientDrawable().apply { setColor(accentColor) })).apply {
-                setLayerGravity(0, Gravity.BOTTOM)
-                setLayerHeight(0, dp(2))
-            } else null
+            actionIcons[tab]?.setTint(if (selected) accentColor else inkColor)
         }
         if (mode != ViewMode.MARKDOWN) markwon.setMarkdown(preview, editor.text.toString())
         saveNote()
         if (editing && showInput) {
             val target = if (restoreHeadingFocus) heading else editor
             target.requestFocus()
+            target.setSelection(editingSelectionStart.coerceIn(0, target.length()),
+                editingSelectionEnd.coerceIn(0, target.length()))
             (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(target, InputMethodManager.SHOW_IMPLICIT)
         }
     }
@@ -386,10 +452,13 @@ open class NotesActivity : Activity() {
         editor.setText(note.body)
         undo.clear()
         redo.clear()
+        updateHistoryButtons()
         restoreHeadingFocus = focusHeading
         val target = if (focusHeading) heading else editor
         target.requestFocus()
         target.setSelection(note.cursor.coerceIn(0, target.length()))
+        editingSelectionStart = target.selectionStart
+        editingSelectionEnd = target.selectionEnd
         loadingNote = false
         setViewMode(if (viewMode == ViewMode.PREVIEW) ViewMode.MARKDOWN else viewMode, showInput = true)
     }
@@ -401,23 +470,43 @@ open class NotesActivity : Activity() {
         editor.setText(from.removeLast())
         editor.setSelection(editor.length())
         restoringHistory = false
+        updateHistoryButtons()
         editor.requestFocus()
+    }
+
+    private fun updateHistoryButtons() {
+        listOf(undoButton to undo, redoButton to redo).forEach { (button, history) ->
+            button.isEnabled = history.isNotEmpty()
+            button.alpha = if (button.isEnabled) 1f else 0.38f
+        }
     }
 
     private fun tintedIcon(resource: Int) = getDrawable(resource)?.mutate()?.apply {
         setTint(inkColor)
-        setBounds(0, 0, dp(20), dp(20))
+        setBounds(0, 0, dp(24), dp(24))
     }
 
     private fun iconAction(icon: Int, description: Int, onClick: () -> Unit): TextView =
         action("", getString(description), inkColor, onClick).apply {
-            background = LayerDrawable(arrayOf(tintedIcon(icon))).apply {
+            val glyph = requireNotNull(tintedIcon(icon))
+            actionIcons[this] = glyph
+            foreground = LayerDrawable(arrayOf(glyph)).apply {
                 setLayerSize(0, dp(24), dp(24))
                 setLayerGravity(0, Gravity.CENTER)
             }
-            minimumWidth = dp(48)
-            layoutParams = LinearLayout.LayoutParams(dp(48), dp(48))
         }
+
+    private fun actionBackground(): Drawable {
+        val selected = GradientDrawable().apply {
+            setColor((accentColor and 0x00FFFFFF) or (0x20 shl 24))
+        }
+        val states = StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_selected), selected)
+            addState(intArrayOf(), GradientDrawable().apply { setColor(Color.TRANSPARENT) })
+        }
+        return RippleDrawable(ColorStateList.valueOf((inkColor and 0x00FFFFFF) or (0x24 shl 24)),
+            states, GradientDrawable().apply { setColor(Color.WHITE) })
+    }
 
     private fun prefixLines(prefix: String) {
         val start = minOf(editor.selectionStart, editor.selectionEnd).coerceAtLeast(0)
@@ -437,7 +526,10 @@ open class NotesActivity : Activity() {
         setTextColor(color)
         gravity = Gravity.CENTER
         minHeight = dp(48)
-        setPadding(dp(12), 0, dp(12), 0)
+        setPadding(0, 0, 0, 0)
+        minimumWidth = dp(48)
+        layoutParams = LinearLayout.LayoutParams(dp(48), dp(48))
+        background = actionBackground()
         isClickable = true
         isFocusable = false
         tooltipText = description
