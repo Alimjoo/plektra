@@ -597,7 +597,7 @@ class AospKeyboardView @JvmOverloads constructor(
             val previewLabel = previewLabelFor(key)
             val activeSymLabel = symPageLabelFor(key)
             val layerLabel = previewLabel ?: activeSymLabel
-            val label = layerLabel ?: displayLabel(key.spec)
+            val label = SoftwareKeyboardActionLabels.display(layerLabel ?: displayLabel(key.spec))
             textPaint.textSize = when (key.spec.type) {
                 KeyType.SPACE -> sp(12f)
                 KeyType.SYMBOLS -> sp(16f)
@@ -630,14 +630,14 @@ class AospKeyboardView @JvmOverloads constructor(
                 hintPaint.color = themeOverride?.textAndIcons?.let { colorWithAlpha(it, 150) }
                     ?: Color.rgb(156, 164, 172)
                 hintPaint.textAlign = Paint.Align.LEFT
-                canvas.drawText(altHint, key.visualRect.left + dp(9f), key.visualRect.bottom - dp(7f), hintPaint)
+                canvas.drawText(SoftwareKeyboardActionLabels.display(altHint), key.visualRect.left + dp(9f), key.visualRect.bottom - dp(7f), hintPaint)
             }
             if (previewLabel == null && longPressHint.isNotBlank()) {
                 hintPaint.textSize = sp(10f)
                 hintPaint.color = themeOverride?.textAndIcons?.let { colorWithAlpha(it, 150) }
                     ?: Color.rgb(156, 164, 172)
                 hintPaint.textAlign = Paint.Align.RIGHT
-                canvas.drawText(longPressHint, key.visualRect.right - dp(9f), key.visualRect.top + dp(12f), hintPaint)
+                canvas.drawText(SoftwareKeyboardActionLabels.display(longPressHint), key.visualRect.right - dp(9f), key.visualRect.top + dp(12f), hintPaint)
                 hintPaint.textAlign = Paint.Align.CENTER
             }
         }
@@ -1270,8 +1270,8 @@ class AospKeyboardView @JvmOverloads constructor(
     }
 
     private fun accessibilityLabel(key: Key): String {
-        previewLabelFor(key)?.let { return it }
-        symPageLabelFor(key)?.let { return it }
+        previewLabelFor(key)?.let { return SoftwareKeyboardActionLabels.display(it) }
+        symPageLabelFor(key)?.let { return SoftwareKeyboardActionLabels.display(it) }
         return when (key.spec.type) {
             KeyType.CHAR -> displayLabel(key.spec)
             KeyType.SHIFT -> context.getString(R.string.software_keyboard_accessibility_shift)
@@ -1502,7 +1502,7 @@ class AospKeyboardView @JvmOverloads constructor(
             longPressAlternatesFor(key)
         }
         val layerKeys = longPressLayerAlternatesFor(key).map { alternative ->
-            MoreKeyChoice(label = alternative.label, output = alternative.output)
+            MoreKeyChoice(label = SoftwareKeyboardActionLabels.display(alternative.label), output = alternative.output)
         }
         if (resolvedMoreKeys.isEmpty() && layerKeys.isEmpty()) {
             if (themeOverride?.keyPreviewAfterLongPress == true) {
@@ -1514,7 +1514,7 @@ class AospKeyboardView @JvmOverloads constructor(
         dismissPopup()
         val moreKeys = resolvedMoreKeys
             .map { if (shifted && it.length == 1 && it[0].isLetter()) it.uppercase(Locale.ROOT) else it }
-            .map { MoreKeyChoice(label = it, output = it) }
+            .map { MoreKeyChoice(label = SoftwareKeyboardActionLabels.display(it), output = it) }
         val itemWidth = dp(42f)
         val itemHeight = dp(52f)
         val layerItemWidth = dp(48f)
@@ -1593,7 +1593,7 @@ class AospKeyboardView @JvmOverloads constructor(
         val popupLeft = (key.visualRect.centerX() - previewWidth / 2f).coerceIn(0f, width - previewWidth)
         val popupTop = key.visualRect.top - previewHeight - popupVerticalOffset(themeOverride)
         previewPopupState = PreviewPopupState(
-            label = symPageLabelFor(key) ?: displayLabel(key.spec),
+            label = SoftwareKeyboardActionLabels.display(symPageLabelFor(key) ?: displayLabel(key.spec)),
             rect = RectF(popupLeft, popupTop, popupLeft + previewWidth, popupTop + previewHeight),
             hasMoreKeys = longPressAlternatesFor(key).isNotEmpty()
         )
