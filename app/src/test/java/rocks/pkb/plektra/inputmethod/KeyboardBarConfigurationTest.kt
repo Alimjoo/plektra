@@ -38,6 +38,8 @@ class KeyboardBarConfigurationTest {
     }
 
     @Test fun slimProfileCanDisableEverythingWithoutChangingNormalProfile() {
+        SettingsManager.setSlimStatusBarSlotsLeft(context, emptyList())
+        SettingsManager.setSlimStatusBarSlotsRight(context, emptyList())
         SettingsManager.setSuggestionsEnabled(context, true)
         SettingsManager.setStatusBarVariationsEnabled(context, true)
         rocks.pkb.plektra.KeyboardBarConfiguration.setSlimProfile(context,
@@ -50,6 +52,22 @@ class KeyboardBarConfigurationTest {
         controller.setSlimModeActive(true)
         controller.update(snapshot())
         assertEquals(View.GONE, controller.getLayout()!!.visibility)
+    }
+
+    @Test fun slimMenuButtonsKeepTheRowVisibleWithAllContentDisabled() {
+        KeyboardBarConfiguration.setSlimProfile(context,
+            rocks.pkb.plektra.KeyboardBarProfile(false, false, false, false, false))
+        SettingsManager.setSlimStatusBarSlotsLeft(context, listOf(SettingsManager.STATUS_BAR_BUTTON_SETTINGS))
+        SettingsManager.setSlimStatusBarSlotsRight(context, emptyList())
+        val controller = StatusBarController(context, StatusBarController.Mode.CANDIDATES_ONLY)
+        controller.setSlimModeActive(true)
+        controller.update(snapshot())
+        val root = controller.getLayout()!!
+        assertTrue(controller.hasConfiguredMenuButtons)
+        assertEquals(View.VISIBLE, root.visibility)
+        assertEquals(View.VISIBLE, root.getChildAt(0).visibility)
+        assertEquals(View.GONE, root.getChildAt(1).visibility)
+        assertNull((root as ImeChromeLayout).ledOnlyReservedHeightPx)
     }
 
     @Test fun migratedSlimProfileIsIndependentOfSubsequentNormalEdits() {
@@ -194,6 +212,8 @@ class KeyboardBarConfigurationTest {
     }
 
     @Test fun ledOnlyHasNoSuggestionOrActionRowsInSlim() {
+        SettingsManager.setSlimStatusBarSlotsLeft(context, emptyList())
+        SettingsManager.setSlimStatusBarSlotsRight(context, emptyList())
         SettingsManager.setSuggestionsEnabled(context, false)
         SettingsManager.setStatusBarVariationsEnabled(context, false)
         SettingsManager.setModifierIndicators(context, setOf(SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP))

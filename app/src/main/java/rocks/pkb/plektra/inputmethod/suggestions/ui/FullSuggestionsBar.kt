@@ -42,10 +42,8 @@ import android.view.inputmethod.InputMethodManager
 import rocks.pkb.plektra.inputmethod.subtype.AdditionalSubtypeUtils.languageCode
 
 /**
- * Renders the full-width suggestion bar with up to 3 items. Always occupies
- * a row (with placeholders) so the UI stays stable. Hidden when minimal UI
- * is forced or smart features are disabled by the caller.
- * Includes configurable Slim mode buttons on the left/right edges.
+ * Renders up to three suggestions with configurable menu buttons on the left/right edges.
+ * Menu buttons can keep the row visible when suggestions are unavailable or disabled.
  */
 class FullSuggestionsBar(
     private val context: Context,
@@ -71,7 +69,6 @@ class FullSuggestionsBar(
     private var imeServiceClass: Class<*>? = null
     private var showMinimalUiButtons: Boolean = false
     private var contentEnabled = true
-    private var actionsEnabled = true
     private var showModifierMenuIndicators: Boolean = false
     private val renderingRegistry = buttonRegistry ?: StatusBarButtonRegistry()
     private val buttonHost = StatusBarButtonHost(context, renderingRegistry)
@@ -300,17 +297,24 @@ class FullSuggestionsBar(
 
     fun setMinimalUiActive(isActive: Boolean) {
         lastMinimalUiActive = isActive
-        showMinimalUiButtons = actionsEnabled
         renderMinimalUiButtons()
         hamburgerMenuView?.setMinimalUiActive(isActive)
     }
 
-    fun setContentEnabled(suggestions: Boolean, actions: Boolean) {
+    val hasMenuButtons: Boolean
+        get() = showMinimalUiButtons && configuredMenuButtons().isNotEmpty()
+
+    private fun configuredMenuButtons() = if (lastMinimalUiActive == true) {
+        renderingRegistry.getEnabledSlimButtons(context)
+    } else {
+        renderingRegistry.getEnabledButtons(context)
+    }
+
+    fun setContentEnabled(suggestions: Boolean, menuButtons: Boolean) {
         contentEnabled = suggestions
-        actionsEnabled = actions
-        showMinimalUiButtons = actions
+        showMinimalUiButtons = menuButtons
         renderMinimalUiButtons()
-        if (!suggestions && !actions) {
+        if (!suggestions && !hasMenuButtons) {
             hamburgerMenuView?.hide()
             frameContainer?.visibility = View.GONE
         }
@@ -378,9 +382,9 @@ class FullSuggestionsBar(
         
         // Hide suggestions when unavailable, but keep Slim buttons visible.
         val hasDictionary = !requireDictionaryForSuggestions || hasDictionaryForCurrentSubtype()
-        val canShowSuggestions = shouldShow && hasDictionary &&
+        val canShowSuggestions = contentEnabled && shouldShow && hasDictionary &&
             (suggestions.isNotEmpty() || !addWordCandidate.isNullOrBlank())
-        if ((!contentEnabled && !actionsEnabled) || (!canShowSuggestions && !showMinimalUiButtons)) {
+        if (!canShowSuggestions && !hasMenuButtons) {
             cancelPendingSuggestionsAccessibilityEnable()
             suggestionButtons.clear()
             frame.visibility = View.GONE
@@ -405,6 +409,7 @@ class FullSuggestionsBar(
             suggestionButtons.clear()
             bar.visibility = View.GONE
             bar.removeAllViews()
+            bindRowGeometry()
             lastSlots = emptyList()
             lastAnnouncedSlots = emptyList()
             actionCandidate = null
@@ -499,7 +504,6 @@ class FullSuggestionsBar(
     private fun renderMinimalUiButtons() {
         val leftContainer = minimalLeftButtonsContainer ?: return
         val rightContainer = minimalRightButtonsContainer ?: return
-        val registry = renderingRegistry
         val host = buttonHost
 
         leftContainer.removeAllViews()
@@ -536,7 +540,7 @@ class FullSuggestionsBar(
             target.addView(hosted.container)
         }
 
-        val enabledButtons = if (showMinimalUiButtons) registry.getEnabledButtons(context) else emptyList()
+        val enabledButtons = if (showMinimalUiButtons) configuredMenuButtons() else emptyList()
         val leftButtons = enabledButtons
             .filter { it.position == StatusBarButtonPosition.LEFT }
             .sortedBy { it.order }

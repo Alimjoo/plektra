@@ -356,6 +356,8 @@ class StatusBarController(
     private var variationsWrapper: View? = null
     private var hamburgerMenuView: HamburgerMenuView? = null
     private var slimModeActive: Boolean = false
+    val hasConfiguredMenuButtons: Boolean
+        get() = slimModeActive && buttonRegistry.getEnabledSlimButtons(context).isNotEmpty()
     private var hasTransientSurface: Boolean = false
     val hasTransientContent: Boolean
         get() = hasTransientSurface || expansionSuggestions.isNotEmpty()
@@ -2996,6 +2998,8 @@ class StatusBarController(
         val barPresentation = rocks.pkb.plektra.KeyboardBarConfiguration.read(context).presentation(slimModeActive)
         val sharedRow = barPresentation.arrangement == rocks.pkb.plektra.KeyboardBarArrangement.SHARED &&
             !isFullSoftwareKeyboardMode && snapshot.symPage == 0 && !snapshot.clipboardOverlay
+        val showSlimMenuButtons = hasConfiguredMenuButtons && !isFullSoftwareKeyboardMode &&
+            snapshot.symPage == 0 && !snapshot.clipboardOverlay
         val expansionActive = expansionSuggestions.isNotEmpty()
         val suggestionsAvailable = barPresentation.suggestions && !snapshot.shouldDisableSuggestions &&
             (SettingsManager.isExperimentalSuggestionsEnabled(context) || isFullSoftwareKeyboardMode) &&
@@ -3018,7 +3022,7 @@ class StatusBarController(
         }
         
         val layout = ensureLayoutCreated(emojiMapText) ?: return
-        if ((!hasSuggestionRow && !barPresentation.actions && !barPresentation.bottomIndicators && !isFullSoftwareKeyboardMode &&
+        if ((!hasSuggestionRow && !showSlimMenuButtons && !barPresentation.actions && !barPresentation.bottomIndicators && !isFullSoftwareKeyboardMode &&
                 snapshot.symPage == 0 && !snapshot.clipboardOverlay && expansionSuggestions.isEmpty()) || snapshot.navModeActive) {
             collapseLayout()
             return
@@ -3092,7 +3096,7 @@ class StatusBarController(
             else -> emptyList()
         }
         fullSuggestionsBar?.setContentEnabled(suggestionsEnabledSetting || expansionActive || sharedVariations.isNotEmpty(),
-            sharedRow && barPresentation.actions)
+            menuButtons = showSlimMenuButtons || (sharedRow && barPresentation.actions))
         val showFullBar = expansionActive || (sharedRow && barPresentation.actions) || (
             suggestionsEnabledSetting &&
                 (experimentalEnabled || isFullSoftwareKeyboardMode) &&

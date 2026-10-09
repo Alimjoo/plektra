@@ -83,6 +83,7 @@ class KeyboardVisibilityController(
 
     private fun hasConfiguredContent(): Boolean = allowsSurface() && (rocks.pkb.plektra.KeyboardBarConfiguration.read(context)
             .presentation(candidatesBarController.isSlimModeActive()).hasPersistentContent ||
+            candidatesBarController.hasConfiguredMenuButtons() ||
             SettingsManager.resolveEffectiveSoftwareKeyboardMode(context) == SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL ||
             symLayoutController.currentSymPage() > 0 || candidatesBarController.hasTransientContent())
 

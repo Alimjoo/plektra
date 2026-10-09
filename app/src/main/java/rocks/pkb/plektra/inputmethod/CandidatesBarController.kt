@@ -325,6 +325,8 @@ class CandidatesBarController(
 
     fun isSlimModeActive(): Boolean = inputStatusBar.isSlimModeActive()
 
+    fun hasConfiguredMenuButtons(): Boolean = inputStatusBar.hasConfiguredMenuButtons
+
     fun refreshWindowInsets() {
         inputStatusBar.refreshWindowInsets()
         candidatesStatusBar.refreshWindowInsets()
