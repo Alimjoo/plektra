@@ -109,7 +109,7 @@ The script checks the application ID, CalVer version, version code, non-debuggab
 
 When the relevant unit checks have already passed, `--skip-unit-tests` builds without repeating the complete release unit suite. Device acceptance remains a separate check.
 
-The first Nightly's user-facing notes are in [first-nightly.md](../.github/release-templates/first-nightly.md); the shorter highlights remain within F-Droid's 500-character limit. Prepare a source archive from the exact release commit, extract the embedded SBOM and record SHA-256 checksums alongside the unsigned APK.
+The next Nightly's user-facing notes are in [next-nightly.md](../.github/release-templates/next-nightly.md). Keep [nightly-highlights.md](../.github/release-templates/nightly-highlights.md) within F-Droid's 500-character limit. The first release's notes remain in [first-nightly.md](../.github/release-templates/first-nightly.md). Prepare a source archive from the exact release commit, extract the embedded SBOM and record SHA-256 checksums alongside the unsigned APK.
 
 Sign the reviewed APK with `scripts/sign-plektra-nightly-apk-piv.sh` in the maintainer's interactive terminal. Final verification and publication use the signed APK and its checksum. Record its exact source commit and CalVer tag in the release metadata.
 

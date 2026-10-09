@@ -12,7 +12,8 @@ Plektra focuses on efficient text input on Android devices with physical keyboar
 ## Input surfaces
 
 - Configurable keyboard bar with suggestions, variation keys and menu buttons
-- **Normal and Slim profiles** with independently configured visible content
+- **Normal and Slim profiles** with independently configured visible content and menu buttons
+- Optional bold word suggestions on physical and software keyboards
 - Modifier indicators in the bottom strip, Android status bar and beside suggestions
 - Touch SYM and emoji pages
 - Optional software keyboard with themes and device-specific geometry
@@ -23,10 +24,15 @@ Plektra focuses on efficient text input on Android devices with physical keyboar
 - Snippets plus emoji and symbol shortcodes
 - Clipboard history and custom typing sounds
 - Cursor and selection gestures
+- Local Markdown notes with editing, split and preview views
+
+## Languages
+
+German, English and Italian dictionaries are bundled. Download other base dictionaries from Installed dictionaries. User words remain available without a base dictionary. Installing or removing a package refreshes the active keyboard.
 
 ## Data
 
-Plektra stores its input data locally. Backups can include settings, layouts, mappings, themes, dictionaries, snippets, and other user-created data. Pastiera backup ZIPs can be imported in Advanced settings. Legacy preference names are translated, and settings absent from the backup remain unchanged.
+Plektra stores its input data locally. Backups can include settings, layouts, mappings, themes, dictionaries, snippets, and other user-created data. Pastiera backup ZIPs can be imported in Advanced settings. Legacy preference names are translated, and settings absent from the backup remain unchanged. Backups include saved notes and private or modified dictionary packages. Known repository packages remain checksum references. Restore reports missing language packages without starting a download.
 
 ## Accessibility
 

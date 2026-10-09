@@ -1,3 +1,1 @@
-## First Plektra Nightly
-
-Independent Plektra identity and update channel. Configure Normal and Slim profiles, suggestions, variations, menu buttons and modifier indicators. Shared outer geometry respects T2E display corners across SYM, emoji, clipboard and software layouts; prepared contours avoid repeated pixel searches. Includes theme-selection, snippet-visibility, accent-correction and 250px T2E flick fixes.
+Markdown notes with edit, split and preview views. Independent Slim menu buttons and optional bold suggestions on physical and software keyboards. German, English and Italian dictionaries stay bundled; download other languages as needed. Backups include notes and private dictionaries, and report missing language packages. Adds keyboard picker and system caption controls, fold-transition fixes, Coral/Cobalt themes and a clearer monochrome icon.
