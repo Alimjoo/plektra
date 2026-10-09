@@ -146,6 +146,9 @@
             android:theme="@style/Theme.Plektra" />
         
         <activity android:name=".KeyboardLayoutActivity" android:exported="false" android:theme="@style/Theme.Plektra" />
+        <activity android:name=".NotesActivity" android:exported="false"
+            android:configChanges="keyboard|keyboardHidden|navigation"
+            android:label="@string/notes_title" android:theme="@style/Theme.Plektra" />
 
         <activity android:name=".CornerCalibrationActivity" android:exported="false"
             android:label="Displaykurve kalibrieren" android:theme="@style/Theme.Plektra" />

@@ -1,0 +1,31 @@
+<resources>
+    <string name="notes_title">Notes</string>
+    <string name="notes_description">Write Markdown and test your keyboard</string>
+    <string name="notes_heading_hint">Heading</string>
+    <string name="notes_body_hint">Write a note…</string>
+    <string name="notes_preview">Preview</string>
+    <string name="notes_format_bold">Bold</string>
+    <string name="notes_format_italic">Italic</string>
+    <string name="notes_format_heading">Heading</string>
+    <string name="notes_format_list">List</string>
+    <string name="notes_format_code">Code</string>
+    <string name="notes_format_link">Link</string>
+    <item name="notes_heading" type="id" />
+    <item name="notes_body" type="id" />
+    <item name="notes_preview_body" type="id" />
+    <item name="notes_both_toggle" type="id" />
+    <item name="notes_preview_toggle" type="id" />
+    <string name="notes_markdown">Markdown</string>
+    <string name="notes_both">Both</string>
+    <string name="notes_new">New note</string>
+    <string name="notes_untitled">Untitled note</string>
+    <string name="notes_saved">Saved</string>
+    <string name="notes_undo">Undo</string>
+    <string name="notes_redo">Redo</string>
+    <string name="notes_numbered">Numbered list</string>
+    <string name="notes_checklist">Checklist</string>
+    <string name="notes_quote">Quote</string>
+    <string name="notes_table">Table</string>
+    <string name="notes_strike">Strikethrough</string>
+    <string name="notes_code_block">Code block</string>
+</resources>

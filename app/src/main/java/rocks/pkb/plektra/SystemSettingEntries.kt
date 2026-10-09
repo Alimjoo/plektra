@@ -2,6 +2,8 @@ package rocks.pkb.plektra
 
 /** Entries for system controls whose screens also expose the same stable IDs. */
 internal fun systemSettingEntries(): List<SettingEntry> = listOf(
+    SettingEntry("advanced.notes", R.string.notes_title,
+        summaryRes = R.string.notes_description, route = SettingRoute(SettingsDestination.Advanced)),
     SettingEntry("advanced.corner_calibration", R.string.corner_calibration_title,
         summaryRes = R.string.corner_calibration_description, route = SettingRoute(SettingsDestination.Advanced),
         availabilityCheck = { context -> rocks.pkb.plektra.inputmethod.DeviceSpecific.isTitan2EliteDevice() || SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context) }),

@@ -650,6 +650,15 @@ fun AdvancedSettingsScreen(
                             }
                         }
 
+                        Surface(modifier = Modifier.fillMaxWidth().settingRow("advanced.notes") {
+                            context.startActivity(Intent(context, NotesActivity::class.java))
+                        }) {
+                            Column(Modifier.padding(16.dp)) {
+                                Text(stringResource(R.string.notes_title), style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(R.string.notes_description), style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+
                         // IME Test Screen (only in debug builds)
                         if (BuildConfig.DEBUG) {
                             Surface(

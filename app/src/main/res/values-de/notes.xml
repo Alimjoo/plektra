@@ -1,0 +1,26 @@
+<resources>
+    <string name="notes_title">Notizen</string>
+    <string name="notes_description">Markdown schreiben und die Tastatur testen</string>
+    <string name="notes_heading_hint">Überschrift</string>
+    <string name="notes_body_hint">Schreib eine Notiz…</string>
+    <string name="notes_preview">Vorschau</string>
+    <string name="notes_format_bold">Fett</string>
+    <string name="notes_format_italic">Kursiv</string>
+    <string name="notes_format_heading">Überschrift</string>
+    <string name="notes_format_list">Liste</string>
+    <string name="notes_format_code">Code</string>
+    <string name="notes_format_link">Link</string>
+    <string name="notes_markdown">Markdown</string>
+    <string name="notes_both">Beides</string>
+    <string name="notes_new">Neue Notiz</string>
+    <string name="notes_untitled">Unbenannte Notiz</string>
+    <string name="notes_saved">Gespeichert</string>
+    <string name="notes_undo">Rückgängig</string>
+    <string name="notes_redo">Wiederholen</string>
+    <string name="notes_numbered">Nummerierte Liste</string>
+    <string name="notes_checklist">Checkliste</string>
+    <string name="notes_quote">Zitat</string>
+    <string name="notes_table">Tabelle</string>
+    <string name="notes_strike">Durchgestrichen</string>
+    <string name="notes_code_block">Codeblock</string>
+</resources>
