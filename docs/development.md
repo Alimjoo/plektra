@@ -40,13 +40,14 @@ Z=ز X=ش C=غ V=ۈ B=ب N=ن M=م
 | F | ف |
 | G | گ |
 | H | خ |
-| J | ؛ |
+| J | ج |
 | K | ۆ |
 | L | لا (two Unicode letters) |
-| X | ج |
 
-Compact-keyboard additions use **Shift+M → ئ**, **Shift+V → ؟**, **Shift+N → ،**, **Shift+J → ؛**. The custom Shift+J shortcut moves `ج` from its standard PC position to **Shift+X**. Type `ئ` explicitly; this layout does not insert it automatically before vowels. Repeated presses enter repeated letters; there is no multi-tap cycling.
+Compact-keyboard additions use **Shift+M → ئ**, **Alt+N → ،**, **Alt+V → ؟**, **Alt+J → ؛**. Shift+J retains the standard `ج`; Shift+N, Shift+V and Shift+X produce `ن`, `ۈ` and `ش`. Type `ئ` explicitly; this layout does not insert it automatically before vowels. Repeated presses enter repeated letters; there is no multi-tap cycling.
+
+The optional `alt` field in a layout's key mapping overrides that key's device Alt output only while the layout is active. Switching to another layout restores its own Alt mappings. These overrides also apply to sticky Alt, the software Alt layer and the Alt long-press mode.
 
 On a full keyboard, `/` produces `ئ`, Shift+`/` produces `؟`, comma produces `،`, and semicolon produces `؛` (Shift gives `:`). Period, hyphen and Shift+1 retain `.`, `-` and `!`.
 
-Q25 Alt mappings remain device-specific: Alt+R → `3`, Alt+H → `:`, Alt+B → `!`, Alt+I → `-`, and Alt+M → `.`. Use Shift for the Uyghur additions above. Text is committed as ordinary Unicode in logical order, allowing the target editor to handle joining and right-to-left display.
+Other Q25 Alt mappings remain device-specific: Alt+R → `3`, Alt+H → `:`, Alt+B → `!`, Alt+I → `-`, and Alt+M → `.`. Text is committed as ordinary Unicode in logical order, allowing the target editor to handle joining and right-to-left display.

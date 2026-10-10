@@ -42,6 +42,7 @@ object LayoutMappingRepository {
     )
 
     private var currentLayout: Map<Int, LayoutMapping> = defaultLayout
+    private var altMappings: Map<Int, String> = emptyMap()
 
     var supportsAutoCapitalization: Boolean = true
         private set
@@ -59,6 +60,9 @@ object LayoutMappingRepository {
 
     fun setLayout(layout: Map<Int, LayoutMapping>) {
         currentLayout = layout
+        altMappings = layout.mapNotNull { (keyCode, mapping) ->
+            mapping.alt?.let { keyCode to it }
+        }.toMap()
         // Shift can select extra letters in an uncased script. Automatic
         // capitalization must not silently select that alternate layer.
         supportsAutoCapitalization = layout.values.any { mapping ->
@@ -72,6 +76,9 @@ object LayoutMappingRepository {
     fun getLayout(): Map<Int, LayoutMapping> = currentLayout
 
     fun getMapping(keyCode: Int): LayoutMapping? = currentLayout[keyCode]
+
+    fun applyAltMappings(baseMappings: Map<Int, String>): Map<Int, String> =
+        if (altMappings.isEmpty()) baseMappings else baseMappings + altMappings
 
     fun resolveText(
         mapping: LayoutMapping,

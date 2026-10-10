@@ -494,12 +494,12 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
             time += 1_000L
         }
         "QWERTYUIOPASDFGHJKLZXCVBNM".forEach { press(KeyEvent.KEYCODE_A + (it - 'A')) }
-        "DFGHXKLMVNJ".forEach { press(KeyEvent.KEYCODE_A + (it - 'A'), shift) }
+        "DFGHJKLMNVX".forEach { press(KeyEvent.KEYCODE_A + (it - 'A'), shift) }
         listOf(KeyEvent.KEYCODE_SLASH, KeyEvent.KEYCODE_COMMA, KeyEvent.KEYCODE_SEMICOLON).forEach { press(it) }
-        "RHBIM".forEach { press(KeyEvent.KEYCODE_A + (it - 'A'), alt) }
+        "NVJRHBIM".forEach { press(KeyEvent.KEYCODE_A + (it - 'A'), alt) }
 
         assertEquals(
-            "چۋېرتيۇڭوپھسداەىقكلزشغۈبنمژفگخجۆلائ؟،؛ئ،؛3:!-.",
+            "چۋېرتيۇڭوپھسداەىقكلزشغۈبنمژفگخجۆلائنۈشئ،؛،؟؛3:!-.",
             recorder.committedTexts.joinToString("")
         )
     }
